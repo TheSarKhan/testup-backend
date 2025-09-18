@@ -1,7 +1,8 @@
 package com.exam.examapp.service.impl;
 
 import com.exam.examapp.dto.request.ProfileUpdateRequest;
-import com.exam.examapp.dto.response.ProfileResponse;
+import com.exam.examapp.dto.response.ProfileInfoResponse;
+import com.exam.examapp.dto.response.ProfileSettingsResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.mapper.ProfileMapper;
 import com.exam.examapp.model.TeacherInfo;
@@ -27,13 +28,13 @@ public class ProfileServiceImpl implements ProfileService {
     private final FileService fileService;
 
     @Override
-    public ProfileResponse getProfileInfo() {
-        return ProfileMapper.userToProfileResponse(userService.getCurrentUser());
+    public ProfileInfoResponse getProfileInfo() {
+        return ProfileMapper.toInfoResponse(userService.getCurrentUser());
     }
 
     @Override
-    public ProfileResponse getProfileSettings() {
-        return ProfileMapper.userToProfileResponseDetailed(userService.getCurrentUser());
+    public ProfileSettingsResponse getProfileSettings() {
+        return ProfileMapper.toSettingsResponse(userService.getCurrentUser());
     }
 
     @Override
