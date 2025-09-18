@@ -80,8 +80,7 @@ public class ProfileController {
     @PatchMapping(value = "/update-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Update profile picture", description = "Updates user profile picture")
-    public ResponseEntity<ApiResponse<Void>> updateSettings(@RequestPart(required = false) String ignored,
-                                                            @RequestPart MultipartFile image) {
+    public ResponseEntity<ApiResponse<Void>> updateSettings(@RequestParam(required = false) MultipartFile image) {
         profileService.updateProfilePicture(image);
         return ResponseEntity.ok(ApiResponse.build(
                 HttpStatus.OK,
