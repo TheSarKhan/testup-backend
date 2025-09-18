@@ -1,0 +1,633 @@
+package com.exam.examapp.service.impl;
+
+import com.exam.examapp.dto.QuestionDetails;
+import com.exam.examapp.dto.request.ExamRequest;
+import com.exam.examapp.dto.request.ExamUpdateRequest;
+import com.exam.examapp.dto.request.QuestionRequest;
+import com.exam.examapp.dto.request.SubjectStructureQuestionsRequest;
+import com.exam.examapp.dto.request.subject.SubjectStructureRequest;
+import com.exam.examapp.dto.response.ExamBlockResponse;
+import com.exam.examapp.dto.response.ExamResponse;
+import com.exam.examapp.dto.response.StartExamResponse;
+import com.exam.examapp.exception.custom.BadRequestException;
+import com.exam.examapp.exception.custom.ExamExpiredException;
+import com.exam.examapp.exception.custom.ReachedLimitException;
+import com.exam.examapp.exception.custom.ResourceNotFoundException;
+import com.exam.examapp.mapper.ExamMapper;
+import com.exam.examapp.model.Tag;
+import com.exam.examapp.model.User;
+import com.exam.examapp.model.enums.AnswerStatus;
+import com.exam.examapp.model.enums.ExamStatus;
+import com.exam.examapp.model.enums.QuestionType;
+import com.exam.examapp.model.enums.Role;
+import com.exam.examapp.model.exam.Exam;
+import com.exam.examapp.model.exam.ExamTeacher;
+import com.exam.examapp.model.exam.StudentExam;
+import com.exam.examapp.model.question.Question;
+import com.exam.examapp.model.subject.SubjectStructure;
+import com.exam.examapp.model.subject.SubjectStructureQuestion;
+import com.exam.examapp.repository.ExamRepository;
+import com.exam.examapp.repository.ExamTeacherRepository;
+import com.exam.examapp.repository.StudentExamRepository;
+import com.exam.examapp.repository.subject.SubjectStructureQuestionRepository;
+import com.exam.examapp.service.interfaces.*;
+import com.exam.examapp.service.interfaces.subject.SubjectStructureService;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.*;
+
+@Service
+@RequiredArgsConstructor
+public class ExamServiceImpl implements ExamService {
+    private final ExamRepository examRepository;
+
+    private final QuestionService questionService;
+
+    private final SubjectStructureService subjectStructureService;
+
+    private final TagService tagService;
+
+    private final UserService userService;
+
+    private final CacheService cacheService;
+
+    private final StudentExamRepository studentExamRepository;
+
+    private final SubjectStructureQuestionRepository subjectStructureQuestionRepository;
+
+    private final ExamTeacherRepository examTeacherRepository;
+
+    private static void checkByQuestionType(
+            Question question,
+            QuestionDetails questionDetails,
+            String answer,
+            Map<UUID, AnswerStatus> answerStatusMap,
+            List<Integer> correctAndWrongCounts) {
+        switch (question.getType()) {
+            case SINGLE_CHOICE -> {
+                if (String.valueOf(questionDetails.correctVariants().getFirst()).equals(answer)) {
+                    answerStatusMap.put(question.getId(), AnswerStatus.CORRECT);
+                    correctAndWrongCounts.set(0, correctAndWrongCounts.getFirst() + 1);
+                } else if (answer == null) answerStatusMap.put(question.getId(), AnswerStatus.NOT_ANSWERED);
+                else {
+                    answerStatusMap.put(question.getId(), AnswerStatus.WRONG);
+                    correctAndWrongCounts.set(4, correctAndWrongCounts.get(4) + 1);
+                }
+            }
+            case MULTI_CHOICE -> {
+                StringBuilder sb = new StringBuilder();
+                for (Character correctVariant : questionDetails.correctVariants()) {
+                    sb.append(correctVariant);
+                }
+                if (sb.toString().equals(answer)) {
+                    answerStatusMap.put(question.getId(), AnswerStatus.CORRECT);
+                    correctAndWrongCounts.set(1, correctAndWrongCounts.get(1) + 1);
+
+                } else if (answer == null) answerStatusMap.put(question.getId(), AnswerStatus.NOT_ANSWERED);
+                else {
+                    answerStatusMap.put(question.getId(), AnswerStatus.WRONG);
+                    correctAndWrongCounts.set(5, correctAndWrongCounts.get(5) + 1);
+                }
+            }
+            case MATCH -> {
+                Map<Character, List<Character>> characterListMap =
+                        questionDetails.numberToCorrectVariantsMap();
+                StringBuilder sb = new StringBuilder();
+                for (Map.Entry<Character, List<Character>> characterListEntry :
+                        characterListMap.entrySet()) {
+                    sb.append(characterListEntry.getKey());
+                    characterListEntry.getValue().forEach(sb::append);
+                }
+                if (sb.toString().equals(answer)) {
+                    answerStatusMap.put(question.getId(), AnswerStatus.CORRECT);
+                    correctAndWrongCounts.set(2, correctAndWrongCounts.get(2) + 1);
+
+                } else if (answer == null) answerStatusMap.put(question.getId(), AnswerStatus.NOT_ANSWERED);
+                else {
+                    answerStatusMap.put(question.getId(), AnswerStatus.WRONG);
+                    correctAndWrongCounts.set(6, correctAndWrongCounts.get(6) + 1);
+                }
+            }
+            case OPEN_ENDED -> {
+                if (questionDetails.isAuto()) {
+                    if (questionDetails.answer().equals(answer))
+                        answerStatusMap.put(question.getId(), AnswerStatus.CORRECT);
+                    else if (answer == null) {
+                        answerStatusMap.put(question.getId(), AnswerStatus.NOT_ANSWERED);
+                        correctAndWrongCounts.set(3, correctAndWrongCounts.get(3) + 1);
+
+                    } else {
+                        answerStatusMap.put(question.getId(), AnswerStatus.WRONG);
+                        correctAndWrongCounts.set(7, correctAndWrongCounts.get(7) + 1);
+                    }
+                } else answerStatusMap.put(question.getId(), AnswerStatus.WAITING_FOR_REVIEW);
+            }
+            case TEXT_BASED, LISTENING -> {
+                for (Question questionQuestion : question.getQuestions()) {
+                    QuestionDetails details = questionQuestion.getQuestionDetails();
+                    checkByQuestionType(
+                            questionQuestion, details, details.answer(), answerStatusMap, correctAndWrongCounts);
+                }
+            }
+            default -> throw new BadRequestException("Question type not supported.");
+        }
+    }
+
+    private static String formatFormulaWithCounts(
+            String formula, List<Integer> correctAndWrongCounts) {
+        String formattedFormula = formula;
+        formattedFormula = formattedFormula.replace("a", String.valueOf(correctAndWrongCounts.get(0)));
+        formattedFormula = formattedFormula.replace("b", String.valueOf(correctAndWrongCounts.get(1)));
+        formattedFormula = formattedFormula.replace("c", String.valueOf(correctAndWrongCounts.get(2)));
+        formattedFormula = formattedFormula.replace("d", String.valueOf(correctAndWrongCounts.get(3)));
+        formattedFormula = formattedFormula.replace("e", "0");
+        formattedFormula = formattedFormula.replace("f", String.valueOf(correctAndWrongCounts.get(4)));
+        formattedFormula = formattedFormula.replace("g", String.valueOf(correctAndWrongCounts.get(5)));
+        formattedFormula = formattedFormula.replace("h", String.valueOf(correctAndWrongCounts.get(6)));
+        formattedFormula = formattedFormula.replace("i", String.valueOf(correctAndWrongCounts.get(7)));
+        formattedFormula = formattedFormula.replace("j", "0");
+        return formattedFormula;
+    }
+
+    @Override
+    @Transactional
+    public void createExam(
+            ExamRequest request,
+            List<MultipartFile> titles,
+            List<MultipartFile> variantPictures,
+            List<MultipartFile> numberPictures,
+            List<MultipartFile> sounds) {
+
+        User user = userService.getCurrentUser();
+
+        if (Role.TEACHER.equals(user.getRole())) validateRequest(request, user);
+
+        List<SubjectStructureQuestionsRequest> subjectStructureQuestionsRequests =
+                request.subjectStructures();
+
+        List<SubjectStructureQuestion> subjectStructureQuestions = new ArrayList<>();
+
+        for (SubjectStructureQuestionsRequest subjectStructureQuestionsRequest :
+                subjectStructureQuestionsRequests) {
+
+            SubjectStructure subjectStructure =
+                    subjectStructureService.create(
+                            subjectStructureQuestionsRequest.subjectStructureRequest());
+
+            List<Question> questions =
+                    subjectStructureQuestionsRequest.questionRequests().stream()
+                            .map(
+                                    questionRequest ->
+                                            questionService.save(
+                                                    questionRequest, titles, variantPictures, numberPictures, sounds))
+                            .toList();
+
+            subjectStructureQuestions.add(
+                    SubjectStructureQuestion.builder()
+                            .subjectStructure(subjectStructure)
+                            .question(questions)
+                            .build());
+        }
+
+        List<Tag> tags = new ArrayList<>();
+        tags.add(tagService.getTagById(request.headerTagId()));
+        if (request.otherTagIds() != null)
+            tags.addAll(request.otherTagIds().stream().map(tagService::getTagById).toList());
+
+        BigDecimal cost = Role.TEACHER.equals(user.getRole()) ? null : request.cost() == null ? BigDecimal.ZERO : request.cost();
+
+        Exam exam =
+                Exam.builder()
+                        .examTitle(request.examTitle())
+                        .examDescription(request.examDescription())
+                        .subjectStructureQuestions(subjectStructureQuestions)
+                        .tags(tags)
+                        .durationInSeconds(request.durationInSeconds())
+                        .cost(cost)
+                        .isHidden(request.isHidden())
+                        .teacher(user)
+                        .explanationVideoUrl(request.explanationVideoUrl())
+                        .build();
+
+        exam.setNumberOfQuestions(getQuestionCount(exam));
+        examRepository.save(exam);
+
+        if (Role.TEACHER.equals(user.getRole())) {
+            user.getInfo().setCurrentlyTotalExamCount(user.getInfo().getCurrentlyTotalExamCount() + 1);
+            user.getInfo()
+                    .setThisMonthCreatedExamCount(user.getInfo().getThisMonthCreatedExamCount() + 1);
+            userService.save(user);
+        }
+    }
+
+    private void validateRequest(ExamRequest request, User user) {
+        if (Role.TEACHER.equals(user.getRole())
+                && (user.getInfo().getThisMonthCreatedExamCount() >= user.getPack().getMonthlyExamCount()
+                || user.getInfo().getCurrentlyTotalExamCount() >= user.getPack().getTotalExamCount()))
+            throw new ReachedLimitException(
+                    "You have reached the limit of exams for this month or total");
+
+        Integer questionCountTotal =
+                request.subjectStructures().stream()
+                        .map(SubjectStructureQuestionsRequest::subjectStructureRequest)
+                        .map(SubjectStructureRequest::questionCount)
+                        .reduce(Integer::sum)
+                        .orElse(0);
+
+        if (questionCountTotal >= user.getPack().getQuestionCountPerExam())
+            throw new ReachedLimitException("You have reached the limit of questions for this exam");
+
+        List<QuestionRequest> questionRequests =
+                request.subjectStructures().stream()
+                        .map(SubjectStructureQuestionsRequest::questionRequests)
+                        .reduce(
+                                (a, b) -> {
+                                    a.addAll(b);
+                                    return a;
+                                })
+                        .orElseThrow(() -> new BadRequestException("Questions cannot be empty."));
+
+        validate(
+                user,
+                questionRequests,
+                request.hasPicture(),
+                request.hasPdfPicture(),
+                request.hasSound(),
+                request.isHidden(),
+                request.subjectStructures().size(),
+                request.durationInSeconds());
+    }
+
+    @Override
+    @Transactional
+    public List<ExamBlockResponse> getMyExams() {
+        User user = userService.getCurrentUser();
+        if (Role.TEACHER.equals(user.getRole()) || Role.ADMIN.equals(user.getRole())) {
+            return examRepository.getByTeacher(user).stream()
+                    .map(ExamMapper::toBlockResponse)
+                    .toList();
+        } else {
+            return studentExamRepository.getByStudent(user)
+                    .stream()
+                    .map(StudentExam::getExam)
+                    .map(ExamMapper::toBlockResponse)
+                    .toList();
+        }
+    }
+
+    @Override
+    public List<ExamBlockResponse> getAdminCooperationExams() {
+        User user = userService.getCurrentUser();
+        return examTeacherRepository.getByTeacher(user)
+                .stream()
+                .map(ExamTeacher::getExam)
+                .map(ExamMapper::toBlockResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ExamBlockResponse> getExamByTag(List<UUID> tagIds) {
+        Specification<Exam> specification = Specification.unrestricted();
+        for (UUID tagId : tagIds) {
+            specification.or(hasTag(tagId));
+        }
+        return examRepository.findAll(specification)
+                .stream()
+                .map(ExamMapper::toBlockResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ExamBlockResponse> getLastCreatedExams() {
+        return examRepository.getLastCreated().stream().map(ExamMapper::toBlockResponse).toList();
+    }
+
+    @Override
+    @Transactional
+    public ExamResponse getExamById(UUID id) {
+        return ExamMapper.toResponse(getById(id));
+    }
+
+    @Override
+    public Integer getExamCode(UUID id) {
+        Exam exam = getById(id);
+        if (!exam.isHidden())
+            throw new BadRequestException("Exam is not hidden. You cannot get the exam code.");
+        int code = (int) (Math.random() * (9_999_999 - 1_000_000 + 1)) + 1_000_000;
+        cacheService.saveContent("exam_code_", String.valueOf(code), id.toString(), (long) 86_400_000);
+        return code;
+    }
+
+    @Override
+    @Transactional
+    public StartExamResponse startExamViaCode(String studentName, String examCode) {
+        String examId = cacheService.getContent("exam_code_", examCode.substring(1));
+        Exam byId = getById(UUID.fromString(examId));
+        return startExam(studentName, byId.getId());
+    }
+
+    @Override
+    @Transactional
+    public StartExamResponse startExam(String studentName, UUID id) {
+        User user = userService.getCurrentUserOrNull();
+        Exam exam = getById(id);
+        User examCreator = exam.getTeacher();
+
+        if (user == null)
+            return startExamWithoutLogin(studentName, id, examCreator, exam);
+
+        List<StudentExam> byExamAndStudent = studentExamRepository.getByExamAndStudent(exam, user);
+
+        if (byExamAndStudent.isEmpty()) {
+            updateExamStudentCount(id, examCreator);
+            return createStudentExamEntry(exam, user);
+        } else if (byExamAndStudent.size() == 1
+                && ExamStatus.ACTIVE.equals(byExamAndStudent.getFirst().getStatus())) {
+            byExamAndStudent.getFirst().setStatus(ExamStatus.STARTED);
+            byExamAndStudent.getFirst().setStartTime(Instant.now());
+            return new StartExamResponse(
+                    byExamAndStudent.getFirst().getId(),
+                    ExamStatus.ACTIVE,
+                    Map.of(),
+                    Map.of(),
+                    Instant.now(),
+                    ExamMapper.toResponse(exam));
+        } else if (byExamAndStudent.size() == 1
+                && ExamStatus.STARTED.equals(byExamAndStudent.getFirst().getStatus())) {
+            StudentExam first = byExamAndStudent.getFirst();
+
+            if (first.getExam().getDurationInSeconds() == null) {
+                return new StartExamResponse(
+                        first.getId(),
+                        ExamStatus.STARTED,
+                        first.getQuestionIdToAnswerMap(),
+                        first.getListeningIdToPlayTimeMap(),
+                        first.getStartTime(),
+                        ExamMapper.toResponse(exam));
+            } else {
+                if (Instant.now().plusSeconds(exam.getDurationInSeconds()).isBefore(first.getStartTime())) {
+                    return new StartExamResponse(
+                            first.getId(),
+                            first.getStatus(),
+                            first.getQuestionIdToAnswerMap(),
+                            first.getListeningIdToPlayTimeMap(),
+                            first.getStartTime(),
+                            ExamMapper.toResponse(exam));
+                } else {
+                    first.setStatus(ExamStatus.EXPIRED);
+                    calculateResult(first);
+                    throw new ExamExpiredException("Exam has expired.");
+                }
+            }
+        } else {
+            return createStudentExamEntry(exam, user);
+        }
+    }
+
+    private void calculateResult(StudentExam first) {
+        Map<UUID, String> questionIdToAnswerMap = first.getQuestionIdToAnswerMap();
+
+        List<SubjectStructureQuestion> subjectStructureQuestions =
+                first.getExam().getSubjectStructureQuestions().stream().toList();
+
+        Map<UUID, AnswerStatus> answerStatusMap = new HashMap<>();
+
+        List<Integer> correctAndWrongCounts = new ArrayList<>(List.of(0, 0, 0, 0, 0, 0, 0, 0));
+
+        for (SubjectStructureQuestion subjectStructureQuestion : subjectStructureQuestions) {
+            for (Question question : subjectStructureQuestion.getQuestion()) {
+                if (questionIdToAnswerMap.containsKey(question.getId())) {
+                    QuestionDetails questionDetails = question.getQuestionDetails();
+                    String answer = questionIdToAnswerMap.get(question.getId());
+                    checkByQuestionType(
+                            question, questionDetails, answer, answerStatusMap, correctAndWrongCounts);
+                } else {
+                    answerStatusMap.put(question.getId(), AnswerStatus.NOT_ANSWERED);
+                }
+            }
+        }
+
+        long count =
+                answerStatusMap.entrySet().stream()
+                        .filter(entry -> AnswerStatus.WAITING_FOR_REVIEW.equals(entry.getValue()))
+                        .count();
+
+        if (count > 0) {
+            List<UUID> hasUncheckedQuestionStudentExamId =
+                    first.getExam().getHasUncheckedQuestionStudentExamId();
+            hasUncheckedQuestionStudentExamId.add(first.getId());
+            first.setStatus(ExamStatus.WAITING_OPEN_ENDED_QUESTION);
+            first.setNumberOfNotCheckedYetQuestions((int) count);
+            examRepository.save(first.getExam());
+        }
+
+        for (SubjectStructureQuestion subjectStructureQuestion : subjectStructureQuestions) {
+            String formula = subjectStructureQuestion.getSubjectStructure().getFormula();
+            if (formula != null) {
+                String formattedFormula = formatFormulaWithCounts(formula, correctAndWrongCounts);
+
+                Expression e = new ExpressionBuilder(formattedFormula).build();
+                first.setScore(e.evaluate());
+            } else {
+                Map<Integer, Integer> questionToPointMap =
+                        subjectStructureQuestion.getSubjectStructure().getQuestionToPointMap();
+                List<Question> question = subjectStructureQuestion.getQuestion();
+                double score = 0;
+                for (Map.Entry<Integer, Integer> questionToPoint : questionToPointMap.entrySet()) {
+                    Question currentQuestion = question.get(questionToPoint.getKey());
+                    AnswerStatus answerStatus = answerStatusMap.get(currentQuestion.getId());
+                    if (AnswerStatus.CORRECT.equals(answerStatus)) {
+                        score += questionToPoint.getValue();
+                    }
+                }
+                first.setScore(score);
+            }
+        }
+        int correctCount = correctAndWrongCounts.stream().limit(4).mapToInt(Integer::intValue).sum();
+
+        first.setNumberOfCorrectAnswers(correctCount);
+
+        int wrongCount = correctAndWrongCounts.stream().skip(4).mapToInt(Integer::intValue).sum();
+
+        first.setNumberOfWrongAnswers(wrongCount);
+
+        first.setNumberOfNotAnsweredQuestions(
+                first.getNumberOfQuestions()
+                        - (correctCount + wrongCount + first.getNumberOfNotCheckedYetQuestions()));
+
+        studentExamRepository.save(first);
+    }
+
+    private StartExamResponse startExamWithoutLogin(String studentName, UUID id, User examCreator, Exam exam) {
+        updateExamStudentCount(id, examCreator);
+
+        studentExamRepository.getByExamAndStudentName(exam, studentName).orElseThrow(()->
+                new BadRequestException("This student name already exists in this exam."));
+
+        StudentExam save =
+                studentExamRepository.save(
+                        StudentExam.builder()
+                                .numberOfQuestions(getQuestionCount(exam))
+                                .status(ExamStatus.STARTED)
+                                .studentName(studentName)
+                                .startTime(Instant.now())
+                                .exam(exam)
+                                .build());
+
+        return new StartExamResponse(
+                save.getId(),
+                ExamStatus.ACTIVE,
+                Map.of(),
+                Map.of(),
+                Instant.now(),
+                ExamMapper.toResponse(exam));
+    }
+
+    private void updateExamStudentCount(UUID id, User examCreator) {
+        Map<UUID, Integer> examToStudentCountMap = examCreator.getInfo().getExamToStudentCountMap();
+        User currentUserOrNull = userService.getCurrentUserOrNull();
+        if (examToStudentCountMap != null &&
+                (!(Role.TEACHER.equals(examCreator.getRole()) ||
+                        (currentUserOrNull != null && examCreator.getId().equals(currentUserOrNull.getId()))) &&
+                        examToStudentCountMap.get(id) >= examCreator.getPack().getStudentPerExam()))
+            throw new ReachedLimitException("You have reached the limit of students for this exam");
+
+        examToStudentCountMap = examToStudentCountMap == null ? new HashMap<>() : examToStudentCountMap;
+        examToStudentCountMap.put(id, examToStudentCountMap.getOrDefault(id, 0) + 1);
+
+        userService.save(examCreator);
+    }
+
+    private StartExamResponse createStudentExamEntry(Exam exam, User user) {
+        StudentExam save =
+                studentExamRepository.save(
+                        StudentExam.builder()
+                                .numberOfQuestions(getQuestionCount(exam))
+                                .status(ExamStatus.STARTED)
+                                .startTime(Instant.now())
+                                .exam(exam)
+                                .student(user)
+                                .build());
+        return new StartExamResponse(
+                save.getId(),
+                ExamStatus.ACTIVE,
+                Map.of(),
+                Map.of(),
+                Instant.now(),
+                ExamMapper.toResponse(exam));
+    }
+
+    @Override
+    public void finishExam(UUID studentExamId) {
+        StudentExam studentExam = studentExamRepository.findById(studentExamId).orElseThrow(() ->
+                new ResourceNotFoundException(String.format("Student exam with id %s not found.", studentExamId)));
+        calculateResult(studentExam);
+
+    }
+
+    @Override
+    @Transactional
+    public void updateExam(
+            ExamUpdateRequest request,
+            List<MultipartFile> titles,
+            List<MultipartFile> variantPictures,
+            List<MultipartFile> numberPictures,
+            List<MultipartFile> sounds) {
+        User user = userService.getCurrentUser();
+        Exam exam = getById(request.id());
+        if (!Role.ADMIN.equals(user.getRole()) && user.getId().equals(exam.getTeacher().getId()))
+            throw new BadRequestException("You cannot update this exam.");
+
+        if (Role.TEACHER.equals(user.getRole())) {
+            user.getInfo().setCurrentlyTotalExamCount(user.getInfo().getCurrentlyTotalExamCount() - 1);
+            user.getInfo()
+                    .setThisMonthCreatedExamCount(user.getInfo().getThisMonthCreatedExamCount() - 1);
+            userService.save(user);
+        }
+        deleteExam(request.id());
+
+        createExam(request.request(), titles, variantPictures, numberPictures, sounds);
+    }
+
+    private void validate(
+            User user,
+            List<QuestionRequest> questionRequests,
+            boolean hasPicture,
+            boolean hasPdfPicture,
+            boolean hasSound,
+            boolean hidden,
+            int size,
+            Integer integer) {
+        Optional<QuestionRequest> fistManualCheckQuestion =
+                questionRequests.stream()
+                        .filter(
+                                questionRequest ->
+                                        QuestionType.OPEN_ENDED.equals(questionRequest.questionType())
+                                                && (questionRequest.questionDetails().isAuto() != null
+                                                && !questionRequest.questionDetails().isAuto()))
+                        .findFirst();
+
+        if (!user.getPack().isCanAddPicture() && hasPicture)
+            throw new BadRequestException("You cannot add picture for this exam.");
+
+        if (!user.getPack().isCanAddPdfSound() && (hasPdfPicture || hasSound))
+            throw new BadRequestException("You cannot add sound or pdf picture for this exam.");
+
+        if (hidden && !user.getPack().isCanShareViaCode())
+            throw new BadRequestException(
+                    "You cannot share this exam via code (cannot create hidden exam).");
+
+        if (!user.getPack().isCanAddMultipleSubjectInOneExam() && size > 1)
+            throw new BadRequestException("You cannot add more than one subject in one exam.");
+
+        if (!user.getPack().isCanAddManualCheckAutoQuestion() && fistManualCheckQuestion.isPresent())
+            throw new BadRequestException("You cannot add manual check question in this exam.");
+
+        if (integer != null && !user.getPack().isCanSelectExamDuration())
+            throw new BadRequestException("You cannot select exam duration.");
+    }
+
+    @Override
+    public void deleteExam(UUID id) {
+        Exam exam = getById(id);
+        List<SubjectStructureQuestion> subjectStructureQuestions = exam.getSubjectStructureQuestions();
+        for (SubjectStructureQuestion subjectStructureQuestion : subjectStructureQuestions) {
+            List<Question> questions = subjectStructureQuestion.getQuestion();
+            for (Question question : questions) {
+                questionService.delete(question.getId());
+            }
+            subjectStructureService.delete(subjectStructureQuestion.getSubjectStructure().getId());
+            subjectStructureQuestionRepository.deleteById(subjectStructureQuestion.getId());
+        }
+        examRepository.deleteById(id);
+    }
+
+    private int getQuestionCount(Exam exam) {
+        return exam.getSubjectStructureQuestions().stream()
+                .map(
+                        subjectStructureQuestion ->
+                                subjectStructureQuestion.getSubjectStructure().getQuestionCount())
+                .mapToInt(Integer::intValue)
+                .sum();
+    }
+
+    @Override
+    public Exam getById(UUID id) {
+        return examRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Exam not found."));
+    }
+
+    private Specification<Exam> hasTag(UUID tagId) {
+        return (root, query, cb) ->
+                cb.equal(root.get("tags").get("id"), tagId);
+    }
+}

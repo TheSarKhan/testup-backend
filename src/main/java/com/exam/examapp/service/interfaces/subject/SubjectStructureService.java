@@ -1,0 +1,25 @@
+package com.exam.examapp.service.interfaces.subject;
+
+import com.exam.examapp.dto.request.subject.SubjectStructureRequest;
+import com.exam.examapp.dto.request.subject.SubjectStructureUpdateRequest;
+import com.exam.examapp.model.subject.SubjectStructure;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface SubjectStructureService {
+    SubjectStructure create(SubjectStructureRequest request);
+
+    List<SubjectStructure> getAll();
+
+    List<SubjectStructure> getBySubjectId(UUID subjectId);
+
+    List<SubjectStructure> getBySubmoduleId(UUID submoduleId);
+
+    SubjectStructure getById(UUID id);
+
+    SubjectStructure update(SubjectStructureUpdateRequest request);
+
+    void delete(UUID id);
+}

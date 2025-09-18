@@ -1,0 +1,175 @@
+package com.exam.examapp.controller;
+
+import com.exam.examapp.dto.request.ExamRequest;
+import com.exam.examapp.dto.request.ExamUpdateRequest;
+import com.exam.examapp.dto.response.ApiResponse;
+import com.exam.examapp.dto.response.ExamBlockResponse;
+import com.exam.examapp.dto.response.ExamResponse;
+import com.exam.examapp.dto.response.StartExamResponse;
+import com.exam.examapp.service.interfaces.ExamService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/exam")
+@Tag(
+        name = "Exams",
+        description =
+                "Exam management endpoints — create, read, update, delete and start exams. "
+                        + "Endpoints that modify data require bearer token and roles (ADMIN, TEACHER) where noted.")
+public class ExamController {
+    private final ExamService examService;
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    @Operation(
+            summary = "Create Exam",
+            description =
+                    "Create a new exam. Accepts an ExamRequest (structured JSON) as a multipart part and optional media lists (titles, variantPictures, numberPictures, sounds). "
+                            + "Files are optional — pass only those that exist. ExamRequest contains subject structures, timing, cost and flags (hasSound/hasPicture/etc).")
+    public ResponseEntity<ApiResponse<Void>> createExam(
+            @RequestPart @Valid ExamRequest request,
+            @RequestPart(required = false) List<MultipartFile> titles,
+            @RequestPart(required = false) List<MultipartFile> variantPictures,
+            @RequestPart(required = false) List<MultipartFile> numberPictures,
+            @RequestPart(required = false) List<MultipartFile> sounds) {
+
+        examService.createExam(request, titles, variantPictures, numberPictures, sounds);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.build(HttpStatus.CREATED, "Exam created successfully", null));
+    }
+
+    @GetMapping
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    @Operation(
+            summary = "Get my exams",
+            description =
+                    "Retrieve list of exam blocks . Returns summary info used in dashboard.")
+    public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getMyExams() {
+        List<ExamBlockResponse> myExams = examService.getMyExams();
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "My Exams retrieved successfully", myExams));
+    }
+
+    @GetMapping("/tags")
+    public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getTags(@RequestParam List<UUID> tags) {
+        List<ExamBlockResponse> examByTag = examService.getExamByTag(tags);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Exams retrieved successfully", examByTag));
+    }
+
+    @GetMapping("/last-created")
+    public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getLastCreatedExam() {
+        List<ExamBlockResponse> lastCreatedExams = examService.getLastCreatedExams();
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Exams retrieved successfully", lastCreatedExams));
+    }
+
+    @GetMapping("/via-admin")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    @Operation(
+            summary = "Retrieve exams for Admins and Teachers",
+            description = "This endpoint allows only users with ADMIN or TEACHER roles to access the cooperation exams list.")
+    public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getViaAdmin() {
+        List<ExamBlockResponse> adminCooperationExams = examService.getAdminCooperationExams();
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Admin Exams retrieved successfully", adminCooperationExams));
+    }
+
+    @GetMapping("/id")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    @Operation(
+            summary = "Get Exam by id",
+            description = "Retrieve full exam details by exam UUID. Use this to view/edit exam contents.")
+    public ResponseEntity<ApiResponse<ExamResponse>> getExamById(@RequestParam UUID id) {
+        ExamResponse exam = examService.getExamById(id);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Exam retrieved successfully", exam));
+    }
+
+    @GetMapping("/get-code")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    @Operation(
+            summary = "Generate exam access code",
+            description =
+                    "Generates a short code for sharing/starting an exam. Returned code is string prefixed with 'K'.")
+    public ResponseEntity<ApiResponse<String>> getExamAccessCode(@RequestParam UUID id) {
+        Integer examCode = examService.getExamCode(id);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Successfully generated code", "K" + examCode));
+    }
+
+    @GetMapping("/start/code")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+            summary = "Start exam via code",
+            description =
+                    "Start/join an exam by providing access code (for students). Returns studentExamId and exam payload.")
+    public ResponseEntity<ApiResponse<StartExamResponse>> startExam(@RequestParam(required = false) String studentName,
+                                                                    @RequestParam String code) {
+        StartExamResponse startExamResponse = examService.startExamViaCode(studentName, code);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Exam started successfully", startExamResponse));
+    }
+
+    @GetMapping("/start")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+            summary = "Start exam by UUID",
+            description =
+                    "Start an exam by providing its UUID (teacher/admin or system-start). Useful for scheduled or manual starts.")
+    public ResponseEntity<ApiResponse<StartExamResponse>> startExam(@RequestParam(required = false) String studentName,
+                                                                    @RequestParam UUID id) {
+        StartExamResponse startExamResponse = examService.startExam(studentName, id);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Exam started successfully", startExamResponse));
+    }
+
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    @Operation(
+            summary = "Update Exam",
+            description =
+                    "Update existing exam metadata and its media. ExamUpdateRequest must contain the exam UUID and updated ExamRequest payload. "
+                            + "Send updated files as multipart lists (all files can be provided or only changed ones).")
+    public ResponseEntity<ApiResponse<Void>> updateExam(
+            @RequestPart @Valid ExamUpdateRequest request,
+            @RequestPart(required = false) List<MultipartFile> titles,
+            @RequestPart(required = false) List<MultipartFile> variantPictures,
+            @RequestPart(required = false) List<MultipartFile> numberPictures,
+            @RequestPart(required = false) List<MultipartFile> sounds) {
+
+        examService.updateExam(request, titles, variantPictures, numberPictures, sounds);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Exam updated successfully", null));
+    }
+
+    @DeleteMapping
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    @Operation(
+            summary = "Delete exam",
+            description =
+                    "Delete an exam by UUID. This operation typically marks exam as deleted or removes it permanently depending on service logic.")
+    public ResponseEntity<ApiResponse<Void>> deleteExam(@RequestParam UUID id) {
+        examService.deleteExam(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body(ApiResponse.build(HttpStatus.NO_CONTENT, "Exam deleted successfully", null));
+    }
+}

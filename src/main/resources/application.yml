@@ -1,0 +1,82 @@
+spring:
+  application:
+    name: ExamApp
+  config:
+    import: optional:file:.env[.properties]
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:postgresql://localhost:5432/exam
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+    generate-ddl: false
+
+server:
+  port: ${PORT}
+
+jwt:
+  access-token-expire-time: ${ONE_DAY}
+  refresh-token-expire-time: ${ONE_DAY}
+  secretKey: ${JWT_SECRET_KEY}
+
+app:
+  name: ExamApp
+  base-url: ${APP_BASE_URL}
+
+admin:
+  email: ${ADMIN_EMAIL}
+  password: ${ADMIN_PASSWORD}
+  full-name: ${ADMIN_FULL_NAME}
+  phone-number: ${ADMIN_PHONE_NUMBER}
+
+payment:
+  api:
+    approve: ${PAYMENT_APPROVE_URL}
+    cancel: ${PAYMENT_CANCEL_URL}
+    decline: ${PAYMENT_DECLINE_URL}
+  merchant: ${PAYMENT_MERCHANT}
+  secret:
+    key: ${PAYMENT_SECRET_KEY}
