@@ -1,4 +1,4 @@
-package com.exam.examapp.service.interfaces;
+package com.exam.examapp.service.interfaces.exam;
 
 import com.exam.examapp.dto.request.ExamTemplateRequest;
 import com.exam.examapp.dto.request.ExamTemplateUpdateRequest;

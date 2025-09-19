@@ -1,7 +1,7 @@
 package com.exam.examapp.controller;
 
 import com.exam.examapp.dto.response.ApiResponse;
-import com.exam.examapp.service.interfaces.StudentExamService;
+import com.exam.examapp.service.interfaces.exam.StudentExamService;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.Operation;

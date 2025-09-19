@@ -11,7 +11,7 @@ import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.subject.Topic;
 import com.exam.examapp.repository.question.QuestionRepository;
 import com.exam.examapp.service.interfaces.FileService;
-import com.exam.examapp.service.interfaces.QuestionService;
+import com.exam.examapp.service.interfaces.question.QuestionService;
 import com.exam.examapp.service.interfaces.subject.TopicService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.exam.examapp.service.interfaces;
+package com.exam.examapp.service.interfaces.exam;
 
 import org.springframework.web.multipart.MultipartFile;
 

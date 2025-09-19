@@ -1,9 +1,7 @@
-package com.exam.examapp.service.interfaces;
+package com.exam.examapp.service.interfaces.exam;
 
 import com.exam.examapp.dto.request.AddExamTeacherRequest;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public interface ExamTeacherService {

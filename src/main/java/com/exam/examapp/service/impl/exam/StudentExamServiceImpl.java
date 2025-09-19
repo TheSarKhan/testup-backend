@@ -1,4 +1,4 @@
-package com.exam.examapp.service.impl;
+package com.exam.examapp.service.impl.exam;
 
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.model.User;
@@ -6,9 +6,9 @@ import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.exam.StudentExam;
 import com.exam.examapp.repository.StudentExamRepository;
-import com.exam.examapp.service.interfaces.ExamService;
+import com.exam.examapp.service.interfaces.exam.ExamService;
 import com.exam.examapp.service.interfaces.FileService;
-import com.exam.examapp.service.interfaces.StudentExamService;
+import com.exam.examapp.service.interfaces.exam.StudentExamService;
 import com.exam.examapp.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.exam.examapp.service.impl;
+package com.exam.examapp.service.impl.exam;
 
 import com.exam.examapp.dto.request.AddExamTeacherRequest;
 import com.exam.examapp.model.User;
@@ -6,8 +6,8 @@ import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.exam.ExamTeacher;
 import com.exam.examapp.model.subject.Subject;
 import com.exam.examapp.repository.ExamTeacherRepository;
-import com.exam.examapp.service.interfaces.ExamService;
-import com.exam.examapp.service.interfaces.ExamTeacherService;
+import com.exam.examapp.service.interfaces.exam.ExamService;
+import com.exam.examapp.service.interfaces.exam.ExamTeacherService;
 import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.subject.SubjectService;
 import lombok.RequiredArgsConstructor;

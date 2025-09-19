@@ -1,7 +1,6 @@
-package com.exam.examapp.service.impl;
+package com.exam.examapp.service.impl.payment;
 
 import com.exam.examapp.dto.request.payment.Body;
-import com.exam.examapp.dto.request.payment.PaymentCallbackRequest;
 import com.exam.examapp.dto.request.payment.PaymentInitRequest;
 import com.exam.examapp.dto.request.payment.PaymentRequest;
 import com.exam.examapp.dto.response.PaymentInitResponse;
@@ -14,6 +13,9 @@ import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.repository.PaymentResultRepository;
 import com.exam.examapp.service.interfaces.*;
+import com.exam.examapp.service.interfaces.exam.ExamService;
+import com.exam.examapp.service.interfaces.exam.StudentExamService;
+import com.exam.examapp.service.interfaces.payment.PaymentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -121,7 +123,8 @@ public class PaymentServiceImpl implements PaymentService {
             paymentResultRepository.save(PaymentResult.builder()
                     .user(user).amount(request.amount())
                     .description(description).productId(request.productId())
-                    .currency(request.currency()).uuid(payload.uuid()).build());
+                    .currency(request.currency()).invoiceUuid(payload.invoiceUuid())
+                    .uuid(payload.uuid()).build());
             return payload.paymentUrl();
         } else {
             throw new RuntimeException("Failed to create payment: " +
@@ -134,12 +137,12 @@ public class PaymentServiceImpl implements PaymentService {
     public void updateResults(String uuid) {
         PaymentInvoiceResponse response = getInvoice(uuid);
 
-        PaymentResult result = paymentResultRepository.getByUuid(uuid).orElseThrow(() ->
+        PaymentResult result = paymentResultRepository.getByInvoiceUuid(uuid).orElseThrow(() ->
                 new ResourceNotFoundException("Payment result not found."));
 
         String status = response.payload().invoiceStatus();
         result.setStatus(status);
-        result.setPaymentDay(response.payload().paymentDay());
+        result.setPaymentCreateDate(response.payload().createdDate());
 
         paymentResultRepository.save(result);
 
@@ -174,6 +177,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         ResponseEntity<PaymentInvoiceResponse> response = restTemplate.postForEntity(url, entity, PaymentInvoiceResponse.class);
 
+        System.out.println(response.getBody());
         return response.getBody();
     }
 }

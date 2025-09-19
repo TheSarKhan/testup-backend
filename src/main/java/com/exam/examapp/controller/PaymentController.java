@@ -1,11 +1,10 @@
 package com.exam.examapp.controller;
 
-import com.exam.examapp.dto.request.payment.PaymentCallbackRequest;
 import com.exam.examapp.dto.request.payment.PaymentRequest;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.dto.response.PaymentResultResponse;
-import com.exam.examapp.service.interfaces.PaymentResultService;
-import com.exam.examapp.service.interfaces.PaymentService;
+import com.exam.examapp.service.interfaces.payment.PaymentResultService;
+import com.exam.examapp.service.interfaces.payment.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

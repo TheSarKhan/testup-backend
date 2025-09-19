@@ -6,7 +6,7 @@ import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.model.enums.Difficulty;
 import com.exam.examapp.model.enums.QuestionType;
 import com.exam.examapp.model.question.Question;
-import com.exam.examapp.service.interfaces.QuestionService;
+import com.exam.examapp.service.interfaces.question.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

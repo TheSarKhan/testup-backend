@@ -14,4 +14,6 @@ public interface PaymentResultRepository extends JpaRepository<PaymentResult, UU
     List<PaymentResult> getByUser(User user);
 
     Optional<PaymentResult> getByUuid(String uuid);
+
+    Optional<PaymentResult> getByInvoiceUuid(String uuid);
 }
