@@ -1,4 +1,4 @@
-package com.exam.examapp.service.impl;
+package com.exam.examapp.service.impl.question;
 
 import com.exam.examapp.dto.request.QuestionRequest;
 import com.exam.examapp.dto.request.QuestionUpdateRequest;
@@ -11,8 +11,8 @@ import com.exam.examapp.model.enums.QuestionType;
 import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.question.QuestionStorage;
 import com.exam.examapp.repository.QuestionStorageRepository;
-import com.exam.examapp.service.interfaces.QuestionService;
-import com.exam.examapp.service.interfaces.QuestionStorageService;
+import com.exam.examapp.service.interfaces.question.QuestionService;
+import com.exam.examapp.service.interfaces.question.QuestionStorageService;
 import com.exam.examapp.service.interfaces.UserService;
 import jakarta.transaction.Transactional;
 import java.util.List;

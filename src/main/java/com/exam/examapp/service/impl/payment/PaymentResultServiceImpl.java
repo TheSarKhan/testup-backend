@@ -1,10 +1,10 @@
-package com.exam.examapp.service.impl;
+package com.exam.examapp.service.impl.payment;
 
 import com.exam.examapp.dto.response.PaymentResultResponse;
 import com.exam.examapp.model.PaymentResult;
 import com.exam.examapp.model.User;
 import com.exam.examapp.repository.PaymentResultRepository;
-import com.exam.examapp.service.interfaces.PaymentResultService;
+import com.exam.examapp.service.interfaces.payment.PaymentResultService;
 import com.exam.examapp.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,11 +22,10 @@ public class PaymentResultServiceImpl implements PaymentResultService {
 
     @Override
     public List<PaymentResultResponse> getAllPaymentResults() {
-        List<PaymentResult> paymentResults = paymentResultRepository.findAll();
-        for (PaymentResult paymentResult : paymentResults)
-            paymentService.updateResults(paymentResult.getUuid());
+        for (PaymentResult paymentResult : paymentResultRepository.findAll())
+            paymentService.updateResults(paymentResult.getInvoiceUuid());
 
-        return paymentResults.stream()
+        return paymentResultRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -34,11 +33,10 @@ public class PaymentResultServiceImpl implements PaymentResultService {
     @Override
     public List<PaymentResultResponse> getMyPaymentResults() {
         User user = userService.getCurrentUser();
-        List<PaymentResult> paymentResults = paymentResultRepository.getByUser(user);
-        for (PaymentResult paymentResult : paymentResults)
-            paymentService.updateResults(paymentResult.getUuid());
+        for (PaymentResult paymentResult : paymentResultRepository.getByUser(user))
+            paymentService.updateResults(paymentResult.getInvoiceUuid());
 
-        return paymentResults.stream()
+        return paymentResultRepository.getByUser(user).stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -49,6 +47,6 @@ public class PaymentResultServiceImpl implements PaymentResultService {
                 paymentResult.getAmount(),
                 paymentResult.getCurrency(),
                 paymentResult.getDescription(),
-                paymentResult.getPaymentDay());
+                paymentResult.getPaymentCreateDate());
     }
 }

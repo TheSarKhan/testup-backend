@@ -30,12 +30,10 @@ public class JwtService {
     private String secretKey;
 
     public String generateAccessToken(String username) {
-        log.info(AppMessage.JWT_ACCESS_TOKEN_GENERATED.format(username));
         return generateToken(username, accessTokenExpireTime);
     }
 
     public String generateRefreshToken(String username){
-        log.info(AppMessage.JWT_REFRESH_TOKEN_GENERATED.format(username));
         String refreshToken = generateToken(username, refreshTokenExpireTime);
         cacheService.saveContent("refresh_token_", username, refreshToken, refreshTokenExpireTime);
         return refreshToken;

@@ -23,6 +23,8 @@ public class PaymentResult {
 
     private UUID productId;
 
+    private String invoiceUuid;
+
     private String uuid;
 
     private Double amount;
@@ -33,7 +35,7 @@ public class PaymentResult {
 
     private String description;
 
-    private String paymentDay;
+    private String paymentCreateDate;
 
     private Instant createdAt;
 

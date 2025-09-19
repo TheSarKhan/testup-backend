@@ -30,4 +30,3 @@ public class HeaderController {
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Header info received successfully", headerInfo));
     }
 }
-

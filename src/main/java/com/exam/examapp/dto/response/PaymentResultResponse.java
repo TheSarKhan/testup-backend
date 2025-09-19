@@ -5,6 +5,6 @@ public record PaymentResultResponse(
         double amount,
         String currency,
         String description,
-        String  paymentTime
+        String paymentCreateDate
 ) {
 }

@@ -35,6 +35,8 @@ public class StudentExam {
     @Enumerated(EnumType.STRING)
     private ExamStatus status;
 
+    private Double examRating;
+
     private double score;
 
     private int numberOfQuestions;
@@ -58,6 +60,12 @@ public class StudentExam {
 
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<UUID, Integer> listeningIdToPlayTimeMap;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Map<Integer, String>> subjectToQuestionToAnswer;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Map<Integer, AnswerStatus>> subjectToQuestionToAnswerStatus;
 
     private Instant startTime;
 

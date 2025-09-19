@@ -4,5 +4,5 @@ public record PaymentInitResponse(String code,
                                   String message,
                                   Payload payload) {
 
-    public record Payload(String uuid, String paymentUrl) {}
+    public record Payload(String invoiceUuid, String uuid, String paymentUrl) {}
 }

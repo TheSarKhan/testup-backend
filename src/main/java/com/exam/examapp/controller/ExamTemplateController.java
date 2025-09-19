@@ -4,7 +4,7 @@ import com.exam.examapp.dto.request.ExamTemplateRequest;
 import com.exam.examapp.dto.request.ExamTemplateUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.model.exam.ExamTemplate;
-import com.exam.examapp.service.interfaces.ExamTemplateService;
+import com.exam.examapp.service.interfaces.exam.ExamTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

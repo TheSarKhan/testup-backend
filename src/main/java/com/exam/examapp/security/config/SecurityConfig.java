@@ -61,8 +61,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
-        security
-                .csrf(AbstractHttpConfigurer::disable)
+        security.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
@@ -76,8 +75,7 @@ public class SecurityConfig {
                             res.setStatus(HttpServletResponse.SC_FORBIDDEN);
                             res.setContentType("application/json");
                             res.getWriter().write("{\"error\": \"Access denied\"}");
-                        })
-                )
+                        }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**")
                         .permitAll()
@@ -87,8 +85,9 @@ public class SecurityConfig {
                                 "/home", "/api/v1/auth/**",
                                 "/uploads/**", "/api/v1/about",
                                 "/api/v1/header", "/api/v1/test/**",
-                                "/api/v1/home", "api/v1/payment/success",
-                                "api/v1/payment/cancel","api/v1/payment/decline"
+                                "/api/v1/home", "/api/v1/payment/success",
+                                "/api/v1/payment/cancel", "/api/v1/payment/decline",
+                                "/oauth2/error", "/oauth2/success"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/tag/**", "/api/v1/pack/**",
@@ -97,13 +96,11 @@ public class SecurityConfig {
                                 "/api/v1/contact/**"
                         ).permitAll()
                         .requestMatchers("/api/v1/auth/finish-register").authenticated()
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(user -> user.oidcUserService(customOAuth2UserService))
                         .successHandler(oAuth2LoginSuccessHandler)
-                        .failureHandler(oAuth2LoginFailureHandler)
-                )
+                        .failureHandler(oAuth2LoginFailureHandler))
                 .authenticationProvider(authenticationProvider());
 
         return security.build();

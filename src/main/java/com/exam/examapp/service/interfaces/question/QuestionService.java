@@ -1,4 +1,4 @@
-package com.exam.examapp.service.interfaces;
+package com.exam.examapp.service.interfaces.question;
 
 import com.exam.examapp.dto.request.QuestionRequest;
 import com.exam.examapp.dto.request.QuestionUpdateRequest;

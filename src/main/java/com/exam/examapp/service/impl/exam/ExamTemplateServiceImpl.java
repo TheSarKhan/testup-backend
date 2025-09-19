@@ -1,4 +1,4 @@
-package com.exam.examapp.service.impl;
+package com.exam.examapp.service.impl.exam;
 
 import com.exam.examapp.dto.request.ExamTemplateRequest;
 import com.exam.examapp.dto.request.ExamTemplateUpdateRequest;
@@ -8,7 +8,7 @@ import com.exam.examapp.model.exam.ExamTemplate;
 import com.exam.examapp.model.exam.Submodule;
 import com.exam.examapp.model.subject.SubjectStructure;
 import com.exam.examapp.repository.ExamTemplateRepository;
-import com.exam.examapp.service.interfaces.ExamTemplateService;
+import com.exam.examapp.service.interfaces.exam.ExamTemplateService;
 import com.exam.examapp.service.interfaces.subject.SubjectStructureService;
 import com.exam.examapp.service.interfaces.subject.SubmoduleService;
 import java.util.List;

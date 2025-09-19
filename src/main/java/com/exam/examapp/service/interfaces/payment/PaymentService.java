@@ -1,4 +1,4 @@
-package com.exam.examapp.service.interfaces;
+package com.exam.examapp.service.interfaces.payment;
 
 import com.exam.examapp.dto.request.payment.PaymentRequest;
 

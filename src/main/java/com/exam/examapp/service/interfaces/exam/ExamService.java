@@ -1,9 +1,10 @@
-package com.exam.examapp.service.interfaces;
+package com.exam.examapp.service.interfaces.exam;
 
 import com.exam.examapp.dto.request.ExamRequest;
 import com.exam.examapp.dto.request.ExamUpdateRequest;
 import com.exam.examapp.dto.response.ExamBlockResponse;
 import com.exam.examapp.dto.response.ExamResponse;
+import com.exam.examapp.dto.response.ResultStatisticResponse;
 import com.exam.examapp.dto.response.StartExamResponse;
 import java.util.List;
 import java.util.UUID;
@@ -37,7 +38,9 @@ public interface ExamService {
 
   StartExamResponse startExam(String studentName, UUID id);
 
-  void finishExam(UUID examId);
+  ResultStatisticResponse finishExam(UUID studentExamId);
+
+  ResultStatisticResponse getResultStatistic(UUID studentExamId);
 
   void updateExam(
       ExamUpdateRequest request,

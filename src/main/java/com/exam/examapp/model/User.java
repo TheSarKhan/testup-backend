@@ -5,9 +5,11 @@ import com.exam.examapp.security.model.CustomUserDetails;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.Type;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Getter
 @Setter

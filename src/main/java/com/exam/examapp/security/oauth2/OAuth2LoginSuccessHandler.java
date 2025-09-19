@@ -1,27 +1,29 @@
 package com.exam.examapp.security.oauth2;
 
-import com.exam.examapp.model.User;
 import com.exam.examapp.security.service.impl.JwtService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     private final JwtService jwtService;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
+
+    @Value("${app.oauth-security}")
+    private boolean oauthSecurity;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -31,14 +33,45 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String email = oidcUser.getEmail();
         Map<String, Object> claims = oidcUser.getClaims();
 
-        Map<String, Object> tokens = new HashMap<>();
-        tokens.put("accessToken", jwtService.generateAccessToken(email));
-        tokens.put("refreshToken", jwtService.generateRefreshToken(email));
-        tokens.put("role", claims.get("role"));
-        tokens.put("pack", claims.get("pack"));
+        String accessToken = jwtService.generateAccessToken(email);
+        String refreshToken = jwtService.generateRefreshToken(email);
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        objectMapper.writeValue(response.getWriter(), tokens);
+        ResponseCookie accessCookie = ResponseCookie.from("ACCESS_TOKEN", accessToken)
+                .httpOnly(true)
+                .secure(oauthSecurity)
+                .path("/")
+                .maxAge(3600)
+                .sameSite("Strict")
+                .build();
+        response.addHeader("Set-Cookie", accessCookie.toString());
+
+        ResponseCookie refreshCookie = ResponseCookie.from("REFRESH_TOKEN", refreshToken)
+                .httpOnly(true)
+                .secure(oauthSecurity)
+                .path("/")
+                .maxAge(24 * 3600)
+                .sameSite("Strict")
+                .build();
+        response.addHeader("Set-Cookie", refreshCookie.toString());
+
+        ResponseCookie roleCookie = ResponseCookie.from("ROLE", String.valueOf(claims.get("role")))
+                .httpOnly(false)
+                .secure(oauthSecurity)
+                .path("/")
+                .maxAge(3600)
+                .sameSite("Strict")
+                .build();
+        response.addHeader("Set-Cookie", roleCookie.toString());
+
+        ResponseCookie packCookie = ResponseCookie.from("PACK", String.valueOf(claims.get("pack")))
+                .httpOnly(false)
+                .secure(oauthSecurity)
+                .path("/")
+                .maxAge(3600)
+                .sameSite("Strict")
+                .build();
+        response.addHeader("Set-Cookie", packCookie.toString());
+
+        response.sendRedirect(baseUrl + "/oauth2/success");
     }
 }

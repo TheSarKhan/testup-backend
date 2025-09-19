@@ -3,7 +3,7 @@ package com.exam.examapp.service.impl;
 import com.exam.examapp.dto.response.HomeResponse;
 import com.exam.examapp.model.enums.PageType;
 import com.exam.examapp.model.enums.SuperiorityType;
-import com.exam.examapp.service.interfaces.ExamService;
+import com.exam.examapp.service.interfaces.exam.ExamService;
 import com.exam.examapp.service.interfaces.HomeService;
 import com.exam.examapp.service.interfaces.PackService;
 import com.exam.examapp.service.interfaces.information.AdvertisementService;
