@@ -19,7 +19,7 @@ import java.util.Map;
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtService jwtService;
 
-    @Value("${app.base-url}")
+    @Value("${app.front-base-url}")
     private String baseUrl;
 
     @Value("${app.oauth-security}")
@@ -36,7 +36,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtService.generateAccessToken(email);
         String refreshToken = jwtService.generateRefreshToken(email);
 
-        ResponseCookie accessCookie = ResponseCookie.from("ACCESS_TOKEN", accessToken)
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                 .httpOnly(true)
                 .secure(oauthSecurity)
                 .path("/")
@@ -45,7 +45,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .build();
         response.addHeader("Set-Cookie", accessCookie.toString());
 
-        ResponseCookie refreshCookie = ResponseCookie.from("REFRESH_TOKEN", refreshToken)
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(oauthSecurity)
                 .path("/")
@@ -54,7 +54,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .build();
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
-        ResponseCookie roleCookie = ResponseCookie.from("ROLE", String.valueOf(claims.get("role")))
+        ResponseCookie roleCookie = ResponseCookie.from("role", String.valueOf(claims.get("role")))
                 .httpOnly(false)
                 .secure(oauthSecurity)
                 .path("/")
@@ -63,7 +63,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .build();
         response.addHeader("Set-Cookie", roleCookie.toString());
 
-        ResponseCookie packCookie = ResponseCookie.from("PACK", String.valueOf(claims.get("pack")))
+        ResponseCookie packCookie = ResponseCookie.from("pack", String.valueOf(claims.get("pack")))
                 .httpOnly(false)
                 .secure(oauthSecurity)
                 .path("/")
@@ -72,6 +72,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .build();
         response.addHeader("Set-Cookie", packCookie.toString());
 
-        response.sendRedirect(baseUrl + "/oauth2/success");
+        response.sendRedirect(baseUrl);
     }
 }

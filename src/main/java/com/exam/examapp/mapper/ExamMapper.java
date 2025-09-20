@@ -9,10 +9,13 @@ import com.exam.examapp.model.exam.Exam;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ExamMapper {
     public static ExamBlockResponse toBlockResponse(Exam exam) {
         Result result = getResult(exam);
+        List<UUID> studentExamIds = exam.getHasUncheckedQuestionStudentExamId();
+        Boolean hasUnchecked = studentExamIds == null ? null : !studentExamIds.isEmpty();
         return new ExamBlockResponse(
                 exam.getId(),
                 exam.getExamTitle(),
@@ -23,7 +26,7 @@ public class ExamMapper {
                 exam.getRating(),
                 exam.isHidden(),
                 exam.getNumberOfQuestions(),
-                !exam.getHasUncheckedQuestionStudentExamId().isEmpty(),
+                hasUnchecked,
                 exam.getCreatedAt(),
                 exam.getUpdatedAt());
     }
