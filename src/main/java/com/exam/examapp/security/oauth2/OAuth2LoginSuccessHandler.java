@@ -1,6 +1,7 @@
 package com.exam.examapp.security.oauth2;
 
 import com.exam.examapp.security.service.impl.JwtService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String refreshToken = jwtService.generateRefreshToken(email);
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
-                .secure(oauthSecurity)
+                .secure(true)
                 .path("/")
                 .maxAge(3600)
                 .sameSite("None")
@@ -45,20 +46,20 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         response.addHeader("Set-Cookie", accessCookie.toString());
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-                .secure(oauthSecurity)
+                .secure(true)
                 .path("/")
                 .maxAge(24 * 3600)
                 .sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
-        ResponseCookie roleCookie = ResponseCookie.from("role", String.valueOf(claims.get("role")))
-                .secure(oauthSecurity)
-                .path("/")
-                .maxAge(3600)
-                .sameSite("None")
-                .build();
-        response.addHeader("Set-Cookie", roleCookie.toString());
+        Cookie cookie = new Cookie("role", String.valueOf(claims.get("role")));
+        cookie.setPath("/");
+        cookie.setHttpOnly(false);
+        cookie.setSecure(true);
+        cookie.setMaxAge(60 * 60);
+        response.addCookie(cookie);
+
 
         ResponseCookie packCookie = ResponseCookie.from("pack", String.valueOf(claims.get("pack")))
                 .secure(oauthSecurity)
@@ -67,6 +68,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", packCookie.toString());
+
 
         response.sendRedirect(baseUrl);
     }
