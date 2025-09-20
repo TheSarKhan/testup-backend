@@ -181,7 +181,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void finishRegister(Role role, boolean isAcceptedTerms) {
+    public TokenResponse finishRegister(Role role, boolean isAcceptedTerms) {
         if (!isAcceptedTerms) throw new BadRequestException(AppMessage.TERMS_NOT_ACCEPTED.getMessage());
 
         User currentUser = userService.getCurrentUser();
@@ -198,5 +198,10 @@ public class AuthServiceImpl implements AuthService {
 
         currentUser.setRole(role);
         userService.save(currentUser);
+
+        String accessToken = jwtService.generateAccessToken(currentUser.getEmail());
+        String refreshToken = jwtService.generateRefreshToken(currentUser.getEmail());
+
+        return new TokenResponse(accessToken, refreshToken, currentUser.getRole(), currentUser.getPack());
     }
 }

@@ -141,18 +141,18 @@ public class AuthController {
 
     @PatchMapping("/finish-register")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<Void>> finishRegister(@RequestParam
-                                                            @NotNull
-                                                            @Schema(defaultValue = "STUDENT")
-                                                            Role role,
-                                                            @RequestParam
-                                                            @Schema(defaultValue = "true")
-                                                            boolean isAcceptedTerms) {
-        authService.finishRegister(role, isAcceptedTerms);
+    public ResponseEntity<ApiResponse<TokenResponse>> finishRegister(@RequestParam
+                                                                     @NotNull
+                                                                     @Schema(defaultValue = "STUDENT")
+                                                                     Role role,
+                                                                     @RequestParam
+                                                                     @Schema(defaultValue = "true")
+                                                                     boolean isAcceptedTerms) {
+        TokenResponse tokenResponse = authService.finishRegister(role, isAcceptedTerms);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
                         "Registration successful",
-                        null));
+                        tokenResponse));
     }
 }

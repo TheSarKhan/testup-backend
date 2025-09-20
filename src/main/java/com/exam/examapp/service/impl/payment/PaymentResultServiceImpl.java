@@ -22,9 +22,6 @@ public class PaymentResultServiceImpl implements PaymentResultService {
 
     @Override
     public List<PaymentResultResponse> getAllPaymentResults() {
-        for (PaymentResult paymentResult : paymentResultRepository.findAll())
-            paymentService.updateResults(paymentResult.getInvoiceUuid());
-
         return paymentResultRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
@@ -33,12 +30,16 @@ public class PaymentResultServiceImpl implements PaymentResultService {
     @Override
     public List<PaymentResultResponse> getMyPaymentResults() {
         User user = userService.getCurrentUser();
-        for (PaymentResult paymentResult : paymentResultRepository.getByUser(user))
-            paymentService.updateResults(paymentResult.getInvoiceUuid());
-
         return paymentResultRepository.getByUser(user).stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    @Override
+    public void updateResults() {
+        User user = userService.getCurrentUser();
+        for (PaymentResult paymentResult : paymentResultRepository.getByUser(user))
+            paymentService.updateResults(paymentResult.getInvoiceUuid());
     }
 
     private PaymentResultResponse toResponse(PaymentResult paymentResult) {

@@ -8,4 +8,6 @@ public interface PaymentResultService {
     List<PaymentResultResponse> getAllPaymentResults();
 
     List<PaymentResultResponse> getMyPaymentResults();
+
+    void updateResults();
 }

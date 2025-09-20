@@ -49,6 +49,17 @@ public class PaymentController {
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Payment result", "Success"));
     }
 
+    @GetMapping("/verify")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+            summary = "Payment verified",
+            description = "This endpoint is called when the payment finish. Status update."
+    )
+    public ResponseEntity<ApiResponse<Void>> verify() {
+        paymentResultService.updateResults();
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Payment result", null));
+    }
+
     @GetMapping("/cancel")
     @Operation(
             summary = "Payment Redirect",

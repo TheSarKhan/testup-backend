@@ -37,38 +37,34 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String refreshToken = jwtService.generateRefreshToken(email);
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
-                .httpOnly(true)
                 .secure(oauthSecurity)
                 .path("/")
                 .maxAge(3600)
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", accessCookie.toString());
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-                .httpOnly(true)
                 .secure(oauthSecurity)
                 .path("/")
                 .maxAge(24 * 3600)
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
         ResponseCookie roleCookie = ResponseCookie.from("role", String.valueOf(claims.get("role")))
-                .httpOnly(false)
                 .secure(oauthSecurity)
                 .path("/")
                 .maxAge(3600)
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", roleCookie.toString());
 
         ResponseCookie packCookie = ResponseCookie.from("pack", String.valueOf(claims.get("pack")))
-                .httpOnly(false)
                 .secure(oauthSecurity)
                 .path("/")
                 .maxAge(3600)
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", packCookie.toString());
 

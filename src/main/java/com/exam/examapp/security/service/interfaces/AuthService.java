@@ -23,5 +23,5 @@ public interface AuthService {
 
     TokenResponse resetCurrentUserPassword(String oldPassword, String newPassword);
 
-    void finishRegister(Role role, boolean isAcceptedTerms);
+    TokenResponse finishRegister(Role role, boolean isAcceptedTerms);
 }
