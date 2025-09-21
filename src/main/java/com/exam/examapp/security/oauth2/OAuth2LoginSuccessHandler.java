@@ -34,6 +34,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         cacheService.saveContent(HEADER, id.toString(), email, (long) 5 * 60 * 1000);
 
-        response.sendRedirect(baseUrl + "/uuid?uuid=" + id);
+        response.sendRedirect(baseUrl + "/auth/oauth/callback?uuid=" + id);
     }
 }
