@@ -1,6 +1,6 @@
 package com.exam.examapp.service.interfaces.payment;
 
-import com.exam.examapp.dto.response.PaymentResultResponse;
+import com.exam.examapp.dto.response.payment.PaymentResultResponse;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package com.exam.examapp.service.impl.payment;
 
-import com.exam.examapp.dto.response.PaymentResultResponse;
+import com.exam.examapp.dto.response.payment.PaymentResultResponse;
 import com.exam.examapp.model.PaymentResult;
 import com.exam.examapp.model.User;
 import com.exam.examapp.repository.PaymentResultRepository;

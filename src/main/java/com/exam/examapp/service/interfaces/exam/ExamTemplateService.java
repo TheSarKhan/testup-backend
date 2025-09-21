@@ -1,7 +1,7 @@
 package com.exam.examapp.service.interfaces.exam;
 
-import com.exam.examapp.dto.request.ExamTemplateRequest;
-import com.exam.examapp.dto.request.ExamTemplateUpdateRequest;
+import com.exam.examapp.dto.request.exam.ExamTemplateRequest;
+import com.exam.examapp.dto.request.exam.ExamTemplateUpdateRequest;
 import com.exam.examapp.model.exam.ExamTemplate;
 
 import java.util.List;

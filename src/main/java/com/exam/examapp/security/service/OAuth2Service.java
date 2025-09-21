@@ -23,6 +23,7 @@ public class OAuth2Service {
     @Transactional
     public TokenResponse getToken(String id) {
         String email = cacheService.getContent(HEADER, id);
+        cacheService.deleteContent(HEADER, id);
 
         String accessToken = jwtService.generateAccessToken(email);
         String refreshToken = jwtService.generateRefreshToken(email);

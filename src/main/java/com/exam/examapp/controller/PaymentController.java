@@ -2,7 +2,7 @@ package com.exam.examapp.controller;
 
 import com.exam.examapp.dto.request.payment.PaymentRequest;
 import com.exam.examapp.dto.response.ApiResponse;
-import com.exam.examapp.dto.response.PaymentResultResponse;
+import com.exam.examapp.dto.response.payment.PaymentResultResponse;
 import com.exam.examapp.service.interfaces.payment.PaymentResultService;
 import com.exam.examapp.service.interfaces.payment.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;

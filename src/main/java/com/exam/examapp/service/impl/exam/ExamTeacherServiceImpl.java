@@ -1,6 +1,6 @@
 package com.exam.examapp.service.impl.exam;
 
-import com.exam.examapp.dto.request.AddExamTeacherRequest;
+import com.exam.examapp.dto.request.exam.AddExamTeacherRequest;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.exam.ExamTeacher;

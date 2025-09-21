@@ -1,6 +1,6 @@
 package com.exam.examapp.controller;
 
-import com.exam.examapp.dto.request.AddExamTeacherRequest;
+import com.exam.examapp.dto.request.exam.AddExamTeacherRequest;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.service.interfaces.exam.ExamTeacherService;
 import io.swagger.v3.oas.annotations.Operation;

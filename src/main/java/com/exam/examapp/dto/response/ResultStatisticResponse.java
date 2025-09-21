@@ -1,5 +1,6 @@
 package com.exam.examapp.dto.response;
 
+import com.exam.examapp.dto.response.exam.ExamResponse;
 import com.exam.examapp.model.enums.AnswerStatus;
 
 import java.util.Map;

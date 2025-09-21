@@ -1,4 +1,4 @@
-package com.exam.examapp.dto.request;
+package com.exam.examapp.dto.request.exam;
 
 import com.exam.examapp.dto.request.subject.SubjectStructureRequest;
 import jakarta.validation.Valid;

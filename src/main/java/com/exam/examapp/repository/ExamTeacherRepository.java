@@ -1,6 +1,5 @@
 package com.exam.examapp.repository;
 
-import com.exam.examapp.dto.response.ExamBlockResponse;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.exam.ExamTeacher;

@@ -1,4 +1,4 @@
-package com.exam.examapp.dto.request;
+package com.exam.examapp.dto.request.exam;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

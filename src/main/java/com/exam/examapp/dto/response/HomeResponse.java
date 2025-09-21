@@ -1,5 +1,6 @@
 package com.exam.examapp.dto.response;
 
+import com.exam.examapp.dto.response.exam.ExamBlockResponse;
 import com.exam.examapp.dto.response.information.MediaContentResponse;
 import com.exam.examapp.model.Pack;
 import com.exam.examapp.model.information.Advertisement;

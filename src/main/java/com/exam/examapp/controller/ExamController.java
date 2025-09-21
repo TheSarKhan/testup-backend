@@ -1,11 +1,11 @@
 package com.exam.examapp.controller;
 
-import com.exam.examapp.dto.request.ExamRequest;
-import com.exam.examapp.dto.request.ExamUpdateRequest;
+import com.exam.examapp.dto.request.exam.ExamRequest;
+import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
-import com.exam.examapp.dto.response.ExamBlockResponse;
-import com.exam.examapp.dto.response.ExamResponse;
-import com.exam.examapp.dto.response.StartExamResponse;
+import com.exam.examapp.dto.response.exam.ExamBlockResponse;
+import com.exam.examapp.dto.response.exam.ExamResponse;
+import com.exam.examapp.dto.response.exam.StartExamResponse;
 import com.exam.examapp.service.interfaces.exam.ExamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

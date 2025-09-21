@@ -1,7 +1,7 @@
 package com.exam.examapp.mapper;
 
-import com.exam.examapp.dto.response.ExamBlockResponse;
-import com.exam.examapp.dto.response.ExamResponse;
+import com.exam.examapp.dto.response.exam.ExamBlockResponse;
+import com.exam.examapp.dto.response.exam.ExamResponse;
 import com.exam.examapp.dto.response.UserResponseForExam;
 import com.exam.examapp.model.Tag;
 import com.exam.examapp.model.User;

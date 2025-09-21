@@ -1,7 +1,7 @@
 package com.exam.examapp.controller;
 
-import com.exam.examapp.dto.request.ExamTemplateRequest;
-import com.exam.examapp.dto.request.ExamTemplateUpdateRequest;
+import com.exam.examapp.dto.request.exam.ExamTemplateRequest;
+import com.exam.examapp.dto.request.exam.ExamTemplateUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.model.exam.ExamTemplate;
 import com.exam.examapp.service.interfaces.exam.ExamTemplateService;

@@ -1,4 +1,4 @@
-package com.exam.examapp.dto.response;
+package com.exam.examapp.dto.response.exam;
 
 import com.exam.examapp.model.enums.ExamStatus;
 

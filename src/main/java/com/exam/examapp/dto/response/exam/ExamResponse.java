@@ -1,5 +1,6 @@
-package com.exam.examapp.dto.response;
+package com.exam.examapp.dto.response.exam;
 
+import com.exam.examapp.dto.response.UserResponseForExam;
 import com.exam.examapp.model.Tag;
 import com.exam.examapp.model.subject.SubjectStructureQuestion;
 import java.math.BigDecimal;

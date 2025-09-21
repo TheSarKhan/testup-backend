@@ -1,4 +1,4 @@
-package com.exam.examapp.dto.request;
+package com.exam.examapp.dto.request.exam;
 
 import java.util.List;
 import java.util.Map;

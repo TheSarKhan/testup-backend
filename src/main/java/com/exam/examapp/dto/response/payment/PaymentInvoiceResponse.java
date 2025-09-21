@@ -1,4 +1,4 @@
-package com.exam.examapp.dto.response;
+package com.exam.examapp.dto.response.payment;
 
 public record PaymentInvoiceResponse(
         String message,

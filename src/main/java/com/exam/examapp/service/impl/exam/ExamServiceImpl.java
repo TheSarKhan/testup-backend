@@ -1,15 +1,15 @@
 package com.exam.examapp.service.impl.exam;
 
 import com.exam.examapp.dto.QuestionDetails;
-import com.exam.examapp.dto.request.ExamRequest;
-import com.exam.examapp.dto.request.ExamUpdateRequest;
+import com.exam.examapp.dto.request.exam.ExamRequest;
+import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
 import com.exam.examapp.dto.request.QuestionRequest;
 import com.exam.examapp.dto.request.SubjectStructureQuestionsRequest;
 import com.exam.examapp.dto.request.subject.SubjectStructureRequest;
-import com.exam.examapp.dto.response.ExamBlockResponse;
-import com.exam.examapp.dto.response.ExamResponse;
+import com.exam.examapp.dto.response.exam.ExamBlockResponse;
+import com.exam.examapp.dto.response.exam.ExamResponse;
 import com.exam.examapp.dto.response.ResultStatisticResponse;
-import com.exam.examapp.dto.response.StartExamResponse;
+import com.exam.examapp.dto.response.exam.StartExamResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ExamExpiredException;
 import com.exam.examapp.exception.custom.ReachedLimitException;
@@ -75,6 +75,8 @@ public class ExamServiceImpl implements ExamService {
 
     @Value("${app.base-url}")
     private String baseUrl;
+
+    private static final String EXAM_CODE_PREFIX = "exam_code_";
 
     private static String formatFormulaWithCounts(
             String formula, List<Integer> correctAndWrongCounts) {
@@ -274,7 +276,7 @@ public class ExamServiceImpl implements ExamService {
     public List<ExamBlockResponse> getExamByTag(List<UUID> tagIds) {
         Specification<Exam> specification = Specification.unrestricted();
         for (UUID tagId : tagIds) {
-            specification.or(hasTag(tagId));
+            specification.or(ExamSpecification.hasTag(tagId));
         }
         return examRepository.findAll(specification)
                 .stream()
@@ -299,14 +301,14 @@ public class ExamServiceImpl implements ExamService {
         if (!exam.isHidden())
             throw new BadRequestException("Exam is not hidden. You cannot get the exam code.");
         int code = (int) (Math.random() * (9_999_999 - 1_000_000 + 1)) + 1_000_000;
-        cacheService.saveContent("exam_code_", String.valueOf(code), id.toString(), (long) 86_400_000);
+        cacheService.saveContent(EXAM_CODE_PREFIX, String.valueOf(code), id.toString(), (long) 86_400_000);
         return code;
     }
 
     @Override
     @Transactional
     public StartExamResponse startExamViaCode(String studentName, String examCode) {
-        String examId = cacheService.getContent("exam_code_", examCode.substring(1));
+        String examId = cacheService.getContent(EXAM_CODE_PREFIX, examCode.substring(1));
         Exam byId = getById(UUID.fromString(examId));
         return startExam(studentName, byId.getId());
     }
@@ -370,85 +372,113 @@ public class ExamServiceImpl implements ExamService {
     }
 
     private void calculateResult(StudentExam studentExam) {
-        Map<UUID, String> questionIdToAnswerMap = studentExam.getQuestionIdToAnswerMap();
+        List<Integer> correctAndWrongCounts = new ArrayList<>(List.of(0,0,0,0,0,0,0,0));
 
-        List<SubjectStructureQuestion> subjectStructureQuestions =
-                studentExam.getExam().getSubjectStructureQuestions().stream().toList();
+        Map<UUID, AnswerStatus> answerStatusMap = checkAnswers(studentExam, correctAndWrongCounts);
+
+        handleUncheckedQuestions(studentExam, answerStatusMap);
+
+        calculateScore(studentExam, answerStatusMap, correctAndWrongCounts);
+
+        updateStatistics(studentExam, answerStatusMap, correctAndWrongCounts);
+
+        saveStudentExam(studentExam);
+    }
+
+
+    private Map<UUID, AnswerStatus> checkAnswers(StudentExam studentExam,
+                                                 List<Integer> correctAndWrongCounts) {
+        Map<UUID, String> questionIdToAnswerMap = studentExam.getQuestionIdToAnswerMap();
+        List<SubjectStructureQuestion> subjectStructureQuestions = studentExam.getExam().getSubjectStructureQuestions();
 
         Map<UUID, AnswerStatus> answerStatusMap = new HashMap<>();
-
-        List<Integer> correctAndWrongCounts = new ArrayList<>(List.of(0, 0, 0, 0, 0, 0, 0, 0));
 
         for (SubjectStructureQuestion subjectStructureQuestion : subjectStructureQuestions) {
             for (Question question : subjectStructureQuestion.getQuestion()) {
                 if (questionIdToAnswerMap.containsKey(question.getId())) {
-                    QuestionDetails questionDetails = question.getQuestionDetails();
-                    String answer = questionIdToAnswerMap.get(question.getId());
                     AnswerChecker checker = factory.getChecker(question.getType());
-                    checker.check(question, questionDetails, answer, answerStatusMap, correctAndWrongCounts);
+                    checker.check(
+                            question,
+                            question.getQuestionDetails(),
+                            questionIdToAnswerMap.get(question.getId()),
+                            answerStatusMap,
+                            correctAndWrongCounts
+                    );
                 } else {
                     answerStatusMap.put(question.getId(), AnswerStatus.NOT_ANSWERED);
                 }
             }
         }
 
-        long count =
-                answerStatusMap.entrySet().stream()
-                        .filter(entry -> AnswerStatus.WAITING_FOR_REVIEW.equals(entry.getValue()))
-                        .count();
+        return answerStatusMap;
+    }
+
+
+    private void handleUncheckedQuestions(StudentExam studentExam, Map<UUID, AnswerStatus> answerStatusMap) {
+        long count = answerStatusMap.values().stream()
+                .filter(AnswerStatus.WAITING_FOR_REVIEW::equals)
+                .count();
 
         if (count > 0) {
-            List<UUID> hasUncheckedQuestionStudentExamId =
-                    studentExam.getExam().getHasUncheckedQuestionStudentExamId();
-            hasUncheckedQuestionStudentExamId.add(studentExam.getId());
+            studentExam.getExam().getHasUncheckedQuestionStudentExamId().add(studentExam.getId());
             studentExam.setStatus(ExamStatus.WAITING_OPEN_ENDED_QUESTION);
             studentExam.setNumberOfNotCheckedYetQuestions((int) count);
             examRepository.save(studentExam.getExam());
         }
+    }
 
-        for (SubjectStructureQuestion subjectStructureQuestion : subjectStructureQuestions) {
+    private void calculateScore(StudentExam studentExam,
+                                Map<UUID, AnswerStatus> answerStatusMap,
+                                List<Integer> correctAndWrongCounts) {
+        for (SubjectStructureQuestion subjectStructureQuestion : studentExam.getExam().getSubjectStructureQuestions()) {
             String formula = subjectStructureQuestion.getSubjectStructure().getFormula();
+
             if (formula != null) {
                 String formattedFormula = formatFormulaWithCounts(formula, correctAndWrongCounts);
-
-                Expression e = new ExpressionBuilder(formattedFormula).build();
-                studentExam.setScore(e.evaluate());
-            } else {
-                Map<Integer, Integer> questionToPointMap =
-                        subjectStructureQuestion.getSubjectStructure().getQuestionToPointMap();
-                List<Question> question = subjectStructureQuestion.getQuestion();
-                double score = 0;
-                for (Map.Entry<Integer, Integer> questionToPoint : questionToPointMap.entrySet()) {
-                    Question currentQuestion = question.get(questionToPoint.getKey());
-                    AnswerStatus answerStatus = answerStatusMap.get(currentQuestion.getId());
-                    if (AnswerStatus.CORRECT.equals(answerStatus)) {
-                        score += questionToPoint.getValue();
-                    }
-                }
+                double score = new ExpressionBuilder(formattedFormula).build().evaluate();
                 studentExam.setScore(score);
+            } else {
+                studentExam.setScore(calculatePointBasedScore(subjectStructureQuestion, answerStatusMap));
             }
         }
+    }
+
+
+    private double calculatePointBasedScore(SubjectStructureQuestion subjectStructureQuestion,
+                                            Map<UUID, AnswerStatus> answerStatusMap) {
+        Map<Integer, Integer> questionToPointMap = subjectStructureQuestion.getSubjectStructure().getQuestionToPointMap();
+        List<Question> questions = subjectStructureQuestion.getQuestion();
+
+        double score = 0;
+        for (Map.Entry<Integer, Integer> entry : questionToPointMap.entrySet()) {
+            Question currentQuestion = questions.get(entry.getKey());
+            if (AnswerStatus.CORRECT.equals(answerStatusMap.get(currentQuestion.getId()))) {
+                score += entry.getValue();
+            }
+        }
+        return score;
+    }
+
+    private void updateStatistics(StudentExam studentExam,
+                                  Map<UUID, AnswerStatus> answerStatusMap,
+                                  List<Integer> correctAndWrongCounts) {
         int correctCount = correctAndWrongCounts.stream().limit(4).mapToInt(Integer::intValue).sum();
-
-        studentExam.setNumberOfCorrectAnswers(correctCount);
-
         int wrongCount = correctAndWrongCounts.stream().skip(4).mapToInt(Integer::intValue).sum();
 
+        studentExam.setNumberOfCorrectAnswers(correctCount);
         studentExam.setNumberOfWrongAnswers(wrongCount);
 
         studentExam.setNumberOfNotAnsweredQuestions(
                 studentExam.getNumberOfQuestions()
-                        - (correctCount + wrongCount + studentExam.getNumberOfNotCheckedYetQuestions()));
+                        - (correctCount + wrongCount + studentExam.getNumberOfNotCheckedYetQuestions())
+        );
 
-        Map<String, Map<Integer, String>> subjectToQuestionToAnswer =
-                mapStudentAnswersToSubjects(studentExam);
-        studentExam.setSubjectToQuestionToAnswer(subjectToQuestionToAnswer);
+        studentExam.setSubjectToQuestionToAnswer(mapStudentAnswersToSubjects(studentExam));
+        studentExam.setSubjectToQuestionToAnswerStatus(mapSubjectToQuestionAnswerStatus(studentExam));
+    }
 
 
-        Map<String, Map<Integer, AnswerStatus>> subjectToQuestionToAnswerStatus =
-                mapSubjectToQuestionAnswerStatus(studentExam);
-        studentExam.setSubjectToQuestionToAnswerStatus(subjectToQuestionToAnswerStatus);
-
+    private void saveStudentExam(StudentExam studentExam) {
         studentExamRepository.save(studentExam);
     }
 
@@ -653,10 +683,5 @@ public class ExamServiceImpl implements ExamService {
         return examRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found."));
-    }
-
-    private Specification<Exam> hasTag(UUID tagId) {
-        return (root, query, cb) ->
-                cb.equal(root.get("tags").get("id"), tagId);
     }
 }
