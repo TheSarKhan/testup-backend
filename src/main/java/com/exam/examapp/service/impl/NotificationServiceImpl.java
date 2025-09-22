@@ -42,7 +42,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<NotificationResponse> getAllNotificationsSortedByCreatedAt() {
-        return notificationRepository.getAllNotificationsSortedByCreatedAt()
+        User user = userService.getCurrentUser();
+        return notificationRepository.getAllNotificationsSortedByCreatedAt(user)
                 .stream()
                 .map(NotificationMapper::toResponseForMyNotification)
                 .toList();

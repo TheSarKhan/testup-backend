@@ -4,7 +4,7 @@ import com.exam.examapp.dto.request.ProfileUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.dto.response.ProfileInfoResponse;
 import com.exam.examapp.dto.response.ProfileSettingsResponse;
-import com.exam.examapp.model.TeacherInfo;
+import com.exam.examapp.dto.response.TeacherInfoResponse;
 import com.exam.examapp.security.dto.response.TokenResponse;
 import com.exam.examapp.service.interfaces.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,8 +57,8 @@ public class ProfileController {
             summary = "Get teacher info",
             description = "Returns teacher-specific information. Accessible only by users with TEACHER role"
     )
-    public ResponseEntity<ApiResponse<TeacherInfo>> getTeacherInfo() {
-        TeacherInfo teacherInfo = profileService.getTeacherInfo();
+    public ResponseEntity<ApiResponse<TeacherInfoResponse>> getTeacherInfo() {
+        TeacherInfoResponse teacherInfo = profileService.getTeacherInfo();
         return ResponseEntity.ok(ApiResponse.build(
                 HttpStatus.OK,
                 "Teacher info",

@@ -3,9 +3,9 @@ package com.exam.examapp.service.impl;
 import com.exam.examapp.dto.request.ProfileUpdateRequest;
 import com.exam.examapp.dto.response.ProfileInfoResponse;
 import com.exam.examapp.dto.response.ProfileSettingsResponse;
+import com.exam.examapp.dto.response.TeacherInfoResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.mapper.ProfileMapper;
-import com.exam.examapp.model.TeacherInfo;
 import com.exam.examapp.model.User;
 import com.exam.examapp.security.dto.response.TokenResponse;
 import com.exam.examapp.security.service.impl.JwtService;
@@ -38,8 +38,10 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public TeacherInfo getTeacherInfo() {
-        return userService.getTeacherInfo();
+    public TeacherInfoResponse getTeacherInfo() {
+        return new TeacherInfoResponse(
+                userService.getTeacherInfo(),
+                userService.getCurrentUser().getPack());
     }
 
     @Override
