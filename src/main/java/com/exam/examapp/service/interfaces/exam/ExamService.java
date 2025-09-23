@@ -3,6 +3,7 @@ package com.exam.examapp.service.interfaces.exam;
 import com.exam.examapp.dto.request.exam.ExamRequest;
 import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
 import com.exam.examapp.dto.response.exam.ExamBlockResponse;
+import com.exam.examapp.dto.response.exam.ExamDetailedResponse;
 import com.exam.examapp.dto.response.exam.ExamResponse;
 import com.exam.examapp.dto.response.ResultStatisticResponse;
 import com.exam.examapp.dto.response.exam.StartExamResponse;
@@ -28,6 +29,8 @@ public interface ExamService {
 
   List<ExamBlockResponse> getLastCreatedExams();
 
+  ExamDetailedResponse getExamDetailedById(UUID id);
+
   ExamResponse getExamById(UUID id);
 
   Exam getById(UUID id);
@@ -36,7 +39,7 @@ public interface ExamService {
 
   StartExamResponse startExamViaCode(String studentName, String examCode);
 
-  StartExamResponse startExam(String studentName, UUID id);
+  StartExamResponse startExamViaId(String studentName, UUID id);
 
   ResultStatisticResponse finishExam(UUID studentExamId);
 

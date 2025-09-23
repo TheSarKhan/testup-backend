@@ -1,6 +1,7 @@
 package com.exam.examapp.dto.response.exam;
 
 import com.exam.examapp.model.Tag;
+import com.exam.examapp.model.enums.ExamStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -18,6 +19,7 @@ public record ExamBlockResponse(
         boolean isHidden,
         int totalQuestionCount,
         Boolean hasUncheckedAnswer,
+        ExamStatus examStatus,
         Instant createAt,
         Instant updatedAt
 ) {}

@@ -3,7 +3,9 @@ package com.exam.examapp.controller;
 import com.exam.examapp.dto.request.exam.ExamRequest;
 import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
+import com.exam.examapp.dto.response.ResultStatisticResponse;
 import com.exam.examapp.dto.response.exam.ExamBlockResponse;
+import com.exam.examapp.dto.response.exam.ExamDetailedResponse;
 import com.exam.examapp.dto.response.exam.ExamResponse;
 import com.exam.examapp.dto.response.exam.StartExamResponse;
 import com.exam.examapp.service.interfaces.exam.ExamService;
@@ -91,12 +93,23 @@ public class ExamController {
                 ApiResponse.build(HttpStatus.OK, "Admin Exams retrieved successfully", adminCooperationExams));
     }
 
+    @GetMapping("/detailed/id")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    @Operation(
+            summary = "Get Exam detailed by id",
+            description = "Retrieve exam details by exam UUID.")
+    public ResponseEntity<ApiResponse<ExamDetailedResponse>> getDetailedExamById(@RequestParam UUID id) {
+        ExamDetailedResponse exam = examService.getExamDetailedById(id);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Exam retrieved successfully", exam));
+    }
+
     @GetMapping("/id")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
     @Operation(
             summary = "Get Exam by id",
-            description = "Retrieve full exam details by exam UUID. Use this to view/edit exam contents.")
+            description = "Retrieve full exam details by exam UUID.")
     public ResponseEntity<ApiResponse<ExamResponse>> getExamById(@RequestParam UUID id) {
         ExamResponse exam = examService.getExamById(id);
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Exam retrieved successfully", exam));
@@ -136,9 +149,32 @@ public class ExamController {
                     "Start an exam by providing its UUID (teacher/admin or system-start). Useful for scheduled or manual starts.")
     public ResponseEntity<ApiResponse<StartExamResponse>> startExam(@RequestParam(required = false) String studentName,
                                                                     @RequestParam UUID id) {
-        StartExamResponse startExamResponse = examService.startExam(studentName, id);
+        StartExamResponse startExamResponse = examService.startExamViaId(studentName, id);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "Exam started successfully", startExamResponse));
+    }
+
+    @PatchMapping("/finish")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+            summary = "Finish exam",
+            description = "Finish an ongoing exam by providing studentExamId. Returns exam results and statistics."
+    )
+    public ResponseEntity<ApiResponse<ResultStatisticResponse>> finishExam(@RequestParam UUID studentExamId) {
+        ResultStatisticResponse resultStatisticResponse = examService.finishExam(studentExamId);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Exam finished successfully", resultStatisticResponse));
+    }
+
+    @GetMapping("/result")
+    @Operation(
+            summary = "Get Exam Result",
+            description = "Retrieve exam result statistics by providing studentExamId."
+    )
+    public ResponseEntity<ApiResponse<ResultStatisticResponse>> getResult(@RequestParam UUID studentExamId) {
+        ResultStatisticResponse resultStatistic = examService.getResultStatistic(studentExamId);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Exam result retrieved successfully", resultStatistic));
     }
 
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

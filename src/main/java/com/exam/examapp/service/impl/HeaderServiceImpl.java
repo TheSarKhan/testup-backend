@@ -1,6 +1,7 @@
 package com.exam.examapp.service.impl;
 
 import com.exam.examapp.dto.response.HeaderResponse;
+import com.exam.examapp.model.User;
 import com.exam.examapp.service.interfaces.HeaderService;
 import com.exam.examapp.service.interfaces.NotificationService;
 import com.exam.examapp.service.interfaces.UserService;
@@ -16,8 +17,10 @@ public class HeaderServiceImpl implements HeaderService {
 
   @Override
   public HeaderResponse getHeaderInfo() {
-    return new HeaderResponse(
+      User user = userService.getCurrentUser();
+      return new HeaderResponse(
         notificationService.getAllNotificationsSortedByCreatedAt(),
-        userService.getCurrentUser().getProfilePictureUrl());
+        user.getProfilePictureUrl(),
+        user.getCurrentExams());
   }
 }

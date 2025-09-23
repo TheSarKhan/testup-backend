@@ -1,15 +1,16 @@
 package com.exam.examapp.model;
 
+import com.exam.examapp.dto.CurrentExam;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.security.model.CustomUserDetails;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.Type;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import lombok.*;
-import org.hibernate.annotations.Type;
-import org.springframework.security.core.userdetails.UserDetails;
 
 @Getter
 @Setter
@@ -19,66 +20,73 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Table(name = "users")
 @RequiredArgsConstructor
 public class User {
-  @Id private UUID id;
+    @Id
+    private UUID id;
 
-  @Column(nullable = false)
-  private String fullName;
+    @Column(nullable = false)
+    private String fullName;
 
-  @Column(unique = true, nullable = false)
-  private String email;
+    @Column(unique = true, nullable = false)
+    private String email;
 
-  @Column(unique = true)
-  private String phoneNumber;
+    @Column(unique = true)
+    private String phoneNumber;
 
-  @Column(columnDefinition = "TEXT")
-  private String password;
+    @Column(columnDefinition = "TEXT")
+    private String password;
 
-  private String profilePictureUrl;
+    private String profilePictureUrl;
 
-  private String googleId;
+    private String googleId;
 
-  @ManyToOne private Pack pack;
+    @ManyToOne
+    private Pack pack;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private Role role;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 
-  @Type(JsonBinaryType.class)
-  @Column(columnDefinition = "jsonb")
-  private TeacherInfo info;
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
+    private TeacherInfo info;
 
-  private boolean isAcceptedTerms;
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
+    private List<CurrentExam> currentExams;
 
-  private boolean isActive;
+    private boolean isAcceptedTerms;
 
-  private boolean isDeleted;
+    private boolean isActive;
 
-  private boolean isEnabled;
+    private boolean isDeleted;
 
-  private boolean isAccountNonExpired;
+    private boolean isEnabled;
 
-  private boolean isAccountNonLocked;
+    private boolean isAccountNonExpired;
 
-  private boolean isCredentialsNonExpired;
+    private boolean isAccountNonLocked;
 
-  private LocalDateTime createdAt;
+    private boolean isCredentialsNonExpired;
 
-  private LocalDateTime updatedAt;
+    private LocalDateTime createdAt;
 
-  @PrePersist
-  void prePersist() {
-    id = UUID.randomUUID();
-    isActive =
-        isAccountNonExpired = isAccountNonLocked = isCredentialsNonExpired = isEnabled = true;
-    updatedAt = createdAt = LocalDateTime.now();
-  }
+    private LocalDateTime updatedAt;
 
-  @PreUpdate
-  void preUpdate() {
-    updatedAt = LocalDateTime.now();
-  }
+    @PrePersist
+    void prePersist() {
+        id = UUID.randomUUID();
+        isActive =
+                isAccountNonExpired = isAccountNonLocked = isCredentialsNonExpired = isEnabled = true;
+        updatedAt = createdAt = LocalDateTime.now();
+        currentExams = List.of();
+    }
 
-  public CustomUserDetails getCustomUserDetails() {
-    return new CustomUserDetails(this);
-  }
+    @PreUpdate
+    void preUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    public CustomUserDetails getCustomUserDetails() {
+        return new CustomUserDetails(this);
+    }
 }

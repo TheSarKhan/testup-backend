@@ -1,18 +1,21 @@
 package com.exam.examapp.mapper;
 
 import com.exam.examapp.dto.response.exam.ExamBlockResponse;
+import com.exam.examapp.dto.response.exam.ExamDetailedResponse;
 import com.exam.examapp.dto.response.exam.ExamResponse;
 import com.exam.examapp.dto.response.UserResponseForExam;
 import com.exam.examapp.model.Tag;
 import com.exam.examapp.model.User;
+import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.exam.Exam;
+import com.exam.examapp.model.subject.Subject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class ExamMapper {
-    public static ExamBlockResponse toBlockResponse(Exam exam) {
+    public static ExamBlockResponse toBlockResponse(Exam exam, ExamStatus examStatus) {
         Result result = getResult(exam);
         List<UUID> studentExamIds = exam.getHasUncheckedQuestionStudentExamId();
         Boolean hasUnchecked = studentExamIds == null ? null : !studentExamIds.isEmpty();
@@ -27,6 +30,32 @@ public class ExamMapper {
                 exam.isHidden(),
                 exam.getNumberOfQuestions(),
                 hasUnchecked,
+                examStatus,
+                exam.getCreatedAt(),
+                exam.getUpdatedAt());
+    }
+
+    public static ExamDetailedResponse toDetailedResponse(Exam exam, ExamStatus examStatus) {
+        Result result = getResult(exam);
+        List<UUID> studentExamIds = exam.getHasUncheckedQuestionStudentExamId();
+        Boolean hasUnchecked = studentExamIds == null ? null : !studentExamIds.isEmpty();
+        List<Subject> subjects = exam.getSubjectStructureQuestions().stream()
+                .map(subjectStructureQuestion ->
+                subjectStructureQuestion.getSubjectStructure().getSubject())
+                .toList();
+        return new ExamDetailedResponse(
+                exam.getId(),
+                exam.getExamTitle(),
+                result.first(),
+                result.otherTags(),
+                subjects,
+                exam.getDurationInSeconds(),
+                exam.getCost(),
+                exam.getRating(),
+                exam.isHidden(),
+                exam.getNumberOfQuestions(),
+                hasUnchecked,
+                examStatus,
                 exam.getCreatedAt(),
                 exam.getUpdatedAt());
     }

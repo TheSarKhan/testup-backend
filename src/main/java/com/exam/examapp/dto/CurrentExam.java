@@ -1,9 +1,9 @@
-package com.exam.examapp.dto.response.exam;
+package com.exam.examapp.dto;
 
 import java.time.Instant;
 import java.util.UUID;
 
-public record CurrentlyStudentExamResponse(
+public record CurrentExam(
         Instant startTime,
         long durationInSeconds,
         UUID studentExamId,
