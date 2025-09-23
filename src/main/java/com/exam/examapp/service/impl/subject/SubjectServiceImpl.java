@@ -17,18 +17,21 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class SubjectServiceImpl implements SubjectService {
-    private static final String IMAGE_PATH= "uploads/images/subjects";
+    private static final String IMAGE_PATH = "uploads/images/subjects";
 
     private final SubjectRepository subjectRepository;
 
     private final FileService fileService;
 
     @Override
-    public void save(String name, MultipartFile logo) {
+    public void save(String name, boolean isSupportMath, MultipartFile logo) {
         if (subjectRepository.existsSubjectByName(name))
             throw new BadRequestException("Subject already exists");
 
-        Subject build = Subject.builder().name(name).build();
+        Subject build = Subject.builder()
+                .name(name)
+                .isSupportMath(isSupportMath)
+                .build();
         String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);
         build.setLogoUrl(logoUrl);
         subjectRepository.save(build);
@@ -41,24 +44,25 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public Subject getByName(String name) {
-        return subjectRepository.getByName(name).orElseThrow(()->
+        return subjectRepository.getByName(name).orElseThrow(() ->
                 new ResourceNotFoundException("Subject not found"));
     }
 
     @Override
     public Subject getById(UUID id) {
-        return subjectRepository.findById(id).orElseThrow(()->
+        return subjectRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException("Subject not found"));
     }
 
     @Override
-    public void update(UUID id, String name, MultipartFile logo) {
+    public void update(UUID id, String name, boolean isSupportMath, MultipartFile logo) {
         Subject subject = getById(id);
         Optional<Subject> byName = subjectRepository.getByName(name);
         if (byName.isPresent() && !byName.get().getId().equals(id))
             throw new BadRequestException("Subject Already Exists");
 
         subject.setName(name);
+        subject.setSupportMath(isSupportMath);
         fileService.deleteFile(IMAGE_PATH, subject.getLogoUrl());
         String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);
         subject.setLogoUrl(logoUrl);

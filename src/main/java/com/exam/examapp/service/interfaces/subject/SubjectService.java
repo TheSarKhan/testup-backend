@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface SubjectService {
-    void save(String name, MultipartFile logo);
+    void save(String name, boolean isSupportMath, MultipartFile logo);
 
     List<Subject> getAll();
 
@@ -15,7 +15,7 @@ public interface SubjectService {
 
     Subject getById(UUID id);
 
-    void update(UUID id, String name, MultipartFile logo);
+    void update(UUID id, String name, boolean isSupportMath, MultipartFile logo);
 
     void delete(UUID id);
 }

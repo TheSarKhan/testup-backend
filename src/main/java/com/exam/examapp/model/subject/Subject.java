@@ -23,6 +23,8 @@ public class Subject {
     @Column(nullable = false)
     private String logoUrl;
 
+    private boolean isSupportMath;
+
     private Instant createdAt;
 
     private Instant updatedAt;

@@ -9,8 +9,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,6 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,8 +39,11 @@ public class SubjectController {
                                                   @Schema(defaultValue = "Subject name")
                                                   String name,
                                                   @RequestPart
+                                                  @Schema(defaultValue = "false")
+                                                  boolean isSupportMath,
+                                                  @RequestPart
                                                   MultipartFile logo) {
-        subjectService.save(name, logo);
+        subjectService.save(name, isSupportMath, logo);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.CREATED,
@@ -115,8 +119,11 @@ public class SubjectController {
                                                     @Schema(defaultValue = "Subject name")
                                                     String name,
                                                     @RequestPart
+                                                    @Schema(defaultValue = "false")
+                                                    boolean isSupportMath,
+                                                    @RequestPart
                                                     MultipartFile logo) {
-        subjectService.update(id, name, logo);
+        subjectService.update(id, name, isSupportMath, logo);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,

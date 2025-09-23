@@ -9,6 +9,7 @@ public class QuestionMapper {
                 .title(request.title())
                 .titleDescription(request.titleDescription())
                 .isTitlePicture(request.isTitlePicture())
+                .isTitleContainMath(request.isTitleContainMath())
                 .type(request.questionType())
                 .difficulty(request.difficulty())
                 .questionCount(request.questionCount())
@@ -20,6 +21,7 @@ public class QuestionMapper {
         question.setTitle(request.title());
         question.setTitleDescription(request.titleDescription());
         question.setTitlePicture(request.isTitlePicture());
+        question.setTitleContainMath(request.isTitleContainMath());
         question.setType(request.questionType());
         question.setDifficulty(request.difficulty());
         question.setQuestionCount(request.questionCount());

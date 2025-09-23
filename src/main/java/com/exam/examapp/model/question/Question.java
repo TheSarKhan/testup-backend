@@ -34,6 +34,8 @@ public class Question {
 
     private boolean isTitlePicture;
 
+    private boolean isTitleContainMath;
+
     @Enumerated(EnumType.STRING)
     private QuestionType type;
 

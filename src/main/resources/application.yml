@@ -67,7 +67,6 @@ app:
   name: ExamApp
   base-url: ${APP_BASE_URL}
   front-base-url: ${FRONT_BASE_URL}
-  oauth-security: ${APP_OAUTH_SECURITY}
 
 admin:
   email: ${ADMIN_EMAIL}
