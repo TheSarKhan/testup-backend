@@ -45,6 +45,8 @@ public interface ExamService {
 
   ResultStatisticResponse getResultStatistic(UUID studentExamId);
 
+  void publishExam(UUID id);
+
   void updateExam(
       ExamUpdateRequest request,
       List<MultipartFile> titles,

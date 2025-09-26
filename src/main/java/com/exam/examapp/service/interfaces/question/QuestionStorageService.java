@@ -22,6 +22,8 @@ public interface QuestionStorageService {
   List<Question> getQuestionsFromMyStorage(
       QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions);
 
+  List<Question> getQuestionsFromMyStorage(UUID subjectId);
+
   List<Question> getAllQuestionsFromAdminStorage();
 
   List<Question> getQuestionFromAdminStorage(

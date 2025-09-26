@@ -49,6 +49,8 @@ public class Exam {
 
   private BigDecimal cost;
 
+  private boolean isReadyForSale;
+
   private boolean isHidden;
 
   private double rating;

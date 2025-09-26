@@ -10,177 +10,200 @@ import com.exam.examapp.model.enums.Difficulty;
 import com.exam.examapp.model.enums.QuestionType;
 import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.question.QuestionStorage;
+import com.exam.examapp.model.subject.Topic;
 import com.exam.examapp.repository.QuestionStorageRepository;
+import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.question.QuestionService;
 import com.exam.examapp.service.interfaces.question.QuestionStorageService;
-import com.exam.examapp.service.interfaces.UserService;
+import com.exam.examapp.service.interfaces.subject.TopicService;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class QuestionStorageServiceImpl implements QuestionStorageService {
-  private final QuestionStorageRepository questionStorageRepository;
+    private final QuestionStorageRepository questionStorageRepository;
 
-  private final UserService userService;
+    private final UserService userService;
 
-  private final QuestionService questionService;
+    private final QuestionService questionService;
 
-  @Value("${admin.email}")
-  String adminEmail;
+    private final TopicService topicService;
 
-  private static List<Question> filterQuestions(
-      QuestionType type,
-      Difficulty difficulty,
-      UUID topicId,
-      int numberOfQuestions,
-      List<Question> questions) {
-    if (type != null)
-      questions = questions.stream().filter(question -> question.getType() == type).toList();
+    @Value("${admin.email}")
+    String adminEmail;
 
-    if (difficulty != null)
-      questions =
-          questions.stream().filter(question -> question.getDifficulty() == difficulty).toList();
+    private static List<Question> filterQuestions(
+            QuestionType type,
+            Difficulty difficulty,
+            UUID topicId,
+            int numberOfQuestions,
+            List<Question> questions) {
+        if (type != null)
+            questions = questions.stream().filter(question -> question.getType() == type).toList();
 
-    if (topicId != null)
-      questions =
-          questions.stream()
-              .filter(question -> question.getTopic().getId().equals(topicId))
-              .toList();
+        if (difficulty != null)
+            questions =
+                    questions.stream().filter(question -> question.getDifficulty() == difficulty).toList();
 
-    return questions.stream().limit(numberOfQuestions).toList();
-  }
+        if (topicId != null)
+            questions =
+                    questions.stream()
+                            .filter(question -> question.getTopic().getId().equals(topicId))
+                            .toList();
 
-  @Override
-  public void addQuestionsToStorage(
-      QuestionRequest request,
-      List<MultipartFile> titles,
-      List<MultipartFile> variantPictures,
-      List<MultipartFile> numberPictures,
-      List<MultipartFile> sounds) {
-    User user = userService.getCurrentUser();
-
-    if (!user.getPack().isCanPrepareQuestionsDb())
-      throw new DoesNotHavePermissionException("You cannot prepare questions in your storage.");
-
-    Optional<QuestionStorage> questionStorageOptional =
-        questionStorageRepository.getByTeacher(user);
-    Question question =
-        questionService.save(request, titles, variantPictures, numberPictures, sounds);
-
-    if (questionStorageOptional.isPresent()) {
-      QuestionStorage questionStorage = questionStorageOptional.get();
-      List<Question> questions = questionStorage.getQuestions();
-      questions.add(question);
-      questionStorage.setQuestions(questions);
-      questionStorageRepository.save(questionStorage);
-    } else {
-      List<Question> questions = List.of(question);
-      questionStorageRepository.save(
-          QuestionStorage.builder().teacher(user).questions(questions).build());
+        return questions.stream().limit(numberOfQuestions).toList();
     }
-  }
 
-  @Override
-  @Transactional
-  public List<Question> getAllQuestionsFromMyStorage() {
-    User user = userService.getCurrentUser();
-    if (!user.getPack().isCanUseQuestionDb())
-      throw new DoesNotHavePermissionException("You cannot use questions in your storage.");
+    @Override
+    public void addQuestionsToStorage(
+            QuestionRequest request,
+            List<MultipartFile> titles,
+            List<MultipartFile> variantPictures,
+            List<MultipartFile> numberPictures,
+            List<MultipartFile> sounds) {
+        User user = userService.getCurrentUser();
 
-    return questionStorageRepository
-        .getByTeacher(user)
-        .orElseThrow(
-            () -> new ResourceNotFoundException("You don't have any question in your storage."))
-        .getQuestions();
-  }
+        if (!user.getPack().isCanPrepareQuestionsDb())
+            throw new DoesNotHavePermissionException("You cannot prepare questions in your storage.");
 
-  @Override
-  @Transactional
-  public List<Question> getQuestionsFromMyStorage(
-      QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions) {
-    User user = userService.getCurrentUser();
-    if (!user.getPack().isCanUseQuestionDb())
-      throw new DoesNotHavePermissionException("You cannot use questions in your storage.");
+        Optional<QuestionStorage> questionStorageOptional =
+                questionStorageRepository.getByTeacher(user);
+        Question question =
+                questionService.save(request, titles, variantPictures, numberPictures, sounds);
 
-    if (numberOfQuestions <= 0)
-      throw new BadRequestException("Number of questions must be greater than 0.");
+        if (questionStorageOptional.isPresent()) {
+            QuestionStorage questionStorage = questionStorageOptional.get();
+            List<Question> questions = questionStorage.getQuestions();
+            questions.add(question);
+            questionStorage.setQuestions(questions);
+            questionStorageRepository.save(questionStorage);
+        } else {
+            List<Question> questions = List.of(question);
+            questionStorageRepository.save(
+                    QuestionStorage.builder().teacher(user).questions(questions).build());
+        }
+    }
 
-    List<Question> questions =
-        questionStorageRepository
-            .getByTeacher(user)
-            .orElseThrow(
-                () -> new ResourceNotFoundException("You don't have any question in your storage."))
-            .getQuestions();
+    @Override
+    @Transactional
+    public List<Question> getAllQuestionsFromMyStorage() {
+        User user = userService.getCurrentUser();
+        if (!user.getPack().isCanUseQuestionDb())
+            throw new DoesNotHavePermissionException("You cannot use questions in your storage.");
 
-    return filterQuestions(type, difficulty, topicId, numberOfQuestions, questions);
-  }
+        return questionStorageRepository
+                .getByTeacher(user)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("You don't have any question in your storage."))
+                .getQuestions();
+    }
 
-  @Override
-  public List<Question> getAllQuestionsFromAdminStorage() {
-    User user = userService.getCurrentUser();
-    if (!user.getPack().isCanUseQuestionDb())
-      throw new DoesNotHavePermissionException("You cannot use questions in Admin storage.");
+    @Override
+    @Transactional
+    public List<Question> getQuestionsFromMyStorage(
+            QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions) {
+        User user = userService.getCurrentUser();
+        if (!user.getPack().isCanUseQuestionDb())
+            throw new DoesNotHavePermissionException("You cannot use questions in your storage.");
 
-    return questionStorageRepository
-        .getByTeacher(userService.getByEmail(adminEmail))
-        .orElseThrow(
-            () -> new ResourceNotFoundException("Admin don't have any question in Admin storage."))
-        .getQuestions();
-  }
+        if (numberOfQuestions <= 0)
+            throw new BadRequestException("Number of questions must be greater than 0.");
 
-  @Override
-  public List<Question> getQuestionFromAdminStorage(
-      QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions) {
-    User user = userService.getCurrentUser();
-    if (!user.getPack().isCanUseQuestionDb())
-      throw new DoesNotHavePermissionException("You cannot use questions in Admin storage.");
+        List<Question> questions =
+                questionStorageRepository
+                        .getByTeacher(user)
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("You don't have any question in your storage."))
+                        .getQuestions();
 
-    if (numberOfQuestions <= 0)
-      throw new BadRequestException("Number of questions must be greater than 0.");
+        return filterQuestions(type, difficulty, topicId, numberOfQuestions, questions);
+    }
 
-    List<Question> questions =
-        questionStorageRepository
-            .getByTeacher(userService.getByEmail(adminEmail))
-            .orElseThrow(
-                () ->
-                    new ResourceNotFoundException(
-                        "Admin don't have any question in Admin storage."))
-            .getQuestions();
+    @Override
+    public List<Question> getQuestionsFromMyStorage(UUID subjectId) {
+        User user = userService.getCurrentUser();
+        if (!user.getPack().isCanUseQuestionDb())
+            throw new DoesNotHavePermissionException("You cannot use questions in your storage.");
 
-    return filterQuestions(type, difficulty, topicId, numberOfQuestions, questions);
-  }
+        List<Topic> topics = topicService.getAllBySubjectId(subjectId);
 
-  @Override
-  @Transactional
-  public void updateQuestionInStorage(
-      QuestionUpdateRequest request,
-      List<MultipartFile> titles,
-      List<MultipartFile> variantPictures,
-      List<MultipartFile> numberPictures,
-      List<MultipartFile> sounds) {
-    User user = userService.getCurrentUser();
+        return questionStorageRepository
+                .getByTeacher(user)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("You don't have any question in your storage."))
+                .getQuestions()
+                .stream()
+                .filter(question -> topics.contains(question.getTopic()))
+                .toList();
+    }
 
-    if (!user.getPack().isCanPrepareQuestionsDb())
-      throw new DoesNotHavePermissionException("You cannot prepare questions in your storage.");
+    @Override
+    public List<Question> getAllQuestionsFromAdminStorage() {
+        User user = userService.getCurrentUser();
+        if (!user.getPack().isCanUseQuestionDb())
+            throw new DoesNotHavePermissionException("You cannot use questions in Admin storage.");
 
-    questionService.update(request, titles, variantPictures, numberPictures, sounds);
-  }
+        return questionStorageRepository
+                .getByTeacher(userService.getByEmail(adminEmail))
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Admin don't have any question in Admin storage."))
+                .getQuestions();
+    }
 
-  @Override
-  public void removeQuestionsFromStorage(UUID questionId) {
-      QuestionStorage questionStorage = questionStorageRepository
-              .getByTeacher(userService.getCurrentUser())
-              .orElseThrow(
-                      () -> new ResourceNotFoundException("You don't have any question in your storage."));
-      questionStorage.getQuestions().removeIf(question -> question.getId().equals(questionId));
-      questionService.delete(questionId);
-      questionStorageRepository.save(questionStorage);
-  }
+    @Override
+    public List<Question> getQuestionFromAdminStorage(
+            QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions) {
+        User user = userService.getCurrentUser();
+        if (!user.getPack().isCanUseQuestionDb())
+            throw new DoesNotHavePermissionException("You cannot use questions in Admin storage.");
+
+        if (numberOfQuestions <= 0)
+            throw new BadRequestException("Number of questions must be greater than 0.");
+
+        List<Question> questions =
+                questionStorageRepository
+                        .getByTeacher(userService.getByEmail(adminEmail))
+                        .orElseThrow(
+                                () ->
+                                        new ResourceNotFoundException(
+                                                "Admin don't have any question in Admin storage."))
+                        .getQuestions();
+
+        return filterQuestions(type, difficulty, topicId, numberOfQuestions, questions);
+    }
+
+    @Override
+    @Transactional
+    public void updateQuestionInStorage(
+            QuestionUpdateRequest request,
+            List<MultipartFile> titles,
+            List<MultipartFile> variantPictures,
+            List<MultipartFile> numberPictures,
+            List<MultipartFile> sounds) {
+        User user = userService.getCurrentUser();
+
+        if (!user.getPack().isCanPrepareQuestionsDb())
+            throw new DoesNotHavePermissionException("You cannot prepare questions in your storage.");
+
+        questionService.update(request, titles, variantPictures, numberPictures, sounds);
+    }
+
+    @Override
+    public void removeQuestionsFromStorage(UUID questionId) {
+        QuestionStorage questionStorage = questionStorageRepository
+                .getByTeacher(userService.getCurrentUser())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("You don't have any question in your storage."));
+        questionStorage.getQuestions().removeIf(question -> question.getId().equals(questionId));
+        questionService.delete(questionId);
+        questionStorageRepository.save(questionStorage);
+    }
 }

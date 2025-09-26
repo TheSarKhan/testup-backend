@@ -14,6 +14,12 @@ public record AdvertisementUpdateRequest(
         @Schema(defaultValue = "Advertisement description")
         String description,
         @NotBlank
+        String backgroundColor,
+        @NotBlank
+        String buttonColor,
+        @NotBlank
+        String textColor,
+        @NotBlank
         @Schema(defaultValue = "www.youtube.com")
         String redirectUrl
 ) {

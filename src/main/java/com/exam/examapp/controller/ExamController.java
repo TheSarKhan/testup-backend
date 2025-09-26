@@ -27,11 +27,9 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/exam")
-@Tag(
-        name = "Exams",
-        description =
-                "Exam management endpoints — create, read, update, delete and start exams. "
-                        + "Endpoints that modify data require bearer token and roles (ADMIN, TEACHER) where noted.")
+@Tag(name = "Exams",
+        description = "Exam management endpoints — create, read, update, delete and start exams. "
+                + "Endpoints that modify data require bearer token and roles (ADMIN, TEACHER) where noted.")
 public class ExamController {
     private final ExamService examService;
 
@@ -177,6 +175,15 @@ public class ExamController {
                 ApiResponse.build(HttpStatus.OK, "Exam result retrieved successfully", resultStatistic));
     }
 
+    @PatchMapping("/publish")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    public ResponseEntity<ApiResponse<Void>> publish(@RequestParam UUID id) {
+        examService.publishExam(id);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Exam published successfully", null));
+    }
+
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
@@ -191,7 +198,6 @@ public class ExamController {
             @RequestPart(required = false) List<MultipartFile> variantPictures,
             @RequestPart(required = false) List<MultipartFile> numberPictures,
             @RequestPart(required = false) List<MultipartFile> sounds) {
-
         examService.updateExam(request, titles, variantPictures, numberPictures, sounds);
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Exam updated successfully", null));
     }

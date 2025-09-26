@@ -1,6 +1,7 @@
 package com.exam.examapp.mapper;
 
 import com.exam.examapp.dto.request.QuestionRequest;
+import com.exam.examapp.dto.request.QuestionUpdateRequestForExam;
 import com.exam.examapp.model.question.Question;
 
 public class QuestionMapper {
@@ -15,6 +16,21 @@ public class QuestionMapper {
                 .questionCount(request.questionCount())
                 .questionDetails(request.questionDetails())
                 .build();
+    }
+
+    public static QuestionRequest requestToRequest(QuestionUpdateRequestForExam request) {
+        return new QuestionRequest(
+                request.title(),
+                request.titleDescription(),
+                request.isTitlePicture(),
+                request.isTitleContainMath(),
+                request.questionType(),
+                request.difficulty(),
+                request.topicId(),
+                request.questionCount(),
+                request.questions(),
+                request.questionDetails()
+        );
     }
 
     public static Question updateRequestTo(Question question, QuestionRequest request) {

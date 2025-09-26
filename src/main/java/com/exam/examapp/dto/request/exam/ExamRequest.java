@@ -22,4 +22,7 @@ public record ExamRequest(
     boolean hasSound,
     boolean hasPicture,
     boolean hasPdfPicture,
-    String explanationVideoUrl) {}
+    boolean isReadyForSale,
+    String explanationVideoUrl) {
+
+}

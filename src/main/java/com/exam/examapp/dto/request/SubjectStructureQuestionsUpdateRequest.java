@@ -6,4 +6,4 @@ import java.util.List;
 
 public record SubjectStructureQuestionsUpdateRequest(
     @NotNull SubjectStructureUpdateRequest subjectStructureUpdateRequest,
-    @NotNull List<QuestionUpdateRequest> questionRequests) {}
+    @NotNull List<QuestionUpdateRequestForExam> questionRequests) {}

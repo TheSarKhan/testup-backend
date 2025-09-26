@@ -12,12 +12,14 @@ import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.repository.PaymentResultRepository;
-import com.exam.examapp.service.interfaces.*;
+import com.exam.examapp.service.interfaces.PackService;
+import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.exam.ExamService;
 import com.exam.examapp.service.interfaces.exam.StudentExamService;
 import com.exam.examapp.service.interfaces.payment.PaymentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
@@ -125,6 +128,9 @@ public class PaymentServiceImpl implements PaymentService {
                     .description(description).productId(request.productId())
                     .currency(request.currency()).invoiceUuid(payload.invoiceUuid())
                     .uuid(payload.uuid()).build());
+
+            log.info("Payment info. Email : {} , Amount : {} , Currency : {} , Invoice UUID : {}",
+                    user.getEmail(), request.amount(), request.currency(), payload.invoiceUuid());
             return payload.paymentUrl();
         } else {
             throw new RuntimeException("Failed to create payment: " +

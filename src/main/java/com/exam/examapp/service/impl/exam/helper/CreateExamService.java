@@ -35,6 +35,21 @@ public class CreateExamService {
 
     private final ExamRepository examRepository;
 
+    private static Exam buildExam(ExamRequest request, List<SubjectStructureQuestion> subjectStructureQuestions, List<Tag> tags, BigDecimal cost, User user) {
+        return Exam.builder()
+                .examTitle(request.examTitle())
+                .examDescription(request.examDescription())
+                .subjectStructureQuestions(subjectStructureQuestions)
+                .tags(tags)
+                .durationInSeconds(request.durationInSeconds())
+                .cost(cost)
+                .isHidden(request.isHidden())
+                .teacher(user)
+                .isReadyForSale(request.isReadyForSale())
+                .explanationVideoUrl(request.explanationVideoUrl())
+                .build();
+    }
+
     public void createExam(
             ExamRequest request,
             List<MultipartFile> titles,
@@ -62,20 +77,6 @@ public class CreateExamService {
         updateTeacherStatistics(user);
     }
 
-    private static Exam buildExam(ExamRequest request, List<SubjectStructureQuestion> subjectStructureQuestions, List<Tag> tags, BigDecimal cost, User user) {
-        return Exam.builder()
-                .examTitle(request.examTitle())
-                .examDescription(request.examDescription())
-                .subjectStructureQuestions(subjectStructureQuestions)
-                .tags(tags)
-                .durationInSeconds(request.durationInSeconds())
-                .cost(cost)
-                .isHidden(request.isHidden())
-                .teacher(user)
-                .explanationVideoUrl(request.explanationVideoUrl())
-                .build();
-    }
-
     private List<SubjectStructureQuestion> buildSubjectStructureQuestions(
             List<SubjectStructureQuestionsRequest> requests,
             List<MultipartFile> titles,
@@ -86,8 +87,15 @@ public class CreateExamService {
         List<SubjectStructureQuestion> subjectStructureQuestions = new ArrayList<>();
 
         for (SubjectStructureQuestionsRequest req : requests) {
-            SubjectStructure subjectStructure =
-                    subjectStructureService.create(req.subjectStructureRequest());
+            SubjectStructure subjectStructure;
+            if (req.subjectStructureRequest().submoduleId() == null) {
+                subjectStructure = subjectStructureService.create(req.subjectStructureRequest());
+            } else {
+                subjectStructure = subjectStructureService.getBySubmoduleAndSubjectId(
+                        req.subjectStructureRequest().submoduleId(),
+                        req.subjectStructureRequest().subjectId()
+                );
+            }
 
             List<Question> questions =
                     req.questionRequests().stream()
@@ -115,8 +123,7 @@ public class CreateExamService {
 
     private BigDecimal calculateCost(ExamRequest request, User user) {
         return Role.TEACHER.equals(user.getRole())
-                ? null
-                : request.cost() == null ? BigDecimal.ZERO : request.cost();
+                ? null : request.cost() == null ? BigDecimal.ZERO : request.cost();
     }
 
     private void updateTeacherStatistics(User user) {

@@ -1,9 +1,10 @@
 package com.exam.examapp.mapper;
 
+import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
+import com.exam.examapp.dto.response.UserResponseForExam;
 import com.exam.examapp.dto.response.exam.ExamBlockResponse;
 import com.exam.examapp.dto.response.exam.ExamDetailedResponse;
 import com.exam.examapp.dto.response.exam.ExamResponse;
-import com.exam.examapp.dto.response.UserResponseForExam;
 import com.exam.examapp.model.Tag;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.ExamStatus;
@@ -35,13 +36,23 @@ public class ExamMapper {
                 exam.getUpdatedAt());
     }
 
+    public static void update(Exam oldExam, ExamUpdateRequest request) {
+        oldExam.setExamTitle(request.examTitle());
+        oldExam.setExamDescription(request.examDescription());
+        oldExam.setDurationInSeconds(request.durationInSeconds());
+        oldExam.setCost(request.cost());
+        oldExam.setHidden(request.isHidden());
+        oldExam.setReadyForSale(request.isReadyForSale());
+        oldExam.setExplanationVideoUrl(request.explanationVideoUrl());
+    }
+
     public static ExamDetailedResponse toDetailedResponse(Exam exam, ExamStatus examStatus) {
         Result result = getResult(exam);
         List<UUID> studentExamIds = exam.getHasUncheckedQuestionStudentExamId();
         Boolean hasUnchecked = studentExamIds == null ? null : !studentExamIds.isEmpty();
         List<Subject> subjects = exam.getSubjectStructureQuestions().stream()
                 .map(subjectStructureQuestion ->
-                subjectStructureQuestion.getSubjectStructure().getSubject())
+                        subjectStructureQuestion.getSubjectStructure().getSubject())
                 .toList();
         return new ExamDetailedResponse(
                 exam.getId(),

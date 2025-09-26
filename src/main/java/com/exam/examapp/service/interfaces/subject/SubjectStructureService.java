@@ -17,6 +17,10 @@ public interface SubjectStructureService {
 
     List<SubjectStructure> getBySubmoduleId(UUID submoduleId);
 
+    SubjectStructure getBySubmoduleAndSubjectId(UUID submoduleId, UUID subjectId);
+
+    boolean existsBySubmoduleAndSubjectId(UUID submoduleId, UUID subjectId);
+
     SubjectStructure getById(UUID id);
 
     SubjectStructure update(SubjectStructureUpdateRequest request);

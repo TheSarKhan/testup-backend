@@ -1,13 +1,17 @@
 package com.exam.examapp.service.impl.exam.helper;
 
+import com.exam.examapp.dto.request.NotificationRequest;
 import com.exam.examapp.model.enums.AnswerStatus;
 import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.exam.StudentExam;
 import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.subject.SubjectStructureQuestion;
 import com.exam.examapp.repository.ExamRepository;
+import com.exam.examapp.security.service.interfaces.EmailService;
 import com.exam.examapp.service.impl.exam.checker.AnswerChecker;
 import com.exam.examapp.service.impl.exam.checker.AnswerCheckerFactory;
+import com.exam.examapp.service.interfaces.NotificationService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +27,11 @@ public class AnswerService {
 
     private final ExamRepository examRepository;
 
+    private final EmailService emailService;
+
+    private final NotificationService notificationService;
+
+    @Transactional
     public Map<UUID, AnswerStatus> checkAnswers(StudentExam studentExam,
                                                 List<Integer> correctAndWrongCounts) {
         Map<UUID, String> questionIdToAnswerMap = studentExam.getQuestionIdToAnswerMap();
@@ -60,6 +69,19 @@ public class AnswerService {
             studentExam.setStatus(ExamStatus.WAITING_OPEN_ENDED_QUESTION);
             studentExam.setNumberOfNotCheckedYetQuestions((int) count);
             examRepository.save(studentExam.getExam());
+
+            String email = studentExam.getExam().getTeacher().getEmail();
+
+            notificationService.sendNotification(new NotificationRequest(
+                    "TestUp Has Unchecked Question.",
+                    "You have unchecked question in your test. Please review it. Exam title: "
+                            + studentExam.getExam().getExamTitle(),
+                    email));
+
+            emailService.sendEmail(email,
+                    "TestUp Has Unchecked Question.",
+                    "You have unchecked question in your test. Please review it. Exam title: "
+                            + studentExam.getExam().getExamTitle());
         }
     }
 

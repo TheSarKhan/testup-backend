@@ -9,6 +9,9 @@ public class AdvertisementMapper {
         return Advertisement.builder()
                 .title(request.title())
                 .description(request.description())
+                .backgroundColor(request.backgroundColor())
+                .buttonColor(request.buttonColor())
+                .textColor(request.textColor())
                 .redirectUrl(request.redirectUrl())
                 .build();
     }
@@ -17,6 +20,9 @@ public class AdvertisementMapper {
                                                 AdvertisementUpdateRequest request) {
         advertisement.setTitle(request.title());
         advertisement.setDescription(request.description());
+        advertisement.setBackgroundColor(request.backgroundColor());
+        advertisement.setButtonColor(request.buttonColor());
+        advertisement.setTextColor(request.textColor());
         advertisement.setRedirectUrl(request.redirectUrl());
         return advertisement;
     }

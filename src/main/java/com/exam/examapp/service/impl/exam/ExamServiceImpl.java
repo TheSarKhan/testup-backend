@@ -1,5 +1,6 @@
 package com.exam.examapp.service.impl.exam;
 
+import com.exam.examapp.dto.request.QuestionUpdateRequestForExam;
 import com.exam.examapp.dto.request.exam.ExamRequest;
 import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
 import com.exam.examapp.dto.response.ResultStatisticResponse;
@@ -10,12 +11,15 @@ import com.exam.examapp.dto.response.exam.StartExamResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.mapper.ExamMapper;
+import com.exam.examapp.mapper.QuestionMapper;
+import com.exam.examapp.model.Tag;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.exam.StudentExam;
 import com.exam.examapp.model.question.Question;
+import com.exam.examapp.model.subject.SubjectStructure;
 import com.exam.examapp.model.subject.SubjectStructureQuestion;
 import com.exam.examapp.repository.ExamRepository;
 import com.exam.examapp.repository.ExamTeacherRepository;
@@ -23,8 +27,10 @@ import com.exam.examapp.repository.StudentExamRepository;
 import com.exam.examapp.repository.subject.SubjectStructureQuestionRepository;
 import com.exam.examapp.service.impl.exam.helper.CreateExamService;
 import com.exam.examapp.service.impl.exam.helper.ExamResultService;
+import com.exam.examapp.service.impl.exam.helper.ExamValidationService;
 import com.exam.examapp.service.impl.exam.helper.StartExamService;
 import com.exam.examapp.service.interfaces.CacheService;
+import com.exam.examapp.service.interfaces.TagService;
 import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.exam.ExamService;
 import com.exam.examapp.service.interfaces.question.QuestionService;
@@ -36,6 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -55,6 +62,7 @@ public class ExamServiceImpl implements ExamService {
     private final ExamResultService examResultService;
     private final StartExamService startExamService;
     private final CreateExamService createExamService;
+    private final TagService tagService;
 
     @Override
     @Transactional
@@ -105,6 +113,7 @@ public class ExamServiceImpl implements ExamService {
         User user = userService.getCurrentUserOrNull();
         return examRepository.findAll(specification)
                 .stream()
+                .filter(Exam::isReadyForSale)
                 .map(examToResponse(user))
                 .toList();
     }
@@ -114,6 +123,7 @@ public class ExamServiceImpl implements ExamService {
         User user = userService.getCurrentUserOrNull();
         return examRepository.getLastCreated()
                 .stream()
+                .filter(Exam::isReadyForSale)
                 .map(examToResponse(user))
                 .toList();
     }
@@ -188,6 +198,13 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    public void publishExam(UUID id) {
+        Exam exam = getById(id);
+        exam.setReadyForSale(true);
+        examRepository.save(exam);
+    }
+
+    @Override
     @Transactional
     public void updateExam(
             ExamUpdateRequest request,
@@ -195,20 +212,57 @@ public class ExamServiceImpl implements ExamService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
-        User user = userService.getCurrentUser();
         Exam exam = getById(request.id());
-        if (!Role.ADMIN.equals(user.getRole()) && user.getId().equals(exam.getTeacher().getId()))
-            throw new BadRequestException("You cannot update this exam.");
 
-        if (Role.TEACHER.equals(user.getRole())) {
-            user.getInfo().setCurrentlyTotalExamCount(user.getInfo().getCurrentlyTotalExamCount() - 1);
-            user.getInfo()
-                    .setThisMonthCreatedExamCount(user.getInfo().getThisMonthCreatedExamCount() - 1);
-            userService.save(user);
+        ExamValidationService.validationForUpdate(request, userService.getCurrentUser());
+
+        ExamMapper.update(exam, request);
+
+        List<Tag> tags = new ArrayList<>();
+        tags.add(tagService.getTagById(request.headerTagId()));
+        if (request.otherTagIds() != null) {
+            tags.addAll(request.otherTagIds().stream().map(tagService::getTagById).toList());
         }
-        deleteExam(request.id());
 
-        createExam(request.request(), titles, variantPictures, numberPictures, sounds);
+        exam.setTags(tags);
+
+        var subjectStructureQuestionsUpdateRequests = request.subjectStructures();
+        List<SubjectStructureQuestion> subjectStructureQuestions = new ArrayList<>();
+        for (var subjectStructureQuestionsUpdateRequest : subjectStructureQuestionsUpdateRequests) {
+            SubjectStructureQuestion subjectStructureQuestion = new SubjectStructureQuestion();
+            var subjectStructureUpdateRequest = subjectStructureQuestionsUpdateRequest
+                    .subjectStructureUpdateRequest();
+            SubjectStructure subjectStructure;
+            if (subjectStructureUpdateRequest.request().submoduleId() != null) {
+                subjectStructure = subjectStructureService
+                        .getById(subjectStructureUpdateRequest.id());
+            } else {
+                subjectStructureService.delete(subjectStructureUpdateRequest.id());
+                subjectStructure = subjectStructureService
+                        .create(subjectStructureUpdateRequest.request());
+            }
+            subjectStructureQuestion.setSubjectStructure(subjectStructure);
+
+            var questionUpdateRequestForExams = subjectStructureQuestionsUpdateRequest.questionRequests();
+            List<Question> questions = new ArrayList<>();
+            for (QuestionUpdateRequestForExam questionUpdateRequestForExam : questionUpdateRequestForExams) {
+                Question question;
+                if (questionUpdateRequestForExam.hasChange()) {
+                    questionService.delete(questionUpdateRequestForExam.id());
+                    question = questionService.save(
+                            QuestionMapper.requestToRequest(questionUpdateRequestForExam),
+                            titles, variantPictures, numberPictures, sounds);
+
+                } else {
+                    question = questionService.getQuestionById(questionUpdateRequestForExam.id());
+                }
+                questions.add(question);
+            }
+            subjectStructureQuestion.setQuestion(questions);
+            subjectStructureQuestions.add(subjectStructureQuestion);
+        }
+        exam.setSubjectStructureQuestions(subjectStructureQuestions);
+        examRepository.save(exam);
     }
 
     @Override

@@ -26,6 +26,7 @@ public class SubjectStructure {
     private Subject subject;
 
     @ManyToOne
+    @JoinColumn(nullable = true)
     private Submodule submodule;
 
     private boolean isFree;

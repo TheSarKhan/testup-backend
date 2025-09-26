@@ -1,9 +1,13 @@
 package com.exam.examapp.service.impl.exam.helper;
 
 import com.exam.examapp.dto.request.QuestionRequest;
+import com.exam.examapp.dto.request.QuestionUpdateRequestForExam;
 import com.exam.examapp.dto.request.SubjectStructureQuestionsRequest;
+import com.exam.examapp.dto.request.SubjectStructureQuestionsUpdateRequest;
 import com.exam.examapp.dto.request.exam.ExamRequest;
+import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
 import com.exam.examapp.dto.request.subject.SubjectStructureRequest;
+import com.exam.examapp.dto.request.subject.SubjectStructureUpdateRequest;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ReachedLimitException;
 import com.exam.examapp.model.User;
@@ -14,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ExamValidationService {
-    public static void validateExam(
+    private static void validateExam(
             User user,
             List<QuestionRequest> questionRequests,
             boolean hasPicture,
@@ -32,24 +36,10 @@ public class ExamValidationService {
                                                 && !questionRequest.questionDetails().isAuto()))
                         .findFirst();
 
-        if (!user.getPack().isCanAddPicture() && hasPicture)
-            throw new BadRequestException("You cannot add picture for this exam.");
-
-        if (!user.getPack().isCanAddPdfSound() && (hasPdfPicture || hasSound))
-            throw new BadRequestException("You cannot add sound or pdf picture for this exam.");
-
-        if (hidden && !user.getPack().isCanShareViaCode())
-            throw new BadRequestException(
-                    "You cannot share this exam via code (cannot create hidden exam).");
-
-        if (!user.getPack().isCanAddMultipleSubjectInOneExam() && size > 1)
-            throw new BadRequestException("You cannot add more than one subject in one exam.");
-
         if (!user.getPack().isCanAddManualCheckAutoQuestion() && fistManualCheckQuestion.isPresent())
             throw new BadRequestException("You cannot add manual check question in this exam.");
 
-        if (integer != null && !user.getPack().isCanSelectExamDuration())
-            throw new BadRequestException("You cannot select exam duration.");
+        validatePack(user, hasPicture, hasPdfPicture, hasSound, hidden, size, integer);
     }
 
     public static void validateRequest(ExamRequest request, User user) {
@@ -89,4 +79,79 @@ public class ExamValidationService {
                 request.subjectStructures().size(),
                 request.durationInSeconds());
     }
+
+    public static void validationForUpdate(ExamUpdateRequest request, User user) {
+        Integer questionCountTotal =
+                request.subjectStructures().stream()
+                        .map(SubjectStructureQuestionsUpdateRequest::subjectStructureUpdateRequest)
+                        .map(SubjectStructureUpdateRequest::request)
+                        .map(SubjectStructureRequest::questionCount)
+                        .reduce(Integer::sum)
+                        .orElse(0);
+
+        if (questionCountTotal >= user.getPack().getQuestionCountPerExam())
+            throw new ReachedLimitException("You have reached the limit of questions for this exam");
+
+        List<QuestionUpdateRequestForExam> questionRequests =
+                request.subjectStructures().stream()
+                        .map(SubjectStructureQuestionsUpdateRequest::questionRequests)
+                        .reduce(
+                                (a, b) -> {
+                                    a.addAll(b);
+                                    return a;
+                                })
+                        .orElseThrow(() -> new BadRequestException("Questions cannot be empty."));
+
+        ExamValidationService.validateExamForUpdate(
+                user,
+                questionRequests,
+                request.hasPicture(),
+                request.hasPdfPicture(),
+                request.hasSound(),
+                request.isHidden(),
+                request.subjectStructures().size(),
+                request.durationInSeconds());
+    }
+
+    private static void validateExamForUpdate(
+            User user,
+            List<QuestionUpdateRequestForExam> questionRequests,
+            boolean hasPicture,
+            boolean hasPdfPicture,
+            boolean hasSound,
+            boolean hidden,
+            int size,
+            Integer integer) {
+        Optional<QuestionUpdateRequestForExam> fistManualCheckQuestion =
+                questionRequests.stream()
+                        .filter(
+                                questionRequest ->
+                                        QuestionType.OPEN_ENDED.equals(questionRequest.questionType())
+                                                && (questionRequest.questionDetails().isAuto() != null
+                                                && !questionRequest.questionDetails().isAuto()))
+                        .findFirst();
+        if (!user.getPack().isCanAddManualCheckAutoQuestion() && fistManualCheckQuestion.isPresent())
+            throw new BadRequestException("You cannot add manual check question in this exam.");
+
+        validatePack(user, hasPicture, hasPdfPicture, hasSound, hidden, size, integer);
+    }
+
+    private static void validatePack(User user, boolean hasPicture, boolean hasPdfPicture, boolean hasSound, boolean hidden, int size, Integer integer) {
+        if (!user.getPack().isCanAddPicture() && hasPicture)
+            throw new BadRequestException("You cannot add picture for this exam.");
+
+        if (!user.getPack().isCanAddPdfSound() && (hasPdfPicture || hasSound))
+            throw new BadRequestException("You cannot add sound or pdf picture for this exam.");
+
+        if (hidden && !user.getPack().isCanShareViaCode())
+            throw new BadRequestException(
+                    "You cannot share this exam via code (cannot create hidden exam).");
+
+        if (!user.getPack().isCanAddMultipleSubjectInOneExam() && size > 1)
+            throw new BadRequestException("You cannot add more than one subject in one exam.");
+
+        if (integer != null && !user.getPack().isCanSelectExamDuration())
+            throw new BadRequestException("You cannot select exam duration.");
+    }
+
 }

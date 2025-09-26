@@ -29,6 +29,12 @@ public class Advertisement {
     @Column(nullable = false)
     private String redirectUrl;
 
+    private String backgroundColor;
+
+    private String buttonColor;
+
+    private String textColor;
+
     private Instant createdAt;
 
     private Instant updatedAt;
