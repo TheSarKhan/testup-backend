@@ -37,6 +37,7 @@ import com.exam.examapp.service.interfaces.question.QuestionService;
 import com.exam.examapp.service.interfaces.subject.SubjectStructureService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +52,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class ExamServiceImpl implements ExamService {
     private static final String EXAM_CODE_PREFIX = "exam_code_";
+    private static final String EXAM_START_LINK_PREFIX = "/api/v1/exam/start?id=";
     private final ExamRepository examRepository;
     private final QuestionService questionService;
     private final SubjectStructureService subjectStructureService;
@@ -63,6 +65,9 @@ public class ExamServiceImpl implements ExamService {
     private final StartExamService startExamService;
     private final CreateExamService createExamService;
     private final TagService tagService;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     @Override
     @Transactional
@@ -161,6 +166,12 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    public String getExamStartLink(UUID id) {
+        Exam exam = getById(id);
+        return baseUrl + EXAM_START_LINK_PREFIX + exam.getStartId();
+    }
+
+    @Override
     @Transactional
     public StartExamResponse startExamViaCode(String studentName, String examCode) {
         String examId = cacheService.getContent(EXAM_CODE_PREFIX, examCode.substring(1));
@@ -171,11 +182,13 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public StartExamResponse startExamViaId(String studentName, UUID id) {
-        Exam exam = getById(id);
+        Exam exam = examRepository.getExamByStartId(id).orElseThrow(() ->
+                new ResourceNotFoundException("Exam is not found."));
         return startExamService.startExam(studentName, exam);
     }
 
     @Override
+    @Transactional
     public ResultStatisticResponse finishExam(UUID studentExamId) {
         examResultService.calculateResult(findStudentExamById(studentExamId));
 

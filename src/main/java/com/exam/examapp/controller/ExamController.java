@@ -126,6 +126,19 @@ public class ExamController {
                 ApiResponse.build(HttpStatus.OK, "Successfully generated code", "K" + examCode));
     }
 
+    @GetMapping("/get-link")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    @Operation(
+            summary = "Get exam access link",
+            description =
+                    "Get link for sharing/starting an exam. Returned link with student if needed.")
+    public ResponseEntity<ApiResponse<String>> getExamAccessLink(@RequestParam UUID id) {
+        String link = examService.getExamStartLink(id);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Successfully received link", link));
+    }
+
     @GetMapping("/start/code")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(

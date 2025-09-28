@@ -17,4 +17,6 @@ public interface StudentExamRepository extends JpaRepository<StudentExam, UUID> 
     List<StudentExam> getByStudent(User student);
 
     Optional<StudentExam> getByExamAndStudentName(Exam exam, String studentName);
+
+    List<StudentExam> getByExam_Id(UUID examId);
 }

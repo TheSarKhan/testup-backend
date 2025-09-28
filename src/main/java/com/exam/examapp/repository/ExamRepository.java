@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -27,4 +28,6 @@ public interface ExamRepository extends JpaRepository<Exam, UUID>, JpaSpecificat
 
     @Query("from Exam order by createdAt desc ")
     List<Exam> getLastCreated();
+
+    Optional<Exam> getExamByStartId(UUID startId);
 }

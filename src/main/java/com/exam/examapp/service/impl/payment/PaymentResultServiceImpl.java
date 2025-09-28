@@ -4,11 +4,12 @@ import com.exam.examapp.dto.response.payment.PaymentResultResponse;
 import com.exam.examapp.model.PaymentResult;
 import com.exam.examapp.model.User;
 import com.exam.examapp.repository.PaymentResultRepository;
-import com.exam.examapp.service.interfaces.payment.PaymentResultService;
 import com.exam.examapp.service.interfaces.UserService;
+import com.exam.examapp.service.interfaces.payment.PaymentResultService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -38,7 +39,8 @@ public class PaymentResultServiceImpl implements PaymentResultService {
     @Override
     public void updateResults() {
         User user = userService.getCurrentUser();
-        for (PaymentResult paymentResult : paymentResultRepository.getByUser(user))
+        for (PaymentResult paymentResult : paymentResultRepository.getByUserAndLastCreatedAt(user,
+                Instant.now().minusSeconds(7 * 24 * 60 * 60 * 1000)))
             paymentService.updateResults(paymentResult.getInvoiceUuid());
     }
 

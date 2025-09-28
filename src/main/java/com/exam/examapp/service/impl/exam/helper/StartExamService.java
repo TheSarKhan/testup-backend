@@ -87,6 +87,7 @@ public class StartExamService {
                             ExamMapper.toResponse(exam));
                 } else {
                     first.setStatus(ExamStatus.EXPIRED);
+                    first.setEndTime(Instant.now());
                     examResultService.calculateResult(first);
                     throw new ExamExpiredException("Exam has expired.");
                 }

@@ -14,17 +14,18 @@ public class ScoreService {
     public static void calculateScore(StudentExam studentExam,
                                       Map<UUID, AnswerStatus> answerStatusMap,
                                       List<Integer> correctAndWrongCounts) {
+        double score = 0;
         for (SubjectStructureQuestion subjectStructureQuestion : studentExam.getExam().getSubjectStructureQuestions()) {
             String formula = subjectStructureQuestion.getSubjectStructure().getFormula();
 
             if (formula != null) {
                 String formattedFormula = formatFormulaWithCounts(formula, correctAndWrongCounts);
-                double score = new ExpressionBuilder(formattedFormula).build().evaluate();
-                studentExam.setScore(score);
+                score += new ExpressionBuilder(formattedFormula).build().evaluate();
             } else {
-                studentExam.setScore(calculatePointBasedScore(subjectStructureQuestion, answerStatusMap));
+                score += calculatePointBasedScore(subjectStructureQuestion, answerStatusMap);
             }
         }
+        studentExam.setScore(score);
     }
 
     private static double calculatePointBasedScore(SubjectStructureQuestion subjectStructureQuestion,

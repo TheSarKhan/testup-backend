@@ -11,6 +11,9 @@ public record QuestionDetails(
         @JsonProperty("variant_to_is_picture_map")
         Map<Character, Boolean> variantToIsPictureMap,
 
+        @JsonProperty("variant_to_has_math_content_map")
+        Map<Character, Boolean> variantToHasMathContentMap,
+
         @JsonProperty("correct_variants")
         List<Character> correctVariants,
 
@@ -19,6 +22,9 @@ public record QuestionDetails(
 
         @JsonProperty("number_to_is_picture_map")
         Map<Character, Boolean> numberToIsPictureMap,
+
+        @JsonProperty("number_to_has_math_content_map")
+        Map<Character, Boolean> numberToHasMathContentMap,
 
         @JsonProperty("number_to_correct_variants_map")
         Map<Character, List<Character>> numberToCorrectVariantsMap,

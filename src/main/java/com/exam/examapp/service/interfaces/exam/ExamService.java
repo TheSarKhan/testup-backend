@@ -37,6 +37,8 @@ public interface ExamService {
 
   Integer getExamCode(UUID id);
 
+  String getExamStartLink(UUID id);
+
   StartExamResponse startExamViaCode(String studentName, String examCode);
 
   StartExamResponse startExamViaId(String studentName, UUID id);

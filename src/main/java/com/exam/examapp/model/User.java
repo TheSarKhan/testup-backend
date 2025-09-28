@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Type;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -68,22 +68,24 @@ public class User {
 
     private boolean isCredentialsNonExpired;
 
-    private LocalDateTime createdAt;
+    private Instant nextPaymentDate;
 
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+
+    private Instant updatedAt;
 
     @PrePersist
     void prePersist() {
         id = UUID.randomUUID();
         isActive =
                 isAccountNonExpired = isAccountNonLocked = isCredentialsNonExpired = isEnabled = true;
-        updatedAt = createdAt = LocalDateTime.now();
+        updatedAt = createdAt = Instant.now();
         currentExams = List.of();
     }
 
     @PreUpdate
     void preUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = Instant.now();
     }
 
     public CustomUserDetails getCustomUserDetails() {

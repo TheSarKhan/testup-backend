@@ -25,6 +25,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -160,6 +161,7 @@ public class PaymentServiceImpl implements PaymentService {
             } else if (Role.TEACHER.equals(user.getRole())) {
                 Pack pack = packService.getPackById(productId);
                 user.setPack(pack);
+                user.setNextPaymentDate(Instant.now().plusSeconds(2_629_743));
                 userService.save(user);
             }
         }

@@ -53,10 +53,12 @@ public class Exam {
 
   private boolean isHidden;
 
+  private UUID startId;
+
   private double rating;
 
   @JdbcTypeCode(SqlTypes.JSON)
-  private Map<UUID, Double> userIdToRatingMap;
+  private Map<UUID, Integer> userIdToRatingMap;
 
   private List<UUID> hasUncheckedQuestionStudentExamId;
 
@@ -71,6 +73,7 @@ public class Exam {
   @PrePersist
   void prePersist() {
     id = UUID.randomUUID();
+    startId = UUID.randomUUID();
     userIdToRatingMap = new HashMap<>();
     createdAt = updatedAt = Instant.now();
   }

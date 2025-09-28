@@ -2,6 +2,7 @@ package com.exam.examapp;
 
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
+import com.exam.examapp.repository.PaymentResultRepository;
 import com.exam.examapp.repository.UserRepository;
 import java.time.Instant;
 import java.util.List;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DailyTask {
   private final UserRepository userRepository;
+
+  private final PaymentResultRepository paymentResultRepository;
 
   @Scheduled(cron = "0 0 2 * * ?")
   public void runEveryEvening() {
@@ -31,4 +34,12 @@ public class DailyTask {
               userRepository.save(teacher);
             });
   }
+
+    @Scheduled(cron = "0 0 9 * * ?")
+    public void runEveryMorning() {
+        List<User> teachers = userRepository.getByRole(Role.TEACHER);
+        for (User teacher : teachers) {
+
+        }
+    }
 }

@@ -92,9 +92,11 @@ public class QuestionServiceImpl implements QuestionService {
                 new QuestionDetails(
                         variantToContentMap,
                         questionDetails.variantToIsPictureMap(),
+                        questionDetails.variantToHasMathContentMap(),
                         questionDetails.correctVariants(),
                         numberToContentMap,
                         questionDetails.numberToIsPictureMap(),
+                        questionDetails.numberToHasMathContentMap(),
                         questionDetails.numberToCorrectVariantsMap(),
                         questionDetails.isAuto(),
                         questionDetails.listeningTime(),
