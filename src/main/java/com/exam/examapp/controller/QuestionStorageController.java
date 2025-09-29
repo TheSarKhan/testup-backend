@@ -3,6 +3,7 @@ package com.exam.examapp.controller;
 import com.exam.examapp.dto.request.QuestionRequest;
 import com.exam.examapp.dto.request.QuestionUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
+import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Difficulty;
 import com.exam.examapp.model.enums.QuestionType;
 import com.exam.examapp.model.question.Question;
@@ -124,6 +125,32 @@ public class QuestionStorageController {
                         type, difficulty, topicId, numberOfQuestions);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "Questions retrieved successfully", questions));
+    }
+
+    @GetMapping("/teachers")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Get teachers with question storage",
+            description = "Retrieves a list of teachers who have question storage. Accessible only by ADMIN."
+    )
+    public ResponseEntity<ApiResponse<List<User>>> getTeachers() {
+        List<User> response = questionStorageService.getTeachersHasQuestionStorage();
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Teachers retrieved successfully", response));
+    }
+
+    @GetMapping("/by-teacher")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Get questions by teacher",
+            description = "Retrieves all questions created by the specified teacher. Accessible only by ADMIN."
+    )
+    public ResponseEntity<ApiResponse<List<Question>>> getQuestionByTeacher(@RequestParam UUID teacherId) {
+        List<Question> response = questionStorageService.getQuestionsByTeacherId(teacherId);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Questions retrieved successfully", response));
     }
 
     @PatchMapping

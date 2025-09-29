@@ -182,6 +182,21 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
 
     @Override
     @Transactional
+    public List<User> getTeachersHasQuestionStorage() {
+        return questionStorageRepository.findAll().stream()
+                .filter(questionStorage -> !questionStorage.getQuestions().isEmpty())
+                .map(QuestionStorage::getTeacher)
+                .toList();
+    }
+
+    @Override
+    public List<Question> getQuestionsByTeacherId(UUID teacherId) {
+        return questionStorageRepository.getByTeacher(userService.getUserById(teacherId)).orElseThrow(() ->
+                new ResourceNotFoundException("Question Storage Cannot Found.")).getQuestions();
+    }
+
+    @Override
+    @Transactional
     public void updateQuestionInStorage(
             QuestionUpdateRequest request,
             List<MultipartFile> titles,

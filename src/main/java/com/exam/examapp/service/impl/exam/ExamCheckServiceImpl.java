@@ -1,5 +1,6 @@
 package com.exam.examapp.service.impl.exam;
 
+import com.exam.examapp.dto.request.NotificationRequest;
 import com.exam.examapp.dto.response.exam.StartExamResponse;
 import com.exam.examapp.dto.response.exam.statistic.ExamStatistics;
 import com.exam.examapp.dto.response.exam.statistic.ExamStatisticsBestStudent;
@@ -8,6 +9,7 @@ import com.exam.examapp.dto.response.exam.statistic.ExamStatisticsStudent;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.mapper.ExamMapper;
+import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.AnswerStatus;
 import com.exam.examapp.model.enums.QuestionType;
 import com.exam.examapp.model.exam.Exam;
@@ -15,6 +17,8 @@ import com.exam.examapp.model.exam.StudentExam;
 import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.subject.SubjectStructureQuestion;
 import com.exam.examapp.repository.StudentExamRepository;
+import com.exam.examapp.security.service.interfaces.EmailService;
+import com.exam.examapp.service.interfaces.NotificationService;
 import com.exam.examapp.service.interfaces.exam.ExamCheckService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +30,15 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class ExamCheckServiceImpl implements ExamCheckService {
+    private static final String MAIL_SUBJECT = "Sualiniz Yoxlandi";
+
+    private static final String MAIL_BODY = "Muellim sizin sualiniz yoxladi. Imtahan adi: %s";
+
     private final StudentExamRepository studentExamRepository;
+
+    private final NotificationService notificationService;
+
+    private final EmailService emailService;
 
     private static void getAnswerList(List<Question> questions, Map<UUID, AnswerStatus> questionIdToAnswerStatusMap, List<Integer> list) {
         for (Question question : questions) {
@@ -217,6 +229,15 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
         studentExam.setScore(calculateScore(studentExam));
         studentExamRepository.save(studentExam);
+        sendMailAndNotification(studentExam);
+    }
+
+    private void sendMailAndNotification(StudentExam studentExam) {
+        String examTitle = studentExam.getExam().getExamTitle();
+        User student = studentExam.getStudent();
+        String emailContent = String.format(MAIL_BODY, examTitle);
+        emailService.sendEmail(student.getEmail(), MAIL_SUBJECT, emailContent);
+        notificationService.sendNotification(new NotificationRequest(MAIL_SUBJECT, emailContent, student.getEmail()));
     }
 
     private double calculateScore(StudentExam studentExam) {
