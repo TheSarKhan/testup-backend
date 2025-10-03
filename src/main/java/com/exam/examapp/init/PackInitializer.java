@@ -22,7 +22,8 @@ public class PackInitializer {
                     List.of(
                             getFree(),
                             getPro(),
-                            getProPlus()));
+                            getProPlus(),
+                            getAdmin()));
             log.info("Packs initialized.");
         }
     }
@@ -96,6 +97,30 @@ public class PackInitializer {
                 .canSelectExamDuration(false)
                 .canUseQuestionDb(false)
                 .canPrepareQuestionsDb(false)
+                .build();
+    }
+
+    private static Pack getAdmin() {
+        return Pack.builder()
+                .header("For Admin")
+                .packName("Admin")
+                .price(BigDecimal.ZERO)
+                .monthlyExamCount(Integer.MAX_VALUE)
+                .questionCountPerExam(Integer.MAX_VALUE)
+                .studentPerExam(Integer.MAX_VALUE)
+                .totalExamCount(Integer.MAX_VALUE)
+                .canAnalysisStudentResults(true)
+                .canEditExam(true)
+                .canAddPicture(true)
+                .canAddPdfSound(true)
+                .canShareViaCode(true)
+                .canDownloadExamAsPdf(true)
+                .canAddMultipleSubjectInOneExam(true)
+                .canUseExamTemplate(true)
+                .canAddManualCheckAutoQuestion(true)
+                .canSelectExamDuration(true)
+                .canUseQuestionDb(true)
+                .canPrepareQuestionsDb(true)
                 .build();
     }
 }

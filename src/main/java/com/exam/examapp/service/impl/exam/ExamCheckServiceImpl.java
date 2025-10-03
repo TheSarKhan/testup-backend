@@ -22,11 +22,13 @@ import com.exam.examapp.service.interfaces.NotificationService;
 import com.exam.examapp.service.interfaces.exam.ExamCheckService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExamCheckServiceImpl implements ExamCheckService {
@@ -188,20 +190,24 @@ public class ExamCheckServiceImpl implements ExamCheckService {
     @Override
     @Transactional
     public ExamStatistics getExamStatistics(UUID id) {
+        log.info("Getting Exam Statistics for Exam Id: {}", id);
         List<StudentExam> studentExams = studentExamRepository.getByExam_Id(id);
 
         Exam exam = studentExams.getFirst().getExam();
 
-        return new ExamStatistics(
+        ExamStatistics examStatistics = new ExamStatistics(
                 getExamStatisticsRating(exam),
                 getBestStudents(studentExams),
                 getExamStudents(studentExams),
                 exam.getTeacher().getInfo().getExamToStudentCountMap().get(exam.getId()),
                 exam.getTeacher().getPack().getStudentPerExam());
+        log.info("Exam Statistics: {}", examStatistics);
+        return examStatistics;
     }
 
     @Override
     public StartExamResponse getUserExam(UUID studentExamId) {
+        log.info("Getting User Exam for Student Exam Id: {}", studentExamId);
         StudentExam studentExam = getStudentExam(studentExamId);
 
         return new StartExamResponse(
@@ -216,6 +222,7 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
     @Override
     public void checkAnswer(UUID studentExamId, UUID questionId, AnswerStatus status) {
+        log.info("Checking Answer for Student Exam Id: {}, Question Id: {}, Status: {}",studentExamId, questionId, status);
         StudentExam studentExam = getStudentExam(studentExamId);
 
         AnswerStatus answerStatus = studentExam.getQuestionIdToAnswerStatusMap().get(questionId);

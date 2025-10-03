@@ -37,6 +37,7 @@ import com.exam.examapp.service.interfaces.question.QuestionService;
 import com.exam.examapp.service.interfaces.subject.SubjectStructureService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExamServiceImpl implements ExamService {
@@ -77,12 +79,15 @@ public class ExamServiceImpl implements ExamService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
+        log.info("Exam creation started.");
         createExamService.createExam(request, titles, variantPictures, numberPictures, sounds);
+        log.info("Exam creation finished.");
     }
 
     @Override
     @Transactional
     public List<ExamBlockResponse> getMyExams() {
+        log.info("Getting my exams.");
         User user = userService.getCurrentUser();
         if (Role.TEACHER.equals(user.getRole()) || Role.ADMIN.equals(user.getRole())) {
             return examRepository.getByTeacher(user).stream()
@@ -101,6 +106,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<ExamBlockResponse> getAdminCooperationExams() {
+        log.info("Getting admin cooperation exams.");
         User user = userService.getCurrentUser();
         return examTeacherRepository.getByTeacher(user)
                 .stream()
@@ -111,6 +117,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<ExamBlockResponse> getExamByTag(List<UUID> tagIds) {
+        log.info("Getting exams by tag ids: {}", tagIds);
         Specification<Exam> specification = Specification.unrestricted();
         for (UUID tagId : tagIds) {
             specification.or(ExamSpecification.hasTag(tagId));
@@ -125,6 +132,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<ExamBlockResponse> getLastCreatedExams() {
+        log.info("Getting last created exams.");
         User user = userService.getCurrentUserOrNull();
         return examRepository.getLastCreated()
                 .stream()
@@ -135,6 +143,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public ExamDetailedResponse getExamDetailedById(UUID id) {
+        log.info("Getting exam detailed by id: {}", id);
         Exam exam = getById(id);
         User user = userService.getCurrentUserOrNull();
         if (user != null) {
@@ -152,11 +161,13 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public ExamResponse getExamById(UUID id) {
+        log.info("Getting exam response by id: {}", id);
         return ExamMapper.toResponse(getById(id));
     }
 
     @Override
     public Integer getExamCode(UUID id) {
+        log.info("Getting exam code for exam id: {}", id);
         Exam exam = getById(id);
         if (!exam.isHidden())
             throw new BadRequestException("Exam is not hidden. You cannot get the exam code.");
@@ -167,6 +178,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public String getExamStartLink(UUID id) {
+        log.info("Getting exam start link for exam id: {}", id);
         Exam exam = getById(id);
         return baseUrl + EXAM_START_LINK_PREFIX + exam.getStartId();
     }
@@ -174,6 +186,7 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public StartExamResponse startExamViaCode(String studentName, String examCode) {
+        log.info("Starting exam via code: {}", examCode);
         String examId = cacheService.getContent(EXAM_CODE_PREFIX, examCode.substring(1));
         Exam exam = getById(UUID.fromString(examId));
         return startExamService.startExam(studentName, exam);
@@ -182,6 +195,7 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public StartExamResponse startExamViaId(String studentName, UUID id) {
+        log.info("Starting exam via id: {}", id);
         Exam exam = examRepository.getExamByStartId(id).orElseThrow(() ->
                 new ResourceNotFoundException("Exam is not found."));
         return startExamService.startExam(studentName, exam);
@@ -190,6 +204,7 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public ResultStatisticResponse finishExam(UUID studentExamId) {
+        log.info("Finishing exam with id: {}", studentExamId);
         examResultService.calculateResult(findStudentExamById(studentExamId));
 
         StudentExam studentExam = findStudentExamById(studentExamId);
@@ -205,6 +220,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public ResultStatisticResponse getResultStatistic(UUID studentExamId) {
+        log.info("Getting result statistic for exam with id: {}", studentExamId);
         StudentExam studentExam = findStudentExamById(studentExamId);
 
         return examResultService.getResultStatisticResponse(studentExamId, studentExam);
@@ -212,6 +228,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public void publishExam(UUID id) {
+        log.info("Publishing exam with id: {}", id);
         Exam exam = getById(id);
         exam.setReadyForSale(true);
         examRepository.save(exam);
@@ -225,6 +242,7 @@ public class ExamServiceImpl implements ExamService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
+        log.info("Updating exam with id: {}", request.id());
         Exam exam = getById(request.id());
 
         ExamValidationService.validationForUpdate(request, userService.getCurrentUser());
@@ -276,10 +294,12 @@ public class ExamServiceImpl implements ExamService {
         }
         exam.setSubjectStructureQuestions(subjectStructureQuestions);
         examRepository.save(exam);
+        log.info("Exam updated.");
     }
 
     @Override
     public void deleteExam(UUID id) {
+        log.info("Deleting exam with id: {}", id);
         Exam exam = getById(id);
         List<SubjectStructureQuestion> subjectStructureQuestions = exam.getSubjectStructureQuestions();
         for (SubjectStructureQuestion subjectStructureQuestion : subjectStructureQuestions) {
@@ -291,10 +311,12 @@ public class ExamServiceImpl implements ExamService {
             subjectStructureQuestionRepository.deleteById(subjectStructureQuestion.getId());
         }
         examRepository.deleteById(id);
+        log.info("Exam deleted.");
     }
 
     @Override
     public Exam getById(UUID id) {
+        log.info("Getting exam by id: {}", id);
         return examRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Exam not found."));

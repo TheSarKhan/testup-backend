@@ -87,8 +87,4 @@ public class User {
     void preUpdate() {
         updatedAt = Instant.now();
     }
-
-    public CustomUserDetails getCustomUserDetails() {
-        return new CustomUserDetails(this);
-    }
 }

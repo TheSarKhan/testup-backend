@@ -190,6 +190,7 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
     }
 
     @Override
+    @Transactional
     public List<Question> getQuestionsByTeacherId(UUID teacherId) {
         return questionStorageRepository.getByTeacher(userService.getUserById(teacherId)).orElseThrow(() ->
                 new ResourceNotFoundException("Question Storage Cannot Found.")).getQuestions();

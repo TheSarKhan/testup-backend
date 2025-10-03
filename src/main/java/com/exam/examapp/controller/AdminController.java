@@ -1,8 +1,10 @@
 package com.exam.examapp.controller;
 
 import com.exam.examapp.dto.response.ApiResponse;
+import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.service.interfaces.AdminService;
+import com.exam.examapp.service.interfaces.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,11 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -25,6 +25,18 @@ import java.util.UUID;
 @Tag(name = "Admin Management", description = "Endpoints for managing admin accounts")
 public class AdminController {
     private final AdminService adminService;
+
+    private final UserService userService;
+
+    @GetMapping("/users-by-role")
+    @Operation(
+            summary = "Get Users by role",
+            description = "Retrieve a list of users filtered by role."
+    )
+    public ResponseEntity<ApiResponse<List<User>>> getUsersByRole(@RequestParam Role role) {
+        List<User> users = userService.getUsersByRole(role);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Users retrieved successfully", users));
+    }
 
     @PatchMapping("/change-role/id")
     @Operation(summary = "Change role",

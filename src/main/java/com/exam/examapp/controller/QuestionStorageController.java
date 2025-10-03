@@ -70,10 +70,10 @@ public class QuestionStorageController {
             description =
                     "Retrieve filtered questions from personal storage by type, difficulty, topic, and number of questions")
     public ResponseEntity<ApiResponse<List<Question>>> getMyFilteredStorage(
-            @RequestParam QuestionType type,
-            @RequestParam Difficulty difficulty,
-            @RequestParam UUID topicId,
-            @RequestParam int numberOfQuestions) {
+            @RequestParam(required = false) QuestionType type,
+            @RequestParam(required = false) Difficulty difficulty,
+            @RequestParam(required = false) UUID topicId,
+            @RequestParam(required = false) int numberOfQuestions) {
         List<Question> questions =
                 questionStorageService.getQuestionsFromMyStorage(
                         type, difficulty, topicId, numberOfQuestions);
@@ -116,10 +116,10 @@ public class QuestionStorageController {
             description =
                     "Retrieve filtered questions from admin storage by type, difficulty, topic, and number of questions")
     public ResponseEntity<ApiResponse<List<Question>>> getAdminFilteredStorage(
-            @RequestParam QuestionType type,
-            @RequestParam Difficulty difficulty,
-            @RequestParam UUID topicId,
-            @RequestParam int numberOfQuestions) {
+            @RequestParam(required = false) QuestionType type,
+            @RequestParam(required = false) Difficulty difficulty,
+            @RequestParam(required = false) UUID topicId,
+            @RequestParam(required = false) int numberOfQuestions) {
         List<Question> questions =
                 questionStorageService.getQuestionFromAdminStorage(
                         type, difficulty, topicId, numberOfQuestions);

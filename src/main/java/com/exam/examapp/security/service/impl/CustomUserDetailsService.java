@@ -1,5 +1,7 @@
 package com.exam.examapp.security.service.impl;
 
+import com.exam.examapp.model.User;
+import com.exam.examapp.security.model.CustomUserDetails;
 import com.exam.examapp.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +16,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userService.getByEmail(email).getCustomUserDetails();
+        return getCustomUserDetails(userService.getByEmail(email));
+    }
+
+    public CustomUserDetails getCustomUserDetails(User user) {
+        return new CustomUserDetails(user);
     }
 }

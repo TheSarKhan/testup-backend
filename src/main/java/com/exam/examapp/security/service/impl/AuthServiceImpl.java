@@ -49,6 +49,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public String register(RegisterRequest request) {
+        log.info("Registering user:{}", request.email());
         if (!request.isAcceptTerms())
             throw new BadRequestException(AppMessage.TERMS_NOT_ACCEPTED.getMessage());
 
@@ -77,12 +78,14 @@ public class AuthServiceImpl implements AuthService {
                                         : null)
                         .build();
         userService.save(user);
+        log.info("Registered user:{}", request.email());
         return AppMessage.USER_REGISTERED_SUCCESS.format(user.getFullName());
     }
 
     @Override
     @Transactional
     public TokenResponse login(LoginRequest request) {
+        log.info("Logging in user:{}", request.email());
         User user = userService.getByEmail(request.email());
 
         if (!user.isAcceptedTerms())
@@ -103,6 +106,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String logout(String email) {
+        log.info("Logging out user:{}", email);
         cacheService.deleteContent(REFRESH_TOKEN_HEADER, email);
 
         return AppMessage.USER_LOGGED_OUT_SUCCESS.getMessage();
@@ -111,8 +115,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public TokenResponse refresh(String refreshToken) {
+        log.info("Refreshing token:{}", refreshToken);
         String email = jwtService.extractEmail(refreshToken);
         if (email == null)
+            throw new InvalidCredentialsException(AppMessage.INVALID_REFRESH_TOKEN.getMessage());
+
+        String content = cacheService.getContent(REFRESH_TOKEN_HEADER, email);
+
+        if (content == null)
             throw new InvalidCredentialsException(AppMessage.INVALID_REFRESH_TOKEN.getMessage());
 
         cacheService.deleteContent(REFRESH_TOKEN_HEADER, email);
@@ -121,11 +131,13 @@ public class AuthServiceImpl implements AuthService {
         String newRefreshToken = jwtService.generateRefreshToken(email);
 
         User user = userService.getByEmail(email);
+        log.info("Refreshed token email:{}", email);
         return new TokenResponse(accessToken, newRefreshToken, user.getRole(), user.getPack());
     }
 
     @Override
     public String forgetPassword(String email) {
+        log.info("Forgetting password for user:{}", email);
         int randomCode = (int) (Math.random() * 9000) + 1000;
         if (!userService.existsByEmail(email))
             throw new ResourceNotFoundException(AppMessage.EMAIL_NOT_FOUND.getMessage());
@@ -141,6 +153,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String verifyEmailCode(String email, String code) {
+        log.info("Verifying email code for user:{}", email);
         String redisCode = cacheService.getContent(FORGET_PASSWORD_HEADER, email);
 
         if (redisCode == null || !redisCode.equals(code))
@@ -154,6 +167,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String resetPassword(ResetPasswordRequest request) {
+        log.info("Resetting password for user:{}", request.email());
         String redisUuid = cacheService.getContent(ACCESS_RESET_PASSWORD, request.email());
         if (redisUuid == null || !redisUuid.equals(request.uuid()))
             return AppMessage.DONT_COPY_PASTE_LINK.getMessage();
@@ -162,11 +176,13 @@ public class AuthServiceImpl implements AuthService {
         User user = userService.getByEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
         userService.save(user);
+        log.info("Reset password for user:{}", request.email());
         return AppMessage.PASSWORD_RESET_SUCCESS.getMessage();
     }
 
     @Override
     public TokenResponse resetCurrentUserPassword(String oldPassword, String newPassword) {
+        log.info("Resetting current user password");
         User user = userService.getCurrentUser();
         if (!passwordEncoder.matches(oldPassword, user.getPassword()))
             throw new InvalidCredentialsException("Old password is incorrect");
@@ -175,13 +191,14 @@ public class AuthServiceImpl implements AuthService {
         userService.save(user);
 
         String email = user.getEmail();
-
+        log.info("Reset current user password email:{}", email);
         return new TokenResponse(jwtService.generateAccessToken(email),
                 jwtService.generateRefreshToken(email), user.getRole(), user.getPack());
     }
 
     @Override
     public TokenResponse finishRegister(Role role, boolean isAcceptedTerms) {
+        log.info("Finishing registration");
         if (!isAcceptedTerms) throw new BadRequestException(AppMessage.TERMS_NOT_ACCEPTED.getMessage());
 
         User currentUser = userService.getCurrentUser();
@@ -202,6 +219,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(currentUser.getEmail());
         String refreshToken = jwtService.generateRefreshToken(currentUser.getEmail());
 
+        log.info("Finish registration email:{}", currentUser.getEmail());
         return new TokenResponse(accessToken, refreshToken, currentUser.getRole(), currentUser.getPack());
     }
 }

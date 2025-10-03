@@ -1,6 +1,7 @@
 package com.exam.examapp.security.filter;
 
 import com.exam.examapp.security.model.CustomUserDetails;
+import com.exam.examapp.security.service.impl.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,8 @@ public class CustomJwtFilter extends OncePerRequestFilter {
 
     private final UserService userService;
 
+    private final CustomUserDetailsService customUserDetailsService;
+
     @Override
     public void doFilterInternal(@NonNull HttpServletRequest request,
                                  @NonNull HttpServletResponse response,
@@ -42,7 +45,7 @@ public class CustomJwtFilter extends OncePerRequestFilter {
         String email = jwtService.extractEmail(tokenValue);
         try {
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                CustomUserDetails customUserDetails = userService.getByEmail(email).getCustomUserDetails();
+                CustomUserDetails customUserDetails = customUserDetailsService.getCustomUserDetails(userService.getByEmail(email));
 
                 if (jwtService.isValidToken(tokenValue)) {
                     var authenticationToken = new UsernamePasswordAuthenticationToken(
