@@ -129,6 +129,7 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
     }
 
     @Override
+    @Transactional
     public List<Question> getQuestionsFromMyStorage(UUID subjectId) {
         User user = userService.getCurrentUser();
         if (!user.getPack().isCanUseQuestionDb())
@@ -147,6 +148,7 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
     }
 
     @Override
+    @Transactional
     public List<Question> getAllQuestionsFromAdminStorage() {
         User user = userService.getCurrentUser();
         if (!user.getPack().isCanUseQuestionDb())
@@ -160,6 +162,7 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
     }
 
     @Override
+    @Transactional
     public List<Question> getQuestionFromAdminStorage(
             QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions) {
         User user = userService.getCurrentUser();
@@ -214,6 +217,7 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
     }
 
     @Override
+    @Transactional
     public void removeQuestionsFromStorage(UUID questionId) {
         QuestionStorage questionStorage = questionStorageRepository
                 .getByTeacher(userService.getCurrentUser())
