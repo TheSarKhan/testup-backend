@@ -24,7 +24,7 @@ public class QuestionStorage {
     @ManyToOne
     private User teacher;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Question> questions;
 
     private Instant createdAt;
