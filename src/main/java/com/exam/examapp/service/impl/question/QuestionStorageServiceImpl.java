@@ -63,6 +63,7 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
     }
 
     @Override
+    @Transactional
     public void addQuestionsToStorage(
             QuestionRequest request,
             List<MultipartFile> titles,
