@@ -35,14 +35,22 @@ import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.exam.ExamService;
 import com.exam.examapp.service.interfaces.question.QuestionService;
 import com.exam.examapp.service.interfaces.subject.SubjectStructureService;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +90,106 @@ public class ExamServiceImpl implements ExamService {
         log.info("Exam creation started.");
         createExamService.createExam(request, titles, variantPictures, numberPictures, sounds);
         log.info("Exam creation finished.");
+    }
+
+    @Override
+    public List<ExamBlockResponse> getAllExams(String name,
+                                               Integer minCost,
+                                               Integer maxCost,
+                                               List<Integer> rating,
+                                               List<UUID> tagIds,
+                                               Integer pageNum) {
+        Specification<Exam> specification = Specification.unrestricted();
+        specification = specification.and(hasName(name));
+        specification = specification.and(hasCostBetween(minCost, maxCost));
+        specification = specification.and(hasRatingInRange(rating));
+        specification = specification.and(hasTags(tagIds));
+
+        pageNum = (pageNum != null && pageNum > 0) ? pageNum - 1 : 0;
+        int pageSize = 10;
+
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+
+        Page<Exam> page = examRepository.findAll(specification, pageable);
+
+        return page.getContent()
+                .stream()
+                .filter(exam -> Role.ADMIN.equals(exam.getTeacher().getRole()))
+                .filter(Exam::isReadyForSale)
+                .map(examToResponse(userService.getCurrentUserOrNull()))
+                .toList();
+    }
+
+    private Specification<Exam> hasTags(List<UUID> tagIds) {
+        return (root, query, criteriaBuilder) -> {
+            if (tagIds == null || tagIds.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+
+            Join<Object, Object> tagsJoin = root.join("tags");
+
+            CriteriaBuilder.In<UUID> inClause = criteriaBuilder.in(tagsJoin.get("id"));
+            for (UUID tagId : tagIds) {
+                inClause.value(tagId);
+            }
+
+            assert query != null;
+            query.distinct(true);
+
+            return inClause;
+        };
+    }
+
+
+    private Specification<Exam> hasRatingInRange(List<Integer> ratings) {
+        return (root, query, criteriaBuilder) -> {
+            if (ratings == null || ratings.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+
+            Path<Double> ratingPath = root.get("rating");
+            List<Predicate> predicates = new ArrayList<>();
+
+            for (Integer r : ratings) {
+                double lower = r;
+                double upper = (r == 5) ? 5 : r + 1;
+
+                if (r == 5) {
+                    predicates.add(criteriaBuilder.equal(ratingPath, 5.0));
+                } else {
+                    predicates.add(criteriaBuilder.and(
+                            criteriaBuilder.greaterThanOrEqualTo(ratingPath, lower),
+                            criteriaBuilder.lessThan(ratingPath, upper)
+                    ));
+                }
+            }
+            return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private Specification<Exam> hasCostBetween(Integer minCost, Integer maxCost) {
+        return (root, query, criteriaBuilder) -> {
+            Path<BigDecimal> costPath = root.get("cost");
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (minCost != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(costPath, BigDecimal.valueOf(minCost)));
+            }
+
+            if (maxCost != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(costPath, BigDecimal.valueOf(maxCost)));
+            }
+
+            return predicates.isEmpty()
+                    ? criteriaBuilder.conjunction()
+                    : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private Specification<Exam> hasName(String name) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("examTitle")), "%" + name + "%");
     }
 
     @Override

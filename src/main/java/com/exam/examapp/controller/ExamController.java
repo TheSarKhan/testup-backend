@@ -66,6 +66,24 @@ public class ExamController {
                 ApiResponse.build(HttpStatus.OK, "My Exams retrieved successfully", myExams));
     }
 
+    @GetMapping("/all")
+    @Operation(
+            summary = "Get exams",
+            description =
+                    "Retrieve list of exam blocks . Returns summary info used in dashboard.")
+    public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getAllExams(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Integer minCost,
+            @RequestParam(required = false) Integer maxCost,
+            @RequestParam(required = false) List<Integer> rating,
+            @RequestParam(required = false) List<UUID> tagIds,
+            @RequestParam(required = false) Integer pageNum
+    ) {
+        List<ExamBlockResponse> myExams = examService.getAllExams(name, minCost, maxCost, rating, tagIds, pageNum);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Exams retrieved successfully", myExams));
+    }
+
     @GetMapping("/tags")
     public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getTags(@RequestParam List<UUID> tags) {
         List<ExamBlockResponse> examByTag = examService.getExamByTag(tags);

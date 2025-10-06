@@ -15,6 +15,7 @@ import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.question.QuestionService;
 import com.exam.examapp.service.interfaces.subject.SubjectStructureService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CreateExamService {
@@ -61,19 +63,30 @@ public class CreateExamService {
 
         if (Role.TEACHER.equals(user.getRole())) ExamValidationService.validateRequest(request, user);
 
+        log.info("Teacher validation passed. Creating exam");
+
         List<SubjectStructureQuestion> subjectStructureQuestions =
                 buildSubjectStructureQuestions(
                         request.subjectStructures(), titles, variantPictures, numberPictures, sounds);
 
+        log.info("Subject structure questions created.");
+
         List<Tag> tags = buildTags(request);
+
+        log.info("Tags created.");
 
         BigDecimal cost = calculateCost(request, user);
 
         Exam exam = buildExam(request, subjectStructureQuestions, tags, cost, user);
 
+        log.info("Exam created.");
+
         exam.setNumberOfQuestions(QuestionCountService.getQuestionCount(exam));
+
+        log.info("Number of questions calculated.");
         examRepository.save(exam);
 
+        log.info("Exam saved.");
         updateTeacherStatistics(user);
     }
 

@@ -52,7 +52,7 @@ public class ProfileController {
 
     @GetMapping("/teacher-info")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
     @Operation(
             summary = "Get teacher info",
             description = "Returns teacher-specific information. Accessible only by users with TEACHER role"

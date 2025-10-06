@@ -2,59 +2,66 @@ package com.exam.examapp.service.interfaces.exam;
 
 import com.exam.examapp.dto.request.exam.ExamRequest;
 import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
+import com.exam.examapp.dto.response.ResultStatisticResponse;
 import com.exam.examapp.dto.response.exam.ExamBlockResponse;
 import com.exam.examapp.dto.response.exam.ExamDetailedResponse;
 import com.exam.examapp.dto.response.exam.ExamResponse;
-import com.exam.examapp.dto.response.ResultStatisticResponse;
 import com.exam.examapp.dto.response.exam.StartExamResponse;
-import java.util.List;
-import java.util.UUID;
-
 import com.exam.examapp.model.exam.Exam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.UUID;
+
 public interface ExamService {
-  void createExam(
-      ExamRequest request,
-      List<MultipartFile> titles,
-      List<MultipartFile> variantPictures,
-      List<MultipartFile> numberPictures,
-      List<MultipartFile> sounds);
+    void createExam(
+            ExamRequest request,
+            List<MultipartFile> titles,
+            List<MultipartFile> variantPictures,
+            List<MultipartFile> numberPictures,
+            List<MultipartFile> sounds);
 
-  List<ExamBlockResponse> getMyExams();
+    List<ExamBlockResponse> getAllExams(String name,
+                                        Integer minCost,
+                                        Integer maxCost,
+                                        List<Integer> rating,
+                                        List<UUID> tagIds,
+                                        Integer pageNum);
 
-  List<ExamBlockResponse> getAdminCooperationExams();
+    List<ExamBlockResponse> getMyExams();
 
-  List<ExamBlockResponse> getExamByTag(List<UUID> tagIds);
+    List<ExamBlockResponse> getAdminCooperationExams();
 
-  List<ExamBlockResponse> getLastCreatedExams();
+    List<ExamBlockResponse> getExamByTag(List<UUID> tagIds);
 
-  ExamDetailedResponse getExamDetailedById(UUID id);
+    List<ExamBlockResponse> getLastCreatedExams();
 
-  ExamResponse getExamById(UUID id);
+    ExamDetailedResponse getExamDetailedById(UUID id);
 
-  Exam getById(UUID id);
+    ExamResponse getExamById(UUID id);
 
-  Integer getExamCode(UUID id);
+    Exam getById(UUID id);
 
-  String getExamStartLink(UUID id);
+    Integer getExamCode(UUID id);
 
-  StartExamResponse startExamViaCode(String studentName, String examCode);
+    String getExamStartLink(UUID id);
 
-  StartExamResponse startExamViaId(String studentName, UUID id);
+    StartExamResponse startExamViaCode(String studentName, String examCode);
 
-  ResultStatisticResponse finishExam(UUID studentExamId);
+    StartExamResponse startExamViaId(String studentName, UUID id);
 
-  ResultStatisticResponse getResultStatistic(UUID studentExamId);
+    ResultStatisticResponse finishExam(UUID studentExamId);
 
-  void publishExam(UUID id);
+    ResultStatisticResponse getResultStatistic(UUID studentExamId);
 
-  void updateExam(
-      ExamUpdateRequest request,
-      List<MultipartFile> titles,
-      List<MultipartFile> variantPictures,
-      List<MultipartFile> numberPictures,
-      List<MultipartFile> sounds);
+    void publishExam(UUID id);
 
-  void deleteExam(UUID id);
+    void updateExam(
+            ExamUpdateRequest request,
+            List<MultipartFile> titles,
+            List<MultipartFile> variantPictures,
+            List<MultipartFile> numberPictures,
+            List<MultipartFile> sounds);
+
+    void deleteExam(UUID id);
 }
