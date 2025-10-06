@@ -56,17 +56,27 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = QuestionMapper.requestTo(request);
         log.info("Question mapped successfully");
 
-        if (request.isTitlePicture()) {
-            String titleUrl = fileService.uploadFile(IMAGE_TITLE_PATH, titles.getFirst());
-            titles.removeFirst();
-            question.setTitle(titleUrl);
+        try {
+            if (request.isTitlePicture()) {
+                String titleUrl = fileService.uploadFile(IMAGE_TITLE_PATH, titles.getFirst());
+                titles.removeFirst();
+                question.setTitle(titleUrl);
+            }
+        }catch (NoSuchElementException e){
+            log.error("No title uploaded");
+            throw new ResourceNotFoundException("No title uploaded");
         }
         log.info("Title uploaded successfully");
 
-        if (QuestionType.LISTENING.equals(request.questionType())) {
-            String soundUrl = fileService.uploadFile(SOUND_PATH, sounds.getFirst());
-            sounds.removeFirst();
-            question.setSoundUrl(soundUrl);
+        try {
+            if (QuestionType.LISTENING.equals(request.questionType())) {
+                String soundUrl = fileService.uploadFile(SOUND_PATH, sounds.getFirst());
+                sounds.removeFirst();
+                question.setSoundUrl(soundUrl);
+            }
+        }catch (NoSuchElementException e){
+            log.error("No sound uploaded");
+            throw new ResourceNotFoundException("No sound uploaded");
         }
         log.info("Sound uploaded successfully");
 
@@ -81,27 +91,35 @@ public class QuestionServiceImpl implements QuestionService {
         QuestionDetails questionDetails = request.questionDetails();
 
         Map<Character, String> variantToContentMap = null;
-        if (!request.questionType().equals(QuestionType.LISTENING) &&
-                !request.questionType().equals(QuestionType.TEXT_BASED) &&
-                !request.questionType().equals(QuestionType.OPEN_ENDED))
-            variantToContentMap =
-                    getCharacterStringMap(
-                            questionDetails.variantToContentMap(),
-                            questionDetails.variantToIsPictureMap(),
-                            IMAGE_VARIANT_PATH,
-                            variantPictures);
-
+        try {
+            if (!request.questionType().equals(QuestionType.LISTENING) &&
+                    !request.questionType().equals(QuestionType.TEXT_BASED) &&
+                    !request.questionType().equals(QuestionType.OPEN_ENDED))
+                variantToContentMap =
+                        getCharacterStringMap(
+                                questionDetails.variantToContentMap(),
+                                questionDetails.variantToIsPictureMap(),
+                                IMAGE_VARIANT_PATH,
+                                variantPictures);
+        }catch (NoSuchElementException e){
+            log.error("Not enough variant pictures uploaded");
+            throw new ResourceNotFoundException("Not enough variant pictures uploaded");
+        }
         log.info("Variant pictures uploaded successfully");
 
         Map<Character, String> numberToContentMap = null;
-        if (request.questionType().equals(QuestionType.MATCH))
-            numberToContentMap =
-                    getCharacterStringMap(
-                            questionDetails.numberToContentMap(),
-                            questionDetails.numberToIsPictureMap(),
-                            IMAGE_NUMBER_PATH,
-                            numberPictures);
-
+        try {
+            if (request.questionType().equals(QuestionType.MATCH))
+                numberToContentMap =
+                        getCharacterStringMap(
+                                questionDetails.numberToContentMap(),
+                                questionDetails.numberToIsPictureMap(),
+                                IMAGE_NUMBER_PATH,
+                                numberPictures);
+        }catch (NoSuchElementException e){
+            log.error("Not enough number pictures uploaded");
+            throw new ResourceNotFoundException("Not enough number pictures uploaded");
+        }
         log.info("Number pictures uploaded successfully");
 
         question.setQuestionDetails(
