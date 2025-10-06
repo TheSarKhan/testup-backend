@@ -120,14 +120,15 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     private Map<Character, String> getCharacterStringMap(
-            Map<Character, String> questionDetails,
-            Map<Character, Boolean> questionDetails1,
+            Map<Character, String> intCharToContentMap,
+            Map<Character, Boolean> characterIsPictureMap,
             String imageNumberPath,
             List<MultipartFile> variantPictures) {
         Map<Character, String> charToContentMap =
-                questionDetails == null ? new HashMap<>() : new HashMap<>(questionDetails);
-        if (questionDetails1 != null) {
-            for (Map.Entry<Character, Boolean> characterBooleanEntry : questionDetails1.entrySet()) {
+                intCharToContentMap == null ? new HashMap<>() : new HashMap<>(intCharToContentMap);
+        log.info("Character string map created successfully");
+        if (characterIsPictureMap != null && !charToContentMap.isEmpty()) {
+            for (Map.Entry<Character, Boolean> characterBooleanEntry : characterIsPictureMap.entrySet()) {
                 if (characterBooleanEntry.getValue()) {
                     String numberPictureUrl =
                             fileService.uploadFile(imageNumberPath, variantPictures.getFirst());
@@ -136,6 +137,7 @@ public class QuestionServiceImpl implements QuestionService {
                 }
             }
         }
+        log.info("Number pictures uploaded successfully");
         return charToContentMap;
     }
 
