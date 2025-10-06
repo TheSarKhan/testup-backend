@@ -1,6 +1,7 @@
 package com.exam.examapp.security.service.impl;
 
 import com.exam.examapp.AppMessage;
+import com.exam.examapp.exception.custom.JwtException;
 import com.exam.examapp.service.interfaces.CacheService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -33,13 +34,13 @@ public class JwtService {
         return generateToken(username, accessTokenExpireTime);
     }
 
-    public String generateRefreshToken(String username){
+    public String generateRefreshToken(String username) {
         String refreshToken = generateToken(username, refreshTokenExpireTime);
         cacheService.saveContent("refresh_token_", username, refreshToken, refreshTokenExpireTime);
         return refreshToken;
     }
 
-    private String generateToken(String username, Long expireTime){
+    private String generateToken(String username, Long expireTime) {
         return Jwts.builder().
                 subject(username).
                 issuedAt(new Date(System.currentTimeMillis())).
@@ -76,7 +77,7 @@ public class JwtService {
                     parseSignedClaims(token).
                     getPayload();
         } catch (Exception e) {
-            throw new IllegalArgumentException(AppMessage.JWT_TOKEN_INVALID.format(e.getMessage()));
+            throw new JwtException(AppMessage.JWT_TOKEN_INVALID.format(e.getMessage()));
         }
     }
 }

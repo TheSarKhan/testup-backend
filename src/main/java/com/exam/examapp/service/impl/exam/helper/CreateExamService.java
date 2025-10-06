@@ -109,12 +109,14 @@ public class CreateExamService {
                         req.subjectStructureRequest().subjectId()
                 );
             }
+            log.info("Subject structure created.");
 
             List<Question> questions =
                     req.questionRequests().stream()
                             .map(q -> questionService.save(q, titles, variantPictures, numberPictures, sounds))
                             .toList();
 
+            log.info("Questions created.");
             subjectStructureQuestions.add(
                     SubjectStructureQuestion.builder()
                             .subjectStructure(subjectStructure)
