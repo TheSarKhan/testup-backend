@@ -15,12 +15,14 @@ import com.exam.examapp.service.interfaces.question.QuestionService;
 import com.exam.examapp.service.interfaces.subject.TopicService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QuestionServiceImpl implements QuestionService {
@@ -46,23 +48,27 @@ public class QuestionServiceImpl implements QuestionService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
+        log.info("Saving question");
         return getQuestion(request, titles, variantPictures, numberPictures, sounds);
     }
 
     private Question getQuestion(QuestionRequest request, List<MultipartFile> titles, List<MultipartFile> variantPictures, List<MultipartFile> numberPictures, List<MultipartFile> sounds) {
         Question question = QuestionMapper.requestTo(request);
+        log.info("Question mapped successfully");
 
         if (request.isTitlePicture()) {
             String titleUrl = fileService.uploadFile(IMAGE_TITLE_PATH, titles.getFirst());
             titles.removeFirst();
             question.setTitle(titleUrl);
         }
+        log.info("Title uploaded successfully");
 
         if (QuestionType.LISTENING.equals(request.questionType())) {
             String soundUrl = fileService.uploadFile(SOUND_PATH, sounds.getFirst());
             sounds.removeFirst();
             question.setSoundUrl(soundUrl);
         }
+        log.info("Sound uploaded successfully");
 
         return finishEdit(titles, variantPictures, numberPictures, request, question, sounds);
     }
@@ -193,10 +199,12 @@ public class QuestionServiceImpl implements QuestionService {
             List<MultipartFile> sounds) {
         createQuestionDetails(request, variantPictures, numberPictures, question);
 
+        log.info("Question details created successfully");
         if (request.topicId() != null) {
             Topic topic = topicService.getById(request.topicId());
             question.setTopic(topic);
         }
+        log.info("Topic set successfully");
 
         List<Question> questions = new ArrayList<>();
         if (request.questions() != null)
@@ -205,6 +213,7 @@ public class QuestionServiceImpl implements QuestionService {
             }
         question.setQuestions(questions);
 
+        log.info("Questions added successfully");
         return questionRepository.save(question);
     }
 

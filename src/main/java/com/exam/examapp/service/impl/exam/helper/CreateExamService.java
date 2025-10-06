@@ -1,5 +1,6 @@
 package com.exam.examapp.service.impl.exam.helper;
 
+import com.exam.examapp.dto.request.QuestionRequest;
 import com.exam.examapp.dto.request.SubjectStructureQuestionsRequest;
 import com.exam.examapp.dto.request.exam.ExamRequest;
 import com.exam.examapp.model.Tag;
@@ -111,10 +112,11 @@ public class CreateExamService {
             }
             log.info("Subject structure created.");
 
-            List<Question> questions =
-                    req.questionRequests().stream()
-                            .map(q -> questionService.save(q, titles, variantPictures, numberPictures, sounds))
-                            .toList();
+            List<Question> questions = new ArrayList<>();
+            for (QuestionRequest questionRequest : req.questionRequests()) {
+                log.info("Question created. Question title:"+ questionRequest.title());
+                questions.add(questionService.save(questionRequest, titles, variantPictures, numberPictures, sounds));
+            }
 
             log.info("Questions created.");
             subjectStructureQuestions.add(
