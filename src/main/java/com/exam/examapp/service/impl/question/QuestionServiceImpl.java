@@ -80,19 +80,29 @@ public class QuestionServiceImpl implements QuestionService {
             Question question) {
         QuestionDetails questionDetails = request.questionDetails();
 
-        Map<Character, String> variantToContentMap =
-                getCharacterStringMap(
-                        questionDetails.variantToContentMap(),
-                        questionDetails.variantToIsPictureMap(),
-                        IMAGE_VARIANT_PATH,
-                        variantPictures);
+        Map<Character, String> variantToContentMap = null;
+        if (!request.questionType().equals(QuestionType.LISTENING) &&
+                !request.questionType().equals(QuestionType.TEXT_BASED) &&
+                !request.questionType().equals(QuestionType.OPEN_ENDED))
+            variantToContentMap =
+                    getCharacterStringMap(
+                            questionDetails.variantToContentMap(),
+                            questionDetails.variantToIsPictureMap(),
+                            IMAGE_VARIANT_PATH,
+                            variantPictures);
 
-        Map<Character, String> numberToContentMap =
-                getCharacterStringMap(
-                        questionDetails.numberToContentMap(),
-                        questionDetails.numberToIsPictureMap(),
-                        IMAGE_NUMBER_PATH,
-                        numberPictures);
+        log.info("Variant pictures uploaded successfully");
+
+        Map<Character, String> numberToContentMap = null;
+        if (request.questionType().equals(QuestionType.MATCH))
+            numberToContentMap =
+                    getCharacterStringMap(
+                            questionDetails.numberToContentMap(),
+                            questionDetails.numberToIsPictureMap(),
+                            IMAGE_NUMBER_PATH,
+                            numberPictures);
+
+        log.info("Number pictures uploaded successfully");
 
         question.setQuestionDetails(
                 new QuestionDetails(

@@ -114,9 +114,10 @@ public class CreateExamService {
 
             List<Question> questions = new ArrayList<>();
             for (QuestionRequest questionRequest : req.questionRequests()) {
-                log.info("Question created. Question title:"+ questionRequest.title());
                 questions.add(questionService.save(questionRequest, titles, variantPictures, numberPictures, sounds));
+                log.info("Question created. Question title:{}", questionRequest.title());
             }
+
 
             log.info("Questions created.");
             subjectStructureQuestions.add(
