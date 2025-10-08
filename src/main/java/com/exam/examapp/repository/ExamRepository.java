@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,4 +31,6 @@ public interface ExamRepository extends JpaRepository<Exam, UUID>, JpaSpecificat
     List<Exam> getLastCreated();
 
     Optional<Exam> getExamByStartId(UUID startId);
+
+    long countByCreatedAtAfter(Instant createdAtAfter);
 }

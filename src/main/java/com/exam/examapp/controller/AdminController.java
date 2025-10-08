@@ -1,5 +1,6 @@
 package com.exam.examapp.controller;
 
+import com.exam.examapp.dto.response.AdminStatisticsResponse;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
@@ -29,30 +30,29 @@ public class AdminController {
     private final UserService userService;
 
     @GetMapping("/users-by-role")
-    @Operation(
-            summary = "Get Users by role",
-            description = "Retrieve a list of users filtered by role."
-    )
+    @Operation(summary = "Get Users by role", description = "Retrieve a list of users filtered by role.")
     public ResponseEntity<ApiResponse<List<User>>> getUsersByRole(@RequestParam Role role) {
         List<User> users = userService.getUsersByRole(role);
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Users retrieved successfully", users));
     }
 
     @PatchMapping("/change-role/id")
-    @Operation(summary = "Change role",
-            description = "Allows an **ADMIN** to change the role of user by id.")
+    @Operation(summary = "Change role", description = "Allows an **ADMIN** to change the role of user by id.")
     public ResponseEntity<ApiResponse<Void>> changeRole(@RequestParam UUID id, @RequestParam Role role) {
         adminService.changeUserRoleViaId(id, role);
-        return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Role changed successfully", null));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Role changed successfully", null));
     }
 
     @PatchMapping("/change-role/email")
-    @Operation(summary = "Change role",
-            description = "Allows an **ADMIN** to change the role of user by email.")
+    @Operation(summary = "Change role", description = "Allows an **ADMIN** to change the role of user by email.")
     public ResponseEntity<ApiResponse<Void>> changeRoleViaEmail(@RequestParam String email, @RequestParam Role role) {
         adminService.changeUserRoleViaEmail(email, role);
-        return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Role changed successfully", null));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Role changed successfully", null));
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<ApiResponse<AdminStatisticsResponse>> getStatistics() {
+        AdminStatisticsResponse adminStatistics = adminService.getAdminStatistics();
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Statistics retrieved successfully", adminStatistics));
     }
 }

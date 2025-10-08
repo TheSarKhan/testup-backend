@@ -19,4 +19,8 @@ public interface PaymentResultRepository extends JpaRepository<PaymentResult, UU
     List<PaymentResult> getByUserAndLastCreatedAt(User user, Instant createdAtNeeded);
 
     Optional<PaymentResult> getByInvoiceUuid(String uuid);
+
+    List<PaymentResult> getByStatusAndCreatedAtAfter(String status, Instant createdAtAfter);
+
+    List<PaymentResult> getByStatus(String status);
 }
