@@ -1,6 +1,5 @@
 package com.exam.examapp.security.service.impl;
 
-import com.exam.examapp.AppMessage;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.InvalidCredentialsException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
@@ -14,6 +13,7 @@ import com.exam.examapp.security.dto.response.TokenResponse;
 import com.exam.examapp.security.service.interfaces.AuthService;
 import com.exam.examapp.security.service.interfaces.EmailService;
 import com.exam.examapp.service.interfaces.CacheService;
+import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.PackService;
 import com.exam.examapp.service.interfaces.UserService;
 import jakarta.transaction.Transactional;
@@ -42,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final PackService packService;
     private final PasswordEncoder passwordEncoder;
+    private final LogService logService;
 
     @Value("${app.name}")
     private String appName;
@@ -49,19 +50,18 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public String register(RegisterRequest request) {
-        log.info("Registering user:{}", request.email());
+        log.info("İstifadəçi qeydiyyatdan keçir:{}", request.email());
         if (!request.isAcceptTerms())
-            throw new BadRequestException(AppMessage.TERMS_NOT_ACCEPTED.getMessage());
+            throw new BadRequestException("İstifadəçi şərtləri qəbul etmədi");
 
         if (request.role() == Role.ADMIN)
-            throw new BadRequestException(AppMessage.ADMIN_CANNOT_BE_REGISTERED.getMessage());
+            throw new BadRequestException("İstifadəçi rolu admin ola bilməz");
 
         if (userService.existsByEmail(request.email()))
-            throw new BadRequestException(AppMessage.USER_EXISTS_WITH_EMAIL.format(request.email()));
+            throw new BadRequestException("Email artıq mövcuddur");
 
         if (userService.existsByPhoneNumber(request.phoneNumber()))
-            throw new BadRequestException(
-                    AppMessage.USER_EXISTS_WITH_PHONE.format(request.phoneNumber()));
+            throw new BadRequestException("Telefon nömrəsi mövcuddur");
 
         User user =
                 User.builder()
@@ -77,53 +77,55 @@ public class AuthServiceImpl implements AuthService {
                                         ? new TeacherInfo(Instant.now(), 0, 0, new HashMap<>())
                                         : null)
                         .build();
-        userService.save(user);
-        log.info("Registered user:{}", request.email());
-        return AppMessage.USER_REGISTERED_SUCCESS.format(user.getFullName());
+        User save = userService.save(user);
+        log.info("İstifadəçi qeydiyyatdan keçdi:{}", request.email());
+        logService.save("İstifadəçi qeydiyyatdan keçdi:" + request.email(), save);
+        return "İstifadəçi qeydiyyatdan keçdi";
     }
 
     @Override
     @Transactional
     public TokenResponse login(LoginRequest request) {
-        log.info("Logging in user:{}", request.email());
+        log.info("İstifadəçi login olur:{}", request.email());
         User user = userService.getByEmail(request.email());
 
         if (!user.isAcceptedTerms())
-            throw new BadRequestException(AppMessage.TERMS_NOT_ACCEPTED.getMessage());
+            throw new BadRequestException("İstifadəçi şərtləri qəbul etməyib");
 
         if (!passwordEncoder.matches(request.password(), user.getPassword()))
-            throw new InvalidCredentialsException(AppMessage.INVALID_CREDENTIALS.getMessage());
+            throw new InvalidCredentialsException("Parol yanlışdır");
 
         if (!user.isActive() || user.isDeleted())
-            throw new InvalidCredentialsException(AppMessage.USER_NOT_ACTIVE_OR_DELETED.getMessage());
+            throw new InvalidCredentialsException("İstifadəçi aktif deyil və yaxud silinib");
 
         String accessToken = jwtService.generateAccessToken(request.email());
         String refreshToken = jwtService.generateRefreshToken(request.email());
 
-        log.info(AppMessage.USER_LOGGED_IN_SUCCESS.getMessage());
+        log.info("İstifadəçi login oldu:{}", request.email());
         return new TokenResponse(accessToken, refreshToken, user.getRole(), user.getPack());
     }
 
     @Override
     public String logout(String email) {
-        log.info("Logging out user:{}", email);
+        log.info("İstifadəçi logout olur:{}", email);
         cacheService.deleteContent(REFRESH_TOKEN_HEADER, email);
 
-        return AppMessage.USER_LOGGED_OUT_SUCCESS.getMessage();
+        log.info("İstifadəçi logout oldu");
+        return "İstifadəçi logout oldu";
     }
 
     @Override
     @Transactional
     public TokenResponse refresh(String refreshToken) {
-        log.info("Refreshing token:{}", refreshToken);
+        log.info("Token yenilənir:{}", refreshToken);
         String email = jwtService.extractEmail(refreshToken);
         if (email == null)
-            throw new InvalidCredentialsException(AppMessage.INVALID_REFRESH_TOKEN.getMessage());
+            throw new InvalidCredentialsException("Email yanlışdır");
 
         String content = cacheService.getContent(REFRESH_TOKEN_HEADER, email);
 
         if (content == null)
-            throw new InvalidCredentialsException(AppMessage.INVALID_REFRESH_TOKEN.getMessage());
+            throw new InvalidCredentialsException("Kontent mövcud deyil");
 
         cacheService.deleteContent(REFRESH_TOKEN_HEADER, email);
 
@@ -131,20 +133,20 @@ public class AuthServiceImpl implements AuthService {
         String newRefreshToken = jwtService.generateRefreshToken(email);
 
         User user = userService.getByEmail(email);
-        log.info("Refreshed token email:{}", email);
+        log.info("Token yeniləndi:{}", email);
         return new TokenResponse(accessToken, newRefreshToken, user.getRole(), user.getPack());
     }
 
     @Override
     public String forgetPassword(String email) {
-        log.info("Forgetting password for user:{}", email);
+        log.info("İstifadəçi parolu unudub:{}", email);
         int randomCode = (int) (Math.random() * 9000) + 1000;
         if (!userService.existsByEmail(email))
-            throw new ResourceNotFoundException(AppMessage.EMAIL_NOT_FOUND.getMessage());
+            throw new ResourceNotFoundException("Email yanlışdır");
 
         String emailResponse =
                 emailService.sendEmail(
-                        email, appName + " Verification Code", AppMessage.EMAIL_SENT.format(randomCode));
+                        email, appName + " Verifikasiya kodu", "Kodunuz: " + randomCode);
         cacheService.saveContent(
                 FORGET_PASSWORD_HEADER, email, String.valueOf(randomCode), (long) (2 * 60 * 1000));
 
@@ -153,11 +155,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String verifyEmailCode(String email, String code) {
-        log.info("Verifying email code for user:{}", email);
+        log.info("Verifikasiya olunur:{}", email);
         String redisCode = cacheService.getContent(FORGET_PASSWORD_HEADER, email);
 
         if (redisCode == null || !redisCode.equals(code))
-            throw new BadRequestException(AppMessage.INVALID_CODE.getMessage());
+            throw new BadRequestException("Kod yanlışdır");
 
         cacheService.deleteContent(FORGET_PASSWORD_HEADER, email);
         UUID uuid = UUID.randomUUID();
@@ -167,46 +169,47 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String resetPassword(ResetPasswordRequest request) {
-        log.info("Resetting password for user:{}", request.email());
+        log.info("Parol yenilənir:{}", request.email());
         String redisUuid = cacheService.getContent(ACCESS_RESET_PASSWORD, request.email());
         if (redisUuid == null || !redisUuid.equals(request.uuid()))
-            return AppMessage.DONT_COPY_PASTE_LINK.getMessage();
+            return "Please don't try to hack me. I know who you are. My eyes on you.";
 
         cacheService.deleteContent(ACCESS_RESET_PASSWORD, request.email());
         User user = userService.getByEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
         userService.save(user);
-        log.info("Reset password for user:{}", request.email());
-        return AppMessage.PASSWORD_RESET_SUCCESS.getMessage();
+        log.info("Istifadəçi parolu yenilədi:{}", request.email());
+        logService.save("Istifadəçi parolu yenilədi: " + request.email(), user);
+        return "Parolunuz yeniləndi";
     }
 
     @Override
     public TokenResponse resetCurrentUserPassword(String oldPassword, String newPassword) {
-        log.info("Resetting current user password");
+        log.info("Hazırki istifadəçi parolunu yeniləyir");
         User user = userService.getCurrentUser();
         if (!passwordEncoder.matches(oldPassword, user.getPassword()))
-            throw new InvalidCredentialsException("Old password is incorrect");
+            throw new InvalidCredentialsException("Köhnə parol yanlışdır");
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userService.save(user);
 
         String email = user.getEmail();
-        log.info("Reset current user password email:{}", email);
+        log.info("Hazırki istifadəçi parolunu yeniləndi:{}", email);
         return new TokenResponse(jwtService.generateAccessToken(email),
                 jwtService.generateRefreshToken(email), user.getRole(), user.getPack());
     }
 
     @Override
     public TokenResponse finishRegister(Role role, boolean isAcceptedTerms) {
-        log.info("Finishing registration");
-        if (!isAcceptedTerms) throw new BadRequestException(AppMessage.TERMS_NOT_ACCEPTED.getMessage());
+        log.info("Registrasiya sonlandırılır");
+        if (!isAcceptedTerms) throw new BadRequestException("İstifadəçi şərtləri qəbul etməyib");
 
         User currentUser = userService.getCurrentUser();
         if (!Role.EMPTY.equals(currentUser.getRole()))
-            throw new BadRequestException("User already registered.");
+            throw new BadRequestException("Istifadəçi mövcuddur");
 
         if (Role.ADMIN.equals(role) || Role.EMPTY.equals(role))
-            throw new BadRequestException("Role cannot be empty or admin.");
+            throw new BadRequestException("Rol boş və ya admin ola bilməz");
 
         currentUser.setPack(Role.TEACHER.equals(role) ? packService.getPackByName("Free") : null);
 
@@ -219,7 +222,8 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(currentUser.getEmail());
         String refreshToken = jwtService.generateRefreshToken(currentUser.getEmail());
 
-        log.info("Finish registration email:{}", currentUser.getEmail());
+        log.info("Registrasiya sonlandı:{}", currentUser.getEmail());
+        logService.save("Registrasiya sonlandı:" + currentUser.getEmail(), currentUser);
         return new TokenResponse(accessToken, refreshToken, currentUser.getRole(), currentUser.getPack());
     }
 }

@@ -1,6 +1,5 @@
 package com.exam.examapp.security.service.impl;
 
-import com.exam.examapp.AppMessage;
 import com.exam.examapp.exception.custom.JwtException;
 import com.exam.examapp.service.interfaces.CacheService;
 import io.jsonwebtoken.Claims;
@@ -77,7 +76,7 @@ public class JwtService {
                     parseSignedClaims(token).
                     getPayload();
         } catch (Exception e) {
-            throw new JwtException(AppMessage.JWT_TOKEN_INVALID.format(e.getMessage()));
+            throw new JwtException("Token yanlışdır");
         }
     }
 }

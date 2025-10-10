@@ -1,6 +1,5 @@
 package com.exam.examapp.security.service.impl;
 
-import com.exam.examapp.AppMessage;
 import com.exam.examapp.security.service.interfaces.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +15,13 @@ public class SmtpEmailServiceImpl implements EmailService {
 
     @Override
     public String sendEmail(String to, String subject, String content) {
-        log.info(AppMessage.SEND_EMAIL.format(to, subject, content));
+        log.info("Email göndərilir");
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject(subject);
         message.setText(content);
         javaMailSender.send(message);
-        log.info(AppMessage.EMAIL_SENT_SUCCESS.getMessage());
-        return AppMessage.EMAIL_SENT_SUCCESS.getMessage();
+        log.info("Email uğurla göndərildi");
+        return "Email uğurla göndərildi";
     }
 }

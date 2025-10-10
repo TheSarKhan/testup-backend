@@ -1,9 +1,9 @@
 package com.exam.examapp.service.impl;
 
-import com.exam.examapp.AppMessage;
 import com.exam.examapp.exception.custom.DirectoryException;
 import com.exam.examapp.exception.custom.FileException;
 import com.exam.examapp.service.interfaces.FileService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class LocalFileServiceImpl implements FileService {
     @Value("${app.base-url}")
@@ -23,6 +24,7 @@ public class LocalFileServiceImpl implements FileService {
 
     @Override
     public String uploadFile(String directory, MultipartFile file) {
+        log.info("Şəkil endirilir");
         if (file.isEmpty() || Objects.isNull(file.getOriginalFilename()))
             return null;
 
@@ -35,7 +37,7 @@ public class LocalFileServiceImpl implements FileService {
             try {
                 Files.createDirectories(uploadDir);
             } catch (IOException e) {
-                throw new DirectoryException(AppMessage.DIRECTORY_CREATE_FAILED.getMessage() + " " + e.getMessage());
+                throw new DirectoryException("Qovluq yaradıla bilmədi");
             }
         }
 
@@ -45,7 +47,7 @@ public class LocalFileServiceImpl implements FileService {
         try {
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new FileException(AppMessage.FILE_SAVE_FAILED.getMessage() + " " + e.getMessage());
+            throw new FileException("Şəkil yaradıla bilmədi");
         }
 
         return baseUrl + "/" + filePath;
@@ -53,6 +55,7 @@ public class LocalFileServiceImpl implements FileService {
 
     @Override
     public void deleteFile(String directory, String imageUrl) {
+        log.info("Şəkil silinir");
         String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
 
         Path uploadDir = Paths.get(directory);
@@ -61,7 +64,7 @@ public class LocalFileServiceImpl implements FileService {
         try {
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
-            throw new FileException(AppMessage.FILE_DELETE_FAILED.getMessage() + " " + e.getMessage());
+            throw new FileException("Şəkil silinə bilmədi");
         }
     }
 }

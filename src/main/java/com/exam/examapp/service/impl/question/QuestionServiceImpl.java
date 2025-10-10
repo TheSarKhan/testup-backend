@@ -11,6 +11,8 @@ import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.subject.Topic;
 import com.exam.examapp.repository.question.QuestionRepository;
 import com.exam.examapp.service.interfaces.FileService;
+import com.exam.examapp.service.interfaces.LogService;
+import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.question.QuestionService;
 import com.exam.examapp.service.interfaces.subject.TopicService;
 import jakarta.transaction.Transactional;
@@ -40,6 +42,10 @@ public class QuestionServiceImpl implements QuestionService {
 
     private final FileService fileService;
 
+    private final LogService logService;
+
+    private final UserService userService;
+
     @Override
     @Transactional
     public Question save(
@@ -48,13 +54,13 @@ public class QuestionServiceImpl implements QuestionService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
-        log.info("Saving question");
+        log.info("Sual yaradılır");
         return getQuestion(request, titles, variantPictures, numberPictures, sounds);
     }
 
     private Question getQuestion(QuestionRequest request, List<MultipartFile> titles, List<MultipartFile> variantPictures, List<MultipartFile> numberPictures, List<MultipartFile> sounds) {
         Question question = QuestionMapper.requestTo(request);
-        log.info("Question mapped successfully");
+        log.info("Sual uğurla xəritələndi");
 
         try {
             if (request.isTitlePicture()) {
@@ -63,10 +69,9 @@ public class QuestionServiceImpl implements QuestionService {
                 question.setTitle(titleUrl);
             }
         }catch (NoSuchElementException e){
-            log.error("No title uploaded");
-            throw new ResourceNotFoundException("No title uploaded");
+            throw new ResourceNotFoundException("Başlıq yüklənməyib");
         }
-        log.info("Title uploaded successfully");
+        log.info("Başlıq uğurla yükləndi");
 
         try {
             if (QuestionType.LISTENING.equals(request.questionType())) {
@@ -75,10 +80,10 @@ public class QuestionServiceImpl implements QuestionService {
                 question.setSoundUrl(soundUrl);
             }
         }catch (NoSuchElementException e){
-            log.error("No sound uploaded");
-            throw new ResourceNotFoundException("No sound uploaded");
+            throw new ResourceNotFoundException("Səs yüklənməyib");
         }
-        log.info("Sound uploaded successfully");
+
+        log.info("Səs uğurla yükləndi");
 
         return finishEdit(titles, variantPictures, numberPictures, request, question, sounds);
     }
@@ -88,7 +93,10 @@ public class QuestionServiceImpl implements QuestionService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             Question question) {
+        log.info("Sual detalları yaradılır");
         QuestionDetails questionDetails = request.questionDetails();
+
+        log.info("Sual detalları xəritələndi");
 
         Map<Character, String> variantToContentMap = null;
         try {
@@ -102,10 +110,9 @@ public class QuestionServiceImpl implements QuestionService {
                                 IMAGE_VARIANT_PATH,
                                 variantPictures);
         }catch (NoSuchElementException e){
-            log.error("Not enough variant pictures uploaded");
-            throw new ResourceNotFoundException("Not enough variant pictures uploaded");
+            throw new ResourceNotFoundException("Kifayət qədər variant şəkilləri yüklənməyib");
         }
-        log.info("Variant pictures uploaded successfully");
+        log.info("Variant şəkillər uğurla yükləndi");
 
         Map<Character, String> numberToContentMap = null;
         try {
@@ -117,10 +124,9 @@ public class QuestionServiceImpl implements QuestionService {
                                 IMAGE_NUMBER_PATH,
                                 numberPictures);
         }catch (NoSuchElementException e){
-            log.error("Not enough number pictures uploaded");
-            throw new ResourceNotFoundException("Not enough number pictures uploaded");
+            throw new ResourceNotFoundException("Yüklənmiş şəkillərin sayı kifayət deyil");
         }
-        log.info("Number pictures uploaded successfully");
+        log.info("Nömrə şəkillər uğurla yükləndi");
 
         question.setQuestionDetails(
                 new QuestionDetails(
@@ -144,7 +150,7 @@ public class QuestionServiceImpl implements QuestionService {
             List<MultipartFile> variantPictures) {
         Map<Character, String> charToContentMap =
                 intCharToContentMap == null ? new HashMap<>() : new HashMap<>(intCharToContentMap);
-        log.info("Character string map created successfully");
+        log.info("Simvol sətir xəritəsi uğurla yaradıldı");
         if (characterIsPictureMap != null && !charToContentMap.isEmpty()) {
             for (Map.Entry<Character, Boolean> characterBooleanEntry : characterIsPictureMap.entrySet()) {
                 if (characterBooleanEntry.getValue()) {
@@ -155,7 +161,7 @@ public class QuestionServiceImpl implements QuestionService {
                 }
             }
         }
-        log.info("Number pictures uploaded successfully");
+        log.info("Xarakter şəkilləri uğurla yükləndi");
         return charToContentMap;
     }
 
@@ -181,7 +187,7 @@ public class QuestionServiceImpl implements QuestionService {
     public Question getQuestionById(UUID id) {
         return questionRepository
                 .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Question not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Sual tapılmadı"));
     }
 
     @Override
@@ -191,6 +197,7 @@ public class QuestionServiceImpl implements QuestionService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
+        log.info("Sual yenilənir");
         Question byId = getQuestionById(updateRequest.id());
         QuestionRequest request = updateRequest.question();
         Question question = QuestionMapper.updateRequestTo(byId, request);
@@ -201,6 +208,7 @@ public class QuestionServiceImpl implements QuestionService {
             titles.removeFirst();
             question.setTitle(titleUrl);
         }
+        log.info("Sualın başlığı hazırdır");
 
         if (QuestionType.LISTENING.equals(request.questionType())) {
             if (question.getSoundUrl() != null)
@@ -209,6 +217,7 @@ public class QuestionServiceImpl implements QuestionService {
             sounds.removeFirst();
             question.setSoundUrl(soundUrl);
         }
+        log.info("Sualın səsi hazırdır");
 
         for (Question byIdQuestion : byId.getQuestions()) {
             delete(byIdQuestion.getId());
@@ -227,14 +236,16 @@ public class QuestionServiceImpl implements QuestionService {
             QuestionRequest request,
             Question question,
             List<MultipartFile> sounds) {
+        log.info("Son mərhələyə keçirildi");
+
         createQuestionDetails(request, variantPictures, numberPictures, question);
 
-        log.info("Question details created successfully");
+        log.info("Sual təfərrüatları uğurla yaradıldı");
         if (request.topicId() != null) {
             Topic topic = topicService.getById(request.topicId());
             question.setTopic(topic);
         }
-        log.info("Topic set successfully");
+        log.info("Mövzu uğurla quruldu");
 
         List<Question> questions = new ArrayList<>();
         if (request.questions() != null)
@@ -243,12 +254,15 @@ public class QuestionServiceImpl implements QuestionService {
             }
         question.setQuestions(questions);
 
-        log.info("Questions added successfully");
-        return questionRepository.save(question);
+        log.info("Suallar uğurla əlavə edildi");
+        Question savedQuestion = questionRepository.save(question);
+        logService.save("Suallar uğurla əlavə edildi", userService.getCurrentUserOrNull());
+        return savedQuestion;
     }
 
     @Override
     public void delete(UUID id) {
+        log.info("Sual silinir");
         Question byId = getQuestionById(id);
         if (byId.isTitlePicture()) fileService.deleteFile(IMAGE_TITLE_PATH, byId.getTitle());
 
@@ -257,9 +271,12 @@ public class QuestionServiceImpl implements QuestionService {
         deleteQuestionPictures(byId);
 
         questionRepository.delete(byId);
+        log.info("Sual silindi");
+        logService.save("Sual silindi", userService.getCurrentUserOrNull());
     }
 
     private void deleteQuestionPictures(Question byId) {
+        log.info("Sual şəkilləri silinir");
         QuestionDetails questionDetails = byId.getQuestionDetails();
         for (Map.Entry<Character, Boolean> characterBooleanEntry :
                 questionDetails.variantToIsPictureMap().entrySet()) {
@@ -278,5 +295,7 @@ public class QuestionServiceImpl implements QuestionService {
                 fileService.deleteFile(IMAGE_NUMBER_PATH, imageUrl);
             }
         }
+
+        log.info("Sual şəkilləri silindi");
     }
 }

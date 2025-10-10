@@ -43,7 +43,7 @@ public class ModuleController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.CREATED,
-                        "Module created successfully",
+                        "Modul uğurla yaradıldı",
                         null));
     }
 
@@ -59,7 +59,7 @@ public class ModuleController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Modules retrieved successfully",
+                        "Modullar uğurla əldə edildi",
                         allModules));
     }
 
@@ -77,7 +77,7 @@ public class ModuleController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Module retrieved successfully",
+                        "Modul uğurla əldə edildi",
                         module));
     }
 
@@ -101,7 +101,7 @@ public class ModuleController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Module updated successfully",
+                        "Modul uğurla yeniləndi",
                         null));
     }
 
@@ -119,7 +119,7 @@ public class ModuleController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.NO_CONTENT,
-                        "Module deleted successfully",
+                        "Modul uğurla silindi",
                         null));
     }
 }

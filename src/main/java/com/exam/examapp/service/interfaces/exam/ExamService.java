@@ -28,6 +28,13 @@ public interface ExamService {
                                         List<UUID> tagIds,
                                         Integer pageNum);
 
+    List<ExamBlockResponse> getAllExamsForAdmin(String name,
+                                        Integer minCost,
+                                        Integer maxCost,
+                                        List<Integer> rating,
+                                        List<UUID> tagIds,
+                                        Integer pageNum);
+
     List<ExamBlockResponse> getMyExams();
 
     List<ExamBlockResponse> getAdminCooperationExams();

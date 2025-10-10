@@ -39,7 +39,7 @@ public class ContactController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Contact updated successfully",
+                        "Kontakt uğurla yeniləndi",
                         null));
     }
 
@@ -53,7 +53,7 @@ public class ContactController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Contact retrieved successfully",
+                        "Kontakt uğurla əldə edildi",
                         contactResponse));
     }
 }

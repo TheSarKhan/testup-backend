@@ -29,7 +29,7 @@ public class ExamCheckController {
     @Operation(summary = "Get exam statistics", description = "Only admins and teachers can access exam statistics")
     public ResponseEntity<ApiResponse<ExamStatistics>> statistics(@RequestParam UUID examId) {
         ExamStatistics examStatistics = examCheckService.getExamStatistics(examId);
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Exam statistics", examStatistics));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "İmtahan statistikası", examStatistics));
     }
 
     @GetMapping("/student-answers")
@@ -38,7 +38,7 @@ public class ExamCheckController {
     @Operation(summary = "Get student answers", description = "Admins and teachers can view student exam answers")
     public ResponseEntity<ApiResponse<StartExamResponse>> getUserExam(@RequestParam UUID studentExamId) {
         StartExamResponse startExamResponse = examCheckService.getUserExam(studentExamId);
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Exam started successfully", startExamResponse));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "İmtahan uğurla başladı", startExamResponse));
     }
 
     @PatchMapping
@@ -49,6 +49,6 @@ public class ExamCheckController {
                                                          @RequestParam UUID questionId,
                                                          @RequestParam AnswerStatus status) {
         examCheckService.checkAnswer(studentExamId, questionId, status);
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Answer checked successfully", null));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Cavab uğurla yoxlanıldı", null));
     }
 }

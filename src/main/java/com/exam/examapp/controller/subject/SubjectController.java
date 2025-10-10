@@ -47,7 +47,7 @@ public class SubjectController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.CREATED,
-                        "Subject created successfully",
+                        "Mövzu uğurla yaradıldı",
                         null));
     }
 
@@ -63,7 +63,7 @@ public class SubjectController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Subjects retrieved successfully",
+                        "Mövzular uğurla əldə edildi",
                         subjects));
     }
 
@@ -82,7 +82,7 @@ public class SubjectController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Subject received successfully",
+                        "Mövzu uğurla alındı",
                         subject));
     }
 
@@ -100,7 +100,7 @@ public class SubjectController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Subject received successfully",
+                        "Mövzu uğurla alındı",
                         subject));
     }
 
@@ -127,7 +127,7 @@ public class SubjectController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Subject updated successfully",
+                        "Mövzu uğurla yeniləndi",
                         null));
     }
 
@@ -145,7 +145,7 @@ public class SubjectController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.NO_CONTENT,
-                        "Subject deleted successfully",
+                        "Mövzu uğurla silindi",
                         null));
     }
 }

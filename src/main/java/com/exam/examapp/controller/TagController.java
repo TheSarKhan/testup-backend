@@ -28,7 +28,7 @@ public class TagController {
   public ResponseEntity<ApiResponse<Void>> createTag(@RequestParam @NotBlank String tagName) {
     tagService.createTag(tagName);
     return ResponseEntity.ok(
-        ApiResponse.build(HttpStatus.CREATED, "Tag created successfully", null));
+        ApiResponse.build(HttpStatus.CREATED, "Teq uğurla yaradıldı", null));
   }
 
   @GetMapping
@@ -36,7 +36,7 @@ public class TagController {
   public ResponseEntity<ApiResponse<List<Tag>>> getAllTags() {
     List<Tag> allTags = tagService.getAllTags();
     return ResponseEntity.ok(
-        ApiResponse.build(HttpStatus.OK, "Tags retrieved successfully", allTags));
+        ApiResponse.build(HttpStatus.OK, "Teqlər uğurla əldə edildi", allTags));
   }
 
   @GetMapping("/name")
@@ -44,7 +44,7 @@ public class TagController {
   public ResponseEntity<ApiResponse<Tag>> getTagsByName(@RequestParam @NotBlank String tagName) {
     Tag tagByName = tagService.getTagByName(tagName);
     return ResponseEntity.ok(
-        ApiResponse.build(HttpStatus.OK, "Tag retrieved successfully", tagByName));
+        ApiResponse.build(HttpStatus.OK, "Teqlər uğurla əldə edildi", tagByName));
   }
 
   @GetMapping("/id")
@@ -52,7 +52,7 @@ public class TagController {
   public ResponseEntity<ApiResponse<Tag>> getTagsById(@RequestParam UUID id) {
     Tag tagById = tagService.getTagById(id);
     return ResponseEntity.ok(
-        ApiResponse.build(HttpStatus.OK, "Tag retrieved successfully", tagById));
+        ApiResponse.build(HttpStatus.OK, "Teqlər uğurla əldə edildi", tagById));
   }
 
   @PutMapping
@@ -62,7 +62,7 @@ public class TagController {
   public ResponseEntity<ApiResponse<Void>> updateTag(
       @RequestParam UUID id, @RequestParam @NotBlank String tagName) {
     tagService.updateTag(id, tagName);
-    return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Tag updated successfully", null));
+    return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Teq uğurla yeniləndi", null));
   }
 
   @DeleteMapping
@@ -72,6 +72,6 @@ public class TagController {
   public ResponseEntity<ApiResponse<Void>> deleteTag(@RequestParam UUID id) {
     tagService.deleteTag(id);
     return ResponseEntity.ok(
-        ApiResponse.build(HttpStatus.NO_CONTENT, "Tag deleted successfully", null));
+        ApiResponse.build(HttpStatus.NO_CONTENT, "Teq uğurla silindi", null));
   }
 }

@@ -28,6 +28,6 @@ public class AboutController {
   public ResponseEntity<ApiResponse<AboutResponse>> get() {
     AboutResponse about = aboutService.getAbout();
     return ResponseEntity.ok(
-        ApiResponse.build(HttpStatus.OK, "About retrieved successfully", about));
+        ApiResponse.build(HttpStatus.OK, "Haqqında uğurla əldə edildi", about));
   }
 }

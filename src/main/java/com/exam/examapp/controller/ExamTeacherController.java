@@ -51,6 +51,6 @@ public class ExamTeacherController {
                                                                @RequestParam UUID teacherId) {
         examTeacherService.removeExamTeacher(examId, teacherId);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Exam Teacher removed successfully", null));
+                ApiResponse.build(HttpStatus.OK, "İmtahan Müəllim uğurla çıxarıldı", null));
     }
 }

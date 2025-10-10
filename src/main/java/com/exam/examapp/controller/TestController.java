@@ -15,6 +15,6 @@ public class TestController {
 
     @GetMapping("/hello")
     public ResponseEntity<ApiResponse<String>> hello() {
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Test work", "Hello World"));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Test işi", "Salam Dünya"));
     }
 }

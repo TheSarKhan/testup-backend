@@ -42,7 +42,7 @@ public class SubjectStructureController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.CREATED,
-                        "Subject structure created successfully",
+                        "Mövzu strukturu uğurla yaradıldı",
                         null));
     }
 
@@ -58,7 +58,7 @@ public class SubjectStructureController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Subject structures received successfully",
+                        "Mövzu strukturları uğurla qəbul edildi",
                         structures));
     }
 
@@ -75,7 +75,7 @@ public class SubjectStructureController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Subject structures received successfully",
+                        "Mövzu strukturları uğurla qəbul edildi",
                         structures));
     }
 
@@ -91,7 +91,7 @@ public class SubjectStructureController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Subject structures received successfully",
+                        "Mövzu strukturları uğurla qəbul edildi",
                         structures));
     }
 
@@ -108,7 +108,7 @@ public class SubjectStructureController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Subject structure received successfully",
+                        "Mövzu strukturu uğurla alındı",
                         subjectStructure));
     }
 
@@ -126,7 +126,7 @@ public class SubjectStructureController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Subject structure updated successfully",
+                        "Mövzu strukturu uğurla yeniləndi",
                         null));
     }
 
@@ -137,13 +137,12 @@ public class SubjectStructureController {
             summary = "Delete a subject structure",
             description = "Allows an **ADMIN** to delete a subject structure by its unique ID."
     )
-    public ResponseEntity<ApiResponse<Void>> delete(@RequestParam
-                                                    UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@RequestParam UUID id) {
         subjectStructureService.delete(id);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.NO_CONTENT,
-                        "Subject structure deleted successfully",
+                        "Mövzu strukturu uğurla silindi",
                         null));
     }
 }

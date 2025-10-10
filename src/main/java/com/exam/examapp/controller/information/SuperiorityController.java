@@ -44,7 +44,7 @@ public class SuperiorityController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.CREATED,
-                        "Superiority created successfully.",
+                        "Üstünlük uğurla yaradıldı",
                         null));
     }
 
@@ -58,7 +58,7 @@ public class SuperiorityController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Superiority retrieved successfully",
+                        "Üstünlük uğurla əldə edildi",
                         allSuperiority));
     }
 
@@ -74,7 +74,7 @@ public class SuperiorityController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Superiority retrieved successfully",
+                        "Üstünlük uğurla əldə edildi",
                         allSuperiority));
     }
 
@@ -90,7 +90,7 @@ public class SuperiorityController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Superiority retrieved successfully",
+                        "Üstünlük uğurla əldə edildi",
                         superiority));
     }
 
@@ -110,7 +110,7 @@ public class SuperiorityController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Superiority updated successfully",
+                        "Üstünlük uğurla yeniləndi",
                         null));
     }
 
@@ -128,7 +128,7 @@ public class SuperiorityController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.NO_CONTENT,
-                        "Superiority deleted successfully",
+                        "Üstünlük uğurla silindi",
                         null));
     }
 }

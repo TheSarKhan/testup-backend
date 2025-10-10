@@ -45,7 +45,7 @@ public class AdvertisementController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.CREATED,
-                        "Advertisement created successfully.",
+                        "Reklam uğurla yaradıldı",
                         null));
     }
 
@@ -59,7 +59,7 @@ public class AdvertisementController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Advertisements received successfully",
+                        "Reklamlar uğurla qəbul edildi",
                         allAdvertisements));
     }
 
@@ -75,7 +75,7 @@ public class AdvertisementController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Advertisement received successfully",
+                        "Reklamlar uğurla qəbul edildi",
                         advertisement));
     }
 
@@ -92,7 +92,7 @@ public class AdvertisementController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Advertisement received successfully",
+                        "Reklamlar uğurla qəbul edildi",
                         advertisement));
     }
 
@@ -112,7 +112,7 @@ public class AdvertisementController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Advertisement updated successfully",
+                        "Reklamlar uğurla qəbul edildi",
                         null));
     }
 
@@ -130,7 +130,7 @@ public class AdvertisementController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.NO_CONTENT,
-                        "Advertisement deleted successfully",
+                        "Reklamlar uğurla qəbul edildi",
                         null));
     }
 }

@@ -6,11 +6,13 @@ import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.exam.ExamTeacher;
 import com.exam.examapp.model.subject.Subject;
 import com.exam.examapp.repository.ExamTeacherRepository;
+import com.exam.examapp.service.interfaces.LogService;
+import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.exam.ExamService;
 import com.exam.examapp.service.interfaces.exam.ExamTeacherService;
-import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.subject.SubjectService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExamTeacherServiceImpl implements ExamTeacherService {
@@ -29,15 +32,18 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
 
     private final SubjectService subjectService;
 
+    private final LogService logService;
+
     @Override
     public String addExamTeacher(AddExamTeacherRequest request) {
+        log.info("İmtahana müəllim əlavə olunur");
         StringBuilder sb = new StringBuilder();
         Exam exam = examService.getById(request.examId());
         List<ExamTeacher> examTeachers = new ArrayList<>();
         for (Map.Entry<String, List<UUID>> emailListEntry : request.teacherEmailToSubjectIds().entrySet()) {
             if (!userService.existsByEmail(emailListEntry.getKey())) {
-                sb.append("Teacher with email ").append(emailListEntry.getKey())
-                        .append(" does not exist.").append("\n");
+                sb.append("E-poçt ilə müəllim").append(emailListEntry.getKey())
+                        .append(" mövcud deyil").append("\n");
                 continue;
             }
 
@@ -48,12 +54,16 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
         }
         examTeacherRepository.saveAll(examTeachers);
 
-        return sb.isEmpty() ? sb.toString() : "Teacher(s) added successfully.";
+        log.info(sb.isEmpty() ? sb.toString() : "Müəllim(lər) uğurla əlavə edildi.");
+        return sb.isEmpty() ? sb.toString() : "Müəllim(lər) uğurla əlavə edildi.";
     }
 
     @Override
     public void removeExamTeacher(UUID examId, UUID teacherId) {
+        log.info("Müəllim imtahandan kənarlaşdırılır");
         examTeacherRepository.deleteByTeacherAndExam(
                 userService.getUserById(teacherId), examService.getById(examId));
+        log.info("Müəllim imtahandan kənarlaşdırıldı:" + teacherId);
+        logService.save("Müəllim imtahandan kənarlaşdırıldı:" + teacherId, userService.getCurrentUserOrNull());
     }
 }

@@ -50,7 +50,7 @@ public class ExamController {
 
         examService.createExam(request, titles, variantPictures, numberPictures, sounds);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.build(HttpStatus.CREATED, "Exam created successfully", null));
+                .body(ApiResponse.build(HttpStatus.CREATED, "İmtahan uğurla yaradıldı", null));
     }
 
     @GetMapping
@@ -63,7 +63,7 @@ public class ExamController {
     public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getMyExams() {
         List<ExamBlockResponse> myExams = examService.getMyExams();
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "My Exams retrieved successfully", myExams));
+                ApiResponse.build(HttpStatus.OK, "İmtahanlarım uğurla əldə edildi", myExams));
     }
 
     @GetMapping("/all")
@@ -81,20 +81,20 @@ public class ExamController {
     ) {
         List<ExamBlockResponse> myExams = examService.getAllExams(name, minCost, maxCost, rating, tagIds, pageNum);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Exams retrieved successfully", myExams));
+                ApiResponse.build(HttpStatus.OK, "İmtahanlar uğurla əldə edildi", myExams));
     }
 
     @GetMapping("/tags")
     public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getTags(@RequestParam List<UUID> tags) {
         List<ExamBlockResponse> examByTag = examService.getExamByTag(tags);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Exams retrieved successfully", examByTag));
+                ApiResponse.build(HttpStatus.OK, "İmtahanlar uğurla əldə edildi", examByTag));
     }
 
     @GetMapping("/last-created")
     public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getLastCreatedExam() {
         List<ExamBlockResponse> lastCreatedExams = examService.getLastCreatedExams();
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Exams retrieved successfully", lastCreatedExams));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "İmtahanlar uğurla əldə edildi", lastCreatedExams));
     }
 
     @GetMapping("/via-admin")
@@ -106,7 +106,7 @@ public class ExamController {
     public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getViaAdmin() {
         List<ExamBlockResponse> adminCooperationExams = examService.getAdminCooperationExams();
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Admin Exams retrieved successfully", adminCooperationExams));
+                ApiResponse.build(HttpStatus.OK, "Admin İmtahanları uğurla əldə edildi", adminCooperationExams));
     }
 
     @GetMapping("/detailed/id")
@@ -117,7 +117,7 @@ public class ExamController {
             description = "Retrieve exam details by exam UUID.")
     public ResponseEntity<ApiResponse<ExamDetailedResponse>> getDetailedExamById(@RequestParam UUID id) {
         ExamDetailedResponse exam = examService.getExamDetailedById(id);
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Exam retrieved successfully", exam));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "İmtahan uğurla alındı", exam));
     }
 
     @GetMapping("/id")
@@ -128,7 +128,7 @@ public class ExamController {
             description = "Retrieve full exam details by exam UUID.")
     public ResponseEntity<ApiResponse<ExamResponse>> getExamById(@RequestParam UUID id) {
         ExamResponse exam = examService.getExamById(id);
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Exam retrieved successfully", exam));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "İmtahan uğurla alındı", exam));
     }
 
     @GetMapping("/get-code")
@@ -141,7 +141,7 @@ public class ExamController {
     public ResponseEntity<ApiResponse<String>> getExamAccessCode(@RequestParam UUID id) {
         Integer examCode = examService.getExamCode(id);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Successfully generated code", "K" + examCode));
+                ApiResponse.build(HttpStatus.OK, "Kod uğurla yaradıldı", "K" + examCode));
     }
 
     @GetMapping("/get-link")
@@ -154,7 +154,7 @@ public class ExamController {
     public ResponseEntity<ApiResponse<String>> getExamAccessLink(@RequestParam UUID id) {
         String link = examService.getExamStartLink(id);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Successfully received link", link));
+                ApiResponse.build(HttpStatus.OK, "Link uğurla alındı", link));
     }
 
     @GetMapping("/start/code")
@@ -167,7 +167,7 @@ public class ExamController {
                                                                     @RequestParam String code) {
         StartExamResponse startExamResponse = examService.startExamViaCode(studentName, code);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Exam started successfully", startExamResponse));
+                ApiResponse.build(HttpStatus.OK, "İmtahan uğurla başladı", startExamResponse));
     }
 
     @GetMapping("/start")
@@ -180,7 +180,7 @@ public class ExamController {
                                                                     @RequestParam UUID id) {
         StartExamResponse startExamResponse = examService.startExamViaId(studentName, id);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Exam started successfully", startExamResponse));
+                ApiResponse.build(HttpStatus.OK, "İmtahan uğurla başladı", startExamResponse));
     }
 
     @PatchMapping("/finish")
@@ -192,7 +192,7 @@ public class ExamController {
     public ResponseEntity<ApiResponse<ResultStatisticResponse>> finishExam(@RequestParam UUID studentExamId) {
         ResultStatisticResponse resultStatisticResponse = examService.finishExam(studentExamId);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Exam finished successfully", resultStatisticResponse));
+                ApiResponse.build(HttpStatus.OK, "İmtahan uğurla başa çatdı", resultStatisticResponse));
     }
 
     @GetMapping("/result")
@@ -203,7 +203,7 @@ public class ExamController {
     public ResponseEntity<ApiResponse<ResultStatisticResponse>> getResult(@RequestParam UUID studentExamId) {
         ResultStatisticResponse resultStatistic = examService.getResultStatistic(studentExamId);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Exam result retrieved successfully", resultStatistic));
+                ApiResponse.build(HttpStatus.OK, "İmtahan nəticəsi uğurla əldə edildi", resultStatistic));
     }
 
     @PatchMapping("/publish")
@@ -212,7 +212,7 @@ public class ExamController {
     public ResponseEntity<ApiResponse<Void>> publish(@RequestParam UUID id) {
         examService.publishExam(id);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Exam published successfully", null));
+                ApiResponse.build(HttpStatus.OK, "İmtahan uğurla yayımlandı", null));
     }
 
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -230,7 +230,7 @@ public class ExamController {
             @RequestPart(required = false) List<MultipartFile> numberPictures,
             @RequestPart(required = false) List<MultipartFile> sounds) {
         examService.updateExam(request, titles, variantPictures, numberPictures, sounds);
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Exam updated successfully", null));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "İmtahan uğurla yeniləndi", null));
     }
 
     @DeleteMapping
@@ -243,6 +243,6 @@ public class ExamController {
     public ResponseEntity<ApiResponse<Void>> deleteExam(@RequestParam UUID id) {
         examService.deleteExam(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                .body(ApiResponse.build(HttpStatus.NO_CONTENT, "Exam deleted successfully", null));
+                .body(ApiResponse.build(HttpStatus.NO_CONTENT, "İmtahan uğurla silindi", null));
     }
 }

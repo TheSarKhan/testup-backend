@@ -7,6 +7,7 @@ import com.exam.examapp.model.enums.AnswerStatus;
 import com.exam.examapp.model.exam.StudentExam;
 import com.exam.examapp.repository.StudentExamRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExamResultService {
@@ -26,6 +28,7 @@ public class ExamResultService {
     private String baseUrl;
 
     public void calculateResult(StudentExam studentExam) {
+        log.info("İmtahan nəticələri hesablanır");
         List<Integer> correctAndWrongCounts = new ArrayList<>(List.of(0, 0, 0, 0, 0, 0, 0, 0));
 
         Map<UUID, AnswerStatus> answerStatusMap = answerService.checkAnswers(studentExam, correctAndWrongCounts);
@@ -37,11 +40,13 @@ public class ExamResultService {
         updateStatistics(studentExam, answerStatusMap, correctAndWrongCounts);
 
         studentExamRepository.save(studentExam);
+        log.info("İmtahan nəticələri hesablandı");
     }
 
     private void updateStatistics(StudentExam studentExam,
                                   Map<UUID, AnswerStatus> answerStatusMap,
                                   List<Integer> correctAndWrongCounts) {
+        log.info("Statistika yenilənir");
         int correctCount = correctAndWrongCounts.stream().limit(4).mapToInt(Integer::intValue).sum();
         int wrongCount = correctAndWrongCounts.stream().skip(4).mapToInt(Integer::intValue).sum();
 
@@ -60,16 +65,18 @@ public class ExamResultService {
         Map<String, Map<Integer, AnswerStatus>> subjectToQuestionAnswerStatusMap =
                 answerService.mapStudentDataToSubjects(studentExam, answerStatusMap);
         studentExam.setSubjectToQuestionToAnswerStatus(subjectToQuestionAnswerStatusMap);
+        log.info("Statistika yeniləndi");
     }
 
     public ResultStatisticResponse getResultStatisticResponse(UUID studentExamId, StudentExam studentExam) {
+        log.info("Imtahan statistikası hazırlanır");
         long secondsPassed = studentExam.getEndTime().getEpochSecond() - studentExam.getStartTime().getEpochSecond();
 
         ExamResponse examResponse = ExamMapper.toResponse(studentExam.getExam());
 
         String shareLink = baseUrl + "/api/v1/exam/result?studentExamId=" + studentExamId;
 
-        return new ResultStatisticResponse(
+        ResultStatisticResponse resultStatisticResponse = new ResultStatisticResponse(
                 studentExam.getNumberOfCorrectAnswers(),
                 studentExam.getNumberOfWrongAnswers(),
                 studentExam.getNumberOfNotAnsweredQuestions(),
@@ -84,5 +91,7 @@ public class ExamResultService {
                 shareLink,
                 studentExam.getExam().getExplanationVideoUrl()
         );
+        log.info("Imtahan statistikası hazırlandı");
+        return resultStatisticResponse;
     }
 }

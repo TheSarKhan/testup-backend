@@ -12,6 +12,7 @@ import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.repository.PaymentResultRepository;
+import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.PackService;
 import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.exam.ExamService;
@@ -46,6 +47,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentResultRepository paymentResultRepository;
 
+    private final LogService logService;
+
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${payment.api.approve}")
@@ -66,12 +69,13 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public String initPayment(PaymentRequest request) {
+        log.info("Ödəniş yaradılır");
         String url = "https://api.payriff.com/api/v2/invoices";
 
         User user = userService.getCurrentUser();
 
         UUID productId = request.productId();
-        String description = "Admin try to test";
+        String description = "Admin sınamağa çalışır";
 
         if (Role.TEACHER.equals(user.getRole())) {
             Pack pack = packService.getPackById(productId);
@@ -93,7 +97,7 @@ public class PaymentServiceImpl implements PaymentService {
         body.setApproveURL(approveUrl);
         body.setCancelURL(cancelUrl);
         body.setDeclineURL(declineUrl);
-        body.setCustomMessage("Please check your payment result for submit app your payment.");
+        body.setCustomMessage("Ödənişinizi proqrama təqdim etmək üçün ödəniş nəticəsini yoxlayın.");
         body.setExpireDate(LocalDateTime.now().plusHours(1).format(DateTimeFormatter.ISO_DATE_TIME));
         body.setInstallmentPeriod(0);
         body.setInstallmentProductType("BIRKART");
@@ -130,22 +134,23 @@ public class PaymentServiceImpl implements PaymentService {
                     .currency(request.currency()).invoiceUuid(payload.invoiceUuid())
                     .uuid(payload.uuid()).build());
 
-            log.info("Payment info. Email : {} , Amount : {} , Currency : {} , Invoice UUID : {}",
+            log.info("Ödəniş məlumatı. Email : {} , Məbləğ : {} , Valyuta : {} , Invoice UUID : {}",
                     user.getEmail(), request.amount(), request.currency(), payload.invoiceUuid());
             return payload.paymentUrl();
         } else {
-            throw new RuntimeException("Failed to create payment: " +
-                    (response.getBody() != null ? response.getBody().message() : "Unknown error"));
+            throw new RuntimeException("Ödəniş yaratmaq alınmadı: " +
+                    (response.getBody() != null ? response.getBody().message() : "Naməlum xəta"));
         }
     }
 
     @Override
     @Transactional
     public void updateResults(String uuid) {
+        log.info("Ödəniş yenilənir");
         PaymentInvoiceResponse response = getInvoice(uuid);
 
         PaymentResult result = paymentResultRepository.getByInvoiceUuid(uuid).orElseThrow(() ->
-                new ResourceNotFoundException("Payment result not found."));
+                new ResourceNotFoundException("Ödəniş nəticəsi tapılmadı"));
 
         String status = response.payload().invoiceStatus();
         result.setStatus(status);
@@ -165,6 +170,8 @@ public class PaymentServiceImpl implements PaymentService {
                 userService.save(user);
             }
         }
+        log.info("Ödəniş yeniləndi");
+        logService.save("Ödəniş yeniləndi", userService.getCurrentUserOrNull());
     }
 
     public PaymentInvoiceResponse getInvoice(String uuid) {

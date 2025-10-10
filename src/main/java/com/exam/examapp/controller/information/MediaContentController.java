@@ -45,7 +45,7 @@ public class MediaContentController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.CREATED,
-                        "Media Content Created Successfully",
+                        "Media Məzmun Uğurla Yaradıldı",
                         null));
     }
 
@@ -59,7 +59,7 @@ public class MediaContentController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Media Content Retrieved Successfully",
+                        "Media Məzmunu Uğurla Alındı",
                         allMediaContent));
     }
 
@@ -76,7 +76,7 @@ public class MediaContentController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Media Content Retrieved Successfully",
+                        "Media Məzmunu Uğurla Alındı",
                         mediaContents));
     }
 
@@ -92,7 +92,7 @@ public class MediaContentController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Media Content Retrieved Successfully",
+                        "Media Məzmunu Uğurla Alındı",
                         mediaContent));
     }
 
@@ -112,7 +112,7 @@ public class MediaContentController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Media Content Updated Successfully",
+                        "Media Məzmun Uğurla Yeniləndi",
                         null));
     }
 
@@ -130,7 +130,7 @@ public class MediaContentController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.NO_CONTENT,
-                        "Media Content Deleted Successfully",
+                        "Media Məzmunu Uğurla Silindi",
                         null));
     }
 }

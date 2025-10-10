@@ -25,20 +25,14 @@ import com.exam.examapp.repository.ExamRepository;
 import com.exam.examapp.repository.ExamTeacherRepository;
 import com.exam.examapp.repository.StudentExamRepository;
 import com.exam.examapp.repository.subject.SubjectStructureQuestionRepository;
-import com.exam.examapp.service.impl.exam.helper.CreateExamService;
-import com.exam.examapp.service.impl.exam.helper.ExamResultService;
-import com.exam.examapp.service.impl.exam.helper.ExamValidationService;
-import com.exam.examapp.service.impl.exam.helper.StartExamService;
+import com.exam.examapp.service.impl.exam.helper.*;
 import com.exam.examapp.service.interfaces.CacheService;
+import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.TagService;
 import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.exam.ExamService;
 import com.exam.examapp.service.interfaces.question.QuestionService;
 import com.exam.examapp.service.interfaces.subject.SubjectStructureService;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +44,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,19 +55,34 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class ExamServiceImpl implements ExamService {
     private static final String EXAM_CODE_PREFIX = "exam_code_";
+
     private static final String EXAM_START_LINK_PREFIX = "/api/v1/exam/start?id=";
+
     private final ExamRepository examRepository;
+
     private final QuestionService questionService;
+
     private final SubjectStructureService subjectStructureService;
+
     private final UserService userService;
+
     private final CacheService cacheService;
+
     private final StudentExamRepository studentExamRepository;
+
     private final SubjectStructureQuestionRepository subjectStructureQuestionRepository;
+
     private final ExamTeacherRepository examTeacherRepository;
+
     private final ExamResultService examResultService;
+
     private final StartExamService startExamService;
+
     private final CreateExamService createExamService;
+
     private final TagService tagService;
+
+    private final LogService logService;
 
     @Value("${app.base-url}")
     private String baseUrl;
@@ -87,9 +95,10 @@ public class ExamServiceImpl implements ExamService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
-        log.info("Exam creation started.");
+        log.info("İmtahan yaradılır");
         createExamService.createExam(request, titles, variantPictures, numberPictures, sounds);
-        log.info("Exam creation finished.");
+        log.info("İmtahanın yaradılması tamamlandı");
+        logService.save("İmtahanın yaradılması tamamlandı", userService.getCurrentUserOrNull());
     }
 
     @Override
@@ -99,18 +108,7 @@ public class ExamServiceImpl implements ExamService {
                                                List<Integer> rating,
                                                List<UUID> tagIds,
                                                Integer pageNum) {
-        Specification<Exam> specification = Specification.unrestricted();
-        specification = specification.and(hasName(name));
-        specification = specification.and(hasCostBetween(minCost, maxCost));
-        specification = specification.and(hasRatingInRange(rating));
-        specification = specification.and(hasTags(tagIds));
-
-        pageNum = (pageNum != null && pageNum > 0) ? pageNum - 1 : 0;
-        int pageSize = 10;
-
-        Pageable pageable = PageRequest.of(pageNum, pageSize);
-
-        Page<Exam> page = examRepository.findAll(specification, pageable);
+        Page<Exam> page = getExamPage(name, minCost, maxCost, rating, tagIds, pageNum);
 
         return page.getContent()
                 .stream()
@@ -120,82 +118,24 @@ public class ExamServiceImpl implements ExamService {
                 .toList();
     }
 
-    private Specification<Exam> hasTags(List<UUID> tagIds) {
-        return (root, query, criteriaBuilder) -> {
-            if (tagIds == null || tagIds.isEmpty()) {
-                return criteriaBuilder.conjunction();
-            }
+    @Override
+    public List<ExamBlockResponse> getAllExamsForAdmin(String name,
+                                                       Integer minCost,
+                                                       Integer maxCost,
+                                                       List<Integer> rating,
+                                                       List<UUID> tagIds,
+                                                       Integer pageNum) {
+        Page<Exam> page = getExamPage(name, minCost, maxCost, rating, tagIds, pageNum);
 
-            Join<Object, Object> tagsJoin = root.join("tags");
-
-            CriteriaBuilder.In<UUID> inClause = criteriaBuilder.in(tagsJoin.get("id"));
-            for (UUID tagId : tagIds) {
-                inClause.value(tagId);
-            }
-
-            assert query != null;
-            query.distinct(true);
-
-            return inClause;
-        };
-    }
-
-
-    private Specification<Exam> hasRatingInRange(List<Integer> ratings) {
-        return (root, query, criteriaBuilder) -> {
-            if (ratings == null || ratings.isEmpty()) {
-                return criteriaBuilder.conjunction();
-            }
-
-            Path<Double> ratingPath = root.get("rating");
-            List<Predicate> predicates = new ArrayList<>();
-
-            for (Integer r : ratings) {
-                double lower = r;
-                double upper = (r == 5) ? 5 : r + 1;
-
-                if (r == 5) {
-                    predicates.add(criteriaBuilder.equal(ratingPath, 5.0));
-                } else {
-                    predicates.add(criteriaBuilder.and(
-                            criteriaBuilder.greaterThanOrEqualTo(ratingPath, lower),
-                            criteriaBuilder.lessThan(ratingPath, upper)
-                    ));
-                }
-            }
-            return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
-        };
-    }
-
-    private Specification<Exam> hasCostBetween(Integer minCost, Integer maxCost) {
-        return (root, query, criteriaBuilder) -> {
-            Path<BigDecimal> costPath = root.get("cost");
-
-            List<Predicate> predicates = new ArrayList<>();
-
-            if (minCost != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(costPath, BigDecimal.valueOf(minCost)));
-            }
-
-            if (maxCost != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(costPath, BigDecimal.valueOf(maxCost)));
-            }
-
-            return predicates.isEmpty()
-                    ? criteriaBuilder.conjunction()
-                    : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        };
-    }
-
-    private Specification<Exam> hasName(String name) {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("examTitle")), "%" + name + "%");
+        return page.getContent()
+                .stream()
+                .map(examToResponse(userService.getCurrentUserOrNull()))
+                .toList();
     }
 
     @Override
     @Transactional
     public List<ExamBlockResponse> getMyExams() {
-        log.info("Getting my exams.");
         User user = userService.getCurrentUser();
         if (Role.TEACHER.equals(user.getRole()) || Role.ADMIN.equals(user.getRole())) {
             return examRepository.getByTeacher(user).stream()
@@ -214,7 +154,6 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<ExamBlockResponse> getAdminCooperationExams() {
-        log.info("Getting admin cooperation exams.");
         User user = userService.getCurrentUser();
         return examTeacherRepository.getByTeacher(user)
                 .stream()
@@ -225,7 +164,6 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<ExamBlockResponse> getExamByTag(List<UUID> tagIds) {
-        log.info("Getting exams by tag ids: {}", tagIds);
         Specification<Exam> specification = Specification.unrestricted();
         for (UUID tagId : tagIds) {
             specification.or(ExamSpecification.hasTag(tagId));
@@ -240,7 +178,6 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<ExamBlockResponse> getLastCreatedExams() {
-        log.info("Getting last created exams.");
         User user = userService.getCurrentUserOrNull();
         return examRepository.getLastCreated()
                 .stream()
@@ -251,7 +188,6 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public ExamDetailedResponse getExamDetailedById(UUID id) {
-        log.info("Getting exam detailed by id: {}", id);
         Exam exam = getById(id);
         User user = userService.getCurrentUserOrNull();
         if (user != null) {
@@ -269,16 +205,14 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public ExamResponse getExamById(UUID id) {
-        log.info("Getting exam response by id: {}", id);
         return ExamMapper.toResponse(getById(id));
     }
 
     @Override
     public Integer getExamCode(UUID id) {
-        log.info("Getting exam code for exam id: {}", id);
         Exam exam = getById(id);
         if (!exam.isHidden())
-            throw new BadRequestException("Exam is not hidden. You cannot get the exam code.");
+            throw new BadRequestException("İmtahan gizli deyil. İmtahan kodunu əldə edə bilməzsiniz");
         int code = (int) (Math.random() * (9_999_999 - 1_000_000 + 1)) + 1_000_000;
         cacheService.saveContent(EXAM_CODE_PREFIX, String.valueOf(code), id.toString(), (long) 86_400_000);
         return code;
@@ -286,7 +220,6 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public String getExamStartLink(UUID id) {
-        log.info("Getting exam start link for exam id: {}", id);
         Exam exam = getById(id);
         return baseUrl + EXAM_START_LINK_PREFIX + exam.getStartId();
     }
@@ -294,25 +227,31 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public StartExamResponse startExamViaCode(String studentName, String examCode) {
-        log.info("Starting exam via code: {}", examCode);
+        log.info("Kod vasitəsilə imtahan başlayır: {}", examCode);
         String examId = cacheService.getContent(EXAM_CODE_PREFIX, examCode.substring(1));
         Exam exam = getById(UUID.fromString(examId));
-        return startExamService.startExam(studentName, exam);
+        StartExamResponse result = startExamService.startExam(studentName, exam);
+        log.info("İmtahan başladı");
+        logService.save("İmtahan başladı", userService.getCurrentUserOrNull());
+        return result;
     }
 
     @Override
     @Transactional
     public StartExamResponse startExamViaId(String studentName, UUID id) {
-        log.info("Starting exam via id: {}", id);
+        log.info("Id vasitəsilə imtahan başlayır : {}", id);
         Exam exam = examRepository.getExamByStartId(id).orElseThrow(() ->
-                new ResourceNotFoundException("Exam is not found."));
-        return startExamService.startExam(studentName, exam);
+                new ResourceNotFoundException("İmtahan tapılmadı"));
+        StartExamResponse result = startExamService.startExam(studentName, exam);
+        log.info("İmtahan başladı");
+        logService.save("İmtahan başladı", userService.getCurrentUserOrNull());
+        return result;
     }
 
     @Override
     @Transactional
     public ResultStatisticResponse finishExam(UUID studentExamId) {
-        log.info("Finishing exam with id: {}", studentExamId);
+        log.info("İmtahan id ilə bitirilir: {}", studentExamId);
         examResultService.calculateResult(findStudentExamById(studentExamId));
 
         StudentExam studentExam = findStudentExamById(studentExamId);
@@ -323,12 +262,13 @@ public class ExamServiceImpl implements ExamService {
         studentExam.setEndTime(Instant.now());
         studentExamRepository.save(studentExam);
 
+        log.info("İmtahan bitirildi");
         return examResultService.getResultStatisticResponse(studentExamId, studentExam);
     }
 
     @Override
     public ResultStatisticResponse getResultStatistic(UUID studentExamId) {
-        log.info("Getting result statistic for exam with id: {}", studentExamId);
+        log.info("İmtahan üçün id ilə nəticə statistikasının alınması: {}", studentExamId);
         StudentExam studentExam = findStudentExamById(studentExamId);
 
         return examResultService.getResultStatisticResponse(studentExamId, studentExam);
@@ -336,7 +276,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public void publishExam(UUID id) {
-        log.info("Publishing exam with id: {}", id);
+        log.info("İmtahan id ilə nəşr olunur {}", id);
         Exam exam = getById(id);
         exam.setReadyForSale(true);
         examRepository.save(exam);
@@ -350,13 +290,15 @@ public class ExamServiceImpl implements ExamService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
-        log.info("Updating exam with id: {}", request.id());
+        log.info("İmtahan id ilə yenilənir: {}", request.id());
         Exam exam = getById(request.id());
 
         ExamValidationService.validationForUpdate(request, userService.getCurrentUser());
 
+        log.info("Imtahan validasiyadan keçdi");
         ExamMapper.update(exam, request);
 
+        log.info("Imtahan update üçün xəritələndi edildi");
         List<Tag> tags = new ArrayList<>();
         tags.add(tagService.getTagById(request.headerTagId()));
         if (request.otherTagIds() != null) {
@@ -364,6 +306,8 @@ public class ExamServiceImpl implements ExamService {
         }
 
         exam.setTags(tags);
+
+        log.info("Etiketlər hazırlanmışdır");
 
         var subjectStructureQuestionsUpdateRequests = request.subjectStructures();
         List<SubjectStructureQuestion> subjectStructureQuestions = new ArrayList<>();
@@ -402,12 +346,14 @@ public class ExamServiceImpl implements ExamService {
         }
         exam.setSubjectStructureQuestions(subjectStructureQuestions);
         examRepository.save(exam);
-        log.info("Exam updated.");
+        log.info("İmtahan yeniləndi");
+        logService.save("İmtahan yeniləndi", userService.getCurrentUserOrNull());
     }
 
     @Override
+    @Transactional
     public void deleteExam(UUID id) {
-        log.info("Deleting exam with id: {}", id);
+        log.info("İmtahan id ilə silinir: {}", id);
         Exam exam = getById(id);
         List<SubjectStructureQuestion> subjectStructureQuestions = exam.getSubjectStructureQuestions();
         for (SubjectStructureQuestion subjectStructureQuestion : subjectStructureQuestions) {
@@ -419,20 +365,21 @@ public class ExamServiceImpl implements ExamService {
             subjectStructureQuestionRepository.deleteById(subjectStructureQuestion.getId());
         }
         examRepository.deleteById(id);
-        log.info("Exam deleted.");
+        log.info("İmtahan silindi");
+        logService.save("İmtahan silindi", userService.getCurrentUserOrNull());
     }
 
     @Override
     public Exam getById(UUID id) {
-        log.info("Getting exam by id: {}", id);
+        log.info("İd ilə imtahan verilir: {}", id);
         return examRepository
                 .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Exam not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("İmtahan tapılmadı"));
     }
 
     private StudentExam findStudentExamById(UUID studentExamId) {
         return studentExamRepository.findById(studentExamId).orElseThrow(() ->
-                new ResourceNotFoundException(String.format("Student exam with id %s not found.", studentExamId)));
+                new ResourceNotFoundException(String.format("%s id ilə tələbə imtahanı tapılmadı.", studentExamId)));
     }
 
     private Function<Exam, ExamBlockResponse> examToResponse(User user) {
@@ -448,5 +395,20 @@ public class ExamServiceImpl implements ExamService {
             }
             return ExamMapper.toBlockResponse(exam, null);
         };
+    }
+
+    private Page<Exam> getExamPage(String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, Integer pageNum) {
+        Specification<Exam> specification = Specification.unrestricted();
+        specification = specification.and(ExamSpecification.hasName(name));
+        specification = specification.and(ExamSpecification.hasCostBetween(minCost, maxCost));
+        specification = specification.and(ExamSpecification.hasRatingInRange(rating));
+        specification = specification.and(ExamSpecification.hasTags(tagIds));
+
+        pageNum = (pageNum != null && pageNum > 0) ? pageNum - 1 : 0;
+        int pageSize = 10;
+
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+
+        return examRepository.findAll(specification, pageable);
     }
 }

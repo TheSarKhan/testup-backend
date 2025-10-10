@@ -26,6 +26,6 @@ public class HomeController {
     )
     public ResponseEntity<ApiResponse<HomeResponse>> home() {
         HomeResponse homeInfo = homeService.getHomeInfo();
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Home info received successfully", homeInfo));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Ev məlumatı uğurla alındı", homeInfo));
     }
 }

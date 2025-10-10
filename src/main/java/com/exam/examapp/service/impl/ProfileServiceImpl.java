@@ -10,12 +10,15 @@ import com.exam.examapp.model.User;
 import com.exam.examapp.security.dto.response.TokenResponse;
 import com.exam.examapp.security.service.impl.JwtService;
 import com.exam.examapp.service.interfaces.FileService;
+import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.ProfileService;
 import com.exam.examapp.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
@@ -26,6 +29,8 @@ public class ProfileServiceImpl implements ProfileService {
     private final JwtService jwtService;
 
     private final FileService fileService;
+
+    private final LogService logService;
 
     @Override
     public ProfileInfoResponse getProfileInfo() {
@@ -46,6 +51,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public TokenResponse updateProfileInfo(ProfileUpdateRequest request) {
+        log.info("Profil yenilənir");
         User user = userService.getCurrentUser();
         user.setFullName(request.fullName());
         user.setPhoneNumber(request.phoneNumber());
@@ -53,7 +59,7 @@ public class ProfileServiceImpl implements ProfileService {
         String email = request.email();
         if (userService.existsByEmail(email) &&
                 !userService.getByEmail(email).getId().equals(user.getId()))
-            throw new BadRequestException("Email already exists");
+            throw new BadRequestException("E-poçt artıq mövcuddur");
 
         user.setEmail(email);
 
@@ -61,15 +67,19 @@ public class ProfileServiceImpl implements ProfileService {
 
         User newUser = userService.getByEmail(email);
 
-        return new TokenResponse(
+        TokenResponse tokenResponse = new TokenResponse(
                 jwtService.generateAccessToken(email),
                 jwtService.generateRefreshToken(email),
                 newUser.getRole(),
                 newUser.getPack());
+        log.info("Profil yeniləndi");
+        logService.save("Profil yeniləndi", userService.getCurrentUserOrNull());
+        return tokenResponse;
     }
 
     @Override
     public void updateProfilePicture(MultipartFile profilePicture) {
+        log.info("Profil şəkil yenilənir");
         User user = userService.getCurrentUser();
 
         if (user.getProfilePictureUrl() != null) {
@@ -83,5 +93,7 @@ public class ProfileServiceImpl implements ProfileService {
         }
 
         userService.save(user);
+        log.info("Profil şəkil yeniləndi");
+        logService.save("Profil şəkil yeniləndi", userService.getCurrentUserOrNull());
     }
 }

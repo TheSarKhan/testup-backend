@@ -48,7 +48,7 @@ public class QuestionController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.CREATED,
-                        "Question created successfully",
+                        "Sual uğurla yaradıldı",
                         null));
     }
 
@@ -66,7 +66,7 @@ public class QuestionController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Questions received successfully",
+                        "Suallar uğurla qəbul edildi",
                         questions));
     }
 
@@ -81,7 +81,7 @@ public class QuestionController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Question received successfully",
+                        "Sual uğurla alındı",
                         question));
     }
 
@@ -105,7 +105,7 @@ public class QuestionController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Question updated successfully",
+                        "Sual uğurla yeniləndi",
                         null));
     }
 
@@ -120,7 +120,7 @@ public class QuestionController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.NO_CONTENT,
-                        "Question deleted successfully",
+                        "Sual uğurla silindi",
                         null));
     }
 }

@@ -18,6 +18,8 @@ import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.subject.SubjectStructureQuestion;
 import com.exam.examapp.repository.StudentExamRepository;
 import com.exam.examapp.security.service.interfaces.EmailService;
+import com.exam.examapp.service.impl.UserServiceImpl;
+import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.NotificationService;
 import com.exam.examapp.service.interfaces.exam.ExamCheckService;
 import jakarta.transaction.Transactional;
@@ -42,7 +44,12 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
     private final EmailService emailService;
 
+    private final LogService logService;
+
+    private final UserServiceImpl userService;
+
     private static void getAnswerList(List<Question> questions, Map<UUID, AnswerStatus> questionIdToAnswerStatusMap, List<Integer> list) {
+        log.info("Cavab listi götürülür");
         for (Question question : questions) {
             if (QuestionType.TEXT_BASED.equals(question.getType()) || QuestionType.LISTENING.equals(question.getType())) {
                 getAnswerList(question.getQuestions(), questionIdToAnswerStatusMap, list);
@@ -79,6 +86,7 @@ public class ExamCheckServiceImpl implements ExamCheckService {
     }
 
     private static double incrementScore(List<Question> questions, Map<UUID, AnswerStatus> questionIdToAnswerStatusMap, double score, Map<Integer, Integer> questionToPointMap) {
+        log.info("Bal artırılır. Bal:{}", score);
         for (int i = 0; i < questions.size(); i++) {
             Question question = questions.get(i);
             if (QuestionType.TEXT_BASED.equals(question.getType()) || QuestionType.LISTENING.equals(question.getType())) {
@@ -95,6 +103,7 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
     private static String formatFormulaWithCounts(
             String formula, List<Integer> correctAndWrongCounts) {
+        log.info("Formula hazırlanır");
         String formattedFormula = formula;
         formattedFormula = formattedFormula.replace("a", String.valueOf(correctAndWrongCounts.get(0)));
         formattedFormula = formattedFormula.replace("b", String.valueOf(correctAndWrongCounts.get(1)));
@@ -111,11 +120,12 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
     private StudentExam getStudentExam(UUID studentExamId) {
         return studentExamRepository.findById(studentExamId).orElseThrow(() ->
-                new ResourceNotFoundException("Student Exam Not Found"));
+                new ResourceNotFoundException("Tələbə imtahanı tapılmadı"));
     }
 
     private List<ExamStatisticsStudent> getExamStudents(List<StudentExam> studentExams) {
-        return studentExams.stream()
+        log.info("Tələbələr hazırlanır");
+        List<ExamStatisticsStudent> list = studentExams.stream()
                 .sorted(Comparator.comparing(StudentExam::getEndTime).reversed())
                 .map(examStudent -> {
                     long durationInSecond = examStudent.getEndTime().getEpochSecond() -
@@ -137,9 +147,12 @@ public class ExamCheckServiceImpl implements ExamCheckService {
                             examStudent.getNumberOfNotCheckedYetQuestions() > 0);
                 })
                 .toList();
+        log.info("Tələbələr hazırlandı");
+        return list;
     }
 
     private ExamStatisticsRating getExamStatisticsRating(Exam exam) {
+        log.info("İmtahan statistikası götürülür");
         Map<UUID, Integer> userIdToRatingMap = exam.getUserIdToRatingMap();
         Set<Map.Entry<UUID, Integer>> ratingEntries = userIdToRatingMap.entrySet();
         long totalFiveStarCount = ratingEntries.stream()
@@ -153,6 +166,7 @@ public class ExamCheckServiceImpl implements ExamCheckService {
         long totalOneStarCount = ratingEntries.stream()
                 .filter(e -> e.getValue() == 1).count();
 
+        log.info("İmtahan statistikası götürüldü");
         return new ExamStatisticsRating(
                 exam.getRating(),
                 userIdToRatingMap.size(),
@@ -165,7 +179,8 @@ public class ExamCheckServiceImpl implements ExamCheckService {
     }
 
     private List<ExamStatisticsBestStudent> getBestStudents(List<StudentExam> studentExams) {
-        return studentExams.stream()
+        log.info("Ən yaxşı tələbələr hazırlanır");
+        List<ExamStatisticsBestStudent> list = studentExams.stream()
                 .sorted(Comparator.comparing(StudentExam::getScore))
                 .limit(5)
                 .map(examStudent -> {
@@ -185,12 +200,14 @@ public class ExamCheckServiceImpl implements ExamCheckService {
                             examStudent.getScore());
                 })
                 .toList();
+        log.info("Ən yaxşı tələbələr hazırlandı");
+        return list;
     }
 
     @Override
     @Transactional
     public ExamStatistics getExamStatistics(UUID id) {
-        log.info("Getting Exam Statistics for Exam Id: {}", id);
+        log.info("İmtahan statistikası hazırlanır: {}", id);
         List<StudentExam> studentExams = studentExamRepository.getByExam_Id(id);
 
         Exam exam = studentExams.getFirst().getExam();
@@ -201,13 +218,13 @@ public class ExamCheckServiceImpl implements ExamCheckService {
                 getExamStudents(studentExams),
                 exam.getTeacher().getInfo().getExamToStudentCountMap().get(exam.getId()),
                 exam.getTeacher().getPack().getStudentPerExam());
-        log.info("Exam Statistics: {}", examStatistics);
+        log.info("İmtahan statistikası: {}", examStatistics);
         return examStatistics;
     }
 
     @Override
     public StartExamResponse getUserExam(UUID studentExamId) {
-        log.info("Getting User Exam for Student Exam Id: {}", studentExamId);
+        log.info("İmtahan götürülür tələbə imtahan id-si: {}", studentExamId);
         StudentExam studentExam = getStudentExam(studentExamId);
 
         return new StartExamResponse(
@@ -222,12 +239,12 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
     @Override
     public void checkAnswer(UUID studentExamId, UUID questionId, AnswerStatus status) {
-        log.info("Checking Answer for Student Exam Id: {}, Question Id: {}, Status: {}",studentExamId, questionId, status);
+        log.info("Sual yoxlanılır: {}, Sual id-si: {}, Status: {}", studentExamId, questionId, status);
         StudentExam studentExam = getStudentExam(studentExamId);
 
         AnswerStatus answerStatus = studentExam.getQuestionIdToAnswerStatusMap().get(questionId);
         if (answerStatus != AnswerStatus.WAITING_FOR_REVIEW)
-            throw new BadRequestException("This Question is answered.");
+            throw new BadRequestException("Sual artıq yoxlanılmışdır");
 
         studentExam.getQuestionIdToAnswerStatusMap().remove(questionId);
         studentExam.getQuestionIdToAnswerStatusMap().put(questionId, answerStatus);
@@ -236,10 +253,13 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
         studentExam.setScore(calculateScore(studentExam));
         studentExamRepository.save(studentExam);
+        log.info("Imtahan yoxlanıldı");
         sendMailAndNotification(studentExam);
+        logService.save("Imtahan yoxlanıldı", userService.getCurrentUserOrNull());
     }
 
     private void sendMailAndNotification(StudentExam studentExam) {
+        log.info("Email və Bildiriş göndərilir");
         String examTitle = studentExam.getExam().getExamTitle();
         User student = studentExam.getStudent();
         String emailContent = String.format(MAIL_BODY, examTitle);
@@ -248,6 +268,7 @@ public class ExamCheckServiceImpl implements ExamCheckService {
     }
 
     private double calculateScore(StudentExam studentExam) {
+        log.info("İmtahan balı hesablanır");
         List<SubjectStructureQuestion> subjectStructureQuestions = studentExam.getExam().getSubjectStructureQuestions();
         Map<UUID, AnswerStatus> questionIdToAnswerStatusMap = studentExam.getQuestionIdToAnswerStatusMap();
 
@@ -267,6 +288,7 @@ public class ExamCheckServiceImpl implements ExamCheckService {
                 score += new ExpressionBuilder(formatted).build().evaluate();
             }
         }
+        log.info("İmtahan balı hesablanılır");
         return score;
     }
 }

@@ -46,7 +46,7 @@ public class SubmoduleController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.CREATED,
-                        "Submodule created successfully",
+                        "Alt modul uğurla yaradıldı",
                         null));
     }
 
@@ -62,7 +62,7 @@ public class SubmoduleController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Submodules retrieved successfully",
+                        "Alt modullar uğurla əldə edildi",
                         submodules));
     }
 
@@ -73,14 +73,12 @@ public class SubmoduleController {
             summary = "Get submodules by module",
             description = "Retrieves all submodules under a specific module ID. Accessible by **ADMIN** and **TEACHER** roles."
     )
-    public ResponseEntity<ApiResponse<List<Submodule>>> getByModule(@RequestParam
-                                                                    @NotNull
-                                                                    UUID moduleId) {
+    public ResponseEntity<ApiResponse<List<Submodule>>> getByModule(@RequestParam UUID moduleId) {
         List<Submodule> submodules = submoduleService.getAllByModule(moduleId);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Submodules retrieved successfully",
+                        "Alt modullar uğurla əldə edildi",
                         submodules));
     }
 
@@ -91,14 +89,12 @@ public class SubmoduleController {
             summary = "Get submodule by ID",
             description = "Retrieves a submodule by its unique ID."
     )
-    public ResponseEntity<ApiResponse<Submodule>> getById(@RequestParam
-                                                          @NotNull
-                                                          UUID id) {
+    public ResponseEntity<ApiResponse<Submodule>> getById(@RequestParam UUID id) {
         Submodule submodule = submoduleService.getById(id);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Submodule retrieved successfully",
+                        "Submodul uğurla əldə edildi",
                         submodule));
     }
 
@@ -117,7 +113,7 @@ public class SubmoduleController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Submodule retrieved successfully",
+                        "Submodul uğurla əldə edildi",
                         submodule));
     }
 
@@ -137,7 +133,7 @@ public class SubmoduleController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Submodule updated successfully",
+                        "Alt modul uğurla yeniləndi",
                         null));
     }
 
@@ -148,14 +144,12 @@ public class SubmoduleController {
             summary = "Delete a submodule",
             description = "Allows an **ADMIN** to delete a submodule by its unique ID."
     )
-    public ResponseEntity<ApiResponse<Void>> delete(@RequestParam
-                                                    @NotNull
-                                                    UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@RequestParam UUID id) {
         submoduleService.delete(id);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.NO_CONTENT,
-                        "Submodule deleted successfully",
+                        "Alt modul uğurla silindi",
                         null));
     }
 }

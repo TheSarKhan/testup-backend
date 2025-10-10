@@ -5,8 +5,11 @@ import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.model.subject.Subject;
 import com.exam.examapp.repository.subject.SubjectRepository;
 import com.exam.examapp.service.interfaces.FileService;
+import com.exam.examapp.service.interfaces.LogService;
+import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.subject.SubjectService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubjectServiceImpl implements SubjectService {
@@ -21,12 +25,17 @@ public class SubjectServiceImpl implements SubjectService {
 
     private final SubjectRepository subjectRepository;
 
+    private final UserService userService;
+
     private final FileService fileService;
+
+    private final LogService logService;
 
     @Override
     public void save(String name, boolean isSupportMath, MultipartFile logo) {
+        log.info("Mövzu yaradılır");
         if (subjectRepository.existsSubjectByName(name))
-            throw new BadRequestException("Subject already exists");
+            throw new BadRequestException("Mövzu artıq mövcuddur");
 
         Subject build = Subject.builder()
                 .name(name)
@@ -35,6 +44,8 @@ public class SubjectServiceImpl implements SubjectService {
         String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);
         build.setLogoUrl(logoUrl);
         subjectRepository.save(build);
+        log.info("Mövzu yaradıldı");
+        logService.save("Mövzu yaradıldı", userService.getCurrentUserOrNull());
     }
 
     @Override
@@ -45,21 +56,22 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public Subject getByName(String name) {
         return subjectRepository.getByName(name).orElseThrow(() ->
-                new ResourceNotFoundException("Subject not found"));
+                new ResourceNotFoundException("Mövzu tapılmadı"));
     }
 
     @Override
     public Subject getById(UUID id) {
         return subjectRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Subject not found"));
+                new ResourceNotFoundException("Mövzu tapılmadı"));
     }
 
     @Override
     public void update(UUID id, String name, boolean isSupportMath, MultipartFile logo) {
+        log.info("Mövzu yenilənir");
         Subject subject = getById(id);
         Optional<Subject> byName = subjectRepository.getByName(name);
         if (byName.isPresent() && !byName.get().getId().equals(id))
-            throw new BadRequestException("Subject Already Exists");
+            throw new BadRequestException("Mövzu artıq mövcuddur");
 
         subject.setName(name);
         subject.setSupportMath(isSupportMath);
@@ -67,12 +79,17 @@ public class SubjectServiceImpl implements SubjectService {
         String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);
         subject.setLogoUrl(logoUrl);
         subjectRepository.save(subject);
+        log.info("Mövzu yeniləndi");
+        logService.save("Mövzu yeniləndi", userService.getCurrentUserOrNull());
     }
 
     @Override
     public void delete(UUID id) {
+        log.info("Mövzu silinir");
         Subject subject = getById(id);
         fileService.deleteFile(IMAGE_PATH, subject.getLogoUrl());
         subjectRepository.delete(subject);
+        log.info("Mövzu silindi");
+        logService.save("Mövzu silindi", userService.getCurrentUserOrNull());
     }
 }

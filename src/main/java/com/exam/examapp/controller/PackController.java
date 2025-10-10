@@ -41,7 +41,7 @@ public class PackController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.CREATED,
-                        "Pack created successfully.",
+                        "Paket uğurla yaradıldı",
                         null));
     }
 
@@ -55,7 +55,7 @@ public class PackController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Packs received successfully",
+                        "Paketlər uğurla alındı",
                         allPacks));
     }
 
@@ -71,7 +71,7 @@ public class PackController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Pack received successfully",
+                        "Paket uğurla alındı",
                         pack));
     }
 
@@ -88,7 +88,7 @@ public class PackController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Pack received successfully",
+                        "Paket uğurla alındı",
                         pack));
     }
 
@@ -106,7 +106,7 @@ public class PackController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Pack updated successfully",
+                        "Paket uğurla yeniləndi",
                         null));
     }
 
@@ -124,7 +124,7 @@ public class PackController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.NO_CONTENT,
-                        "Pack deleted successfully",
+                        "Paket uğurla silindi",
                         null));
     }
 }

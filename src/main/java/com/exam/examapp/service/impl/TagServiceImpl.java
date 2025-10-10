@@ -4,56 +4,70 @@ import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.model.Tag;
 import com.exam.examapp.repository.TagRepository;
+import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.TagService;
-import java.util.List;
-import java.util.UUID;
+import com.exam.examapp.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.UUID;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
-  private final TagRepository tagRepository;
+    private final TagRepository tagRepository;
 
-  @Override
-  public void createTag(String tagName) {
-    tagRepository.save(Tag.builder().tagName(tagName).build());
-  }
+    private final LogService logService;
 
-  @Override
-  public List<Tag> getAllTags() {
-      List<Tag> all = tagRepository.findAll();
+    private final UserService userService;
 
-      List<Tag> list = all.stream().filter(tag -> tag.getTagName() != null).toList();
+    @Override
+    public void createTag(String tagName) {
+        log.info("Etiket yaradılır: {}", tagName);
+        tagRepository.save(Tag.builder().tagName(tagName).build());
+        log.info("Etiket yaradıldı");
+        logService.save("Etiketlər yaradıldı:" + tagName, userService.getCurrentUserOrNull());
+    }
 
-      return all;
-  }
+    @Override
+    public List<Tag> getAllTags() {
+        return tagRepository.findAll();
+    }
 
-  @Override
-  public Tag getTagByName(String tagName) {
-    return tagRepository
-        .getByTagName(tagName)
-        .orElseThrow(() -> new ResourceNotFoundException("Tag not found."));
-  }
+    @Override
+    public Tag getTagByName(String tagName) {
+        return tagRepository
+                .getByTagName(tagName)
+                .orElseThrow(() -> new ResourceNotFoundException("Etiket tapılmadı"));
+    }
 
-  @Override
-  public Tag getTagById(UUID id) {
-    return tagRepository
-        .findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Tag not found."));
-  }
+    @Override
+    public Tag getTagById(UUID id) {
+        return tagRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Etiket tapılmadı"));
+    }
 
-  @Override
-  public void updateTag(UUID id, String tagName) {
-    Tag tag = getTagById(id);
-    if (!getTagByName(tagName).getId().equals(id))
-      throw new BadRequestException("Tag already exists.");
-    tag.setTagName(tagName);
-    tagRepository.save(tag);
-  }
+    @Override
+    public void updateTag(UUID id, String tagName) {
+        log.info("Etiket yeniləir:{}", tagName);
+        Tag tag = getTagById(id);
+        if (!getTagByName(tagName).getId().equals(id))
+            throw new BadRequestException("Etiket tapılmadı");
+        tag.setTagName(tagName);
+        tagRepository.save(tag);
+        log.info("Etiket yeniləndi:{}", tagName);
+        logService.save("Etiket yeniləndi:" + tagName, userService.getCurrentUserOrNull());
+    }
 
-  @Override
-  public void deleteTag(UUID id) {
-    tagRepository.deleteById(id);
-  }
+    @Override
+    public void deleteTag(UUID id) {
+        log.info("Etiket silinir");
+        tagRepository.deleteById(id);
+        log.info("Etiket silindi");
+        logService.save("Etiket silindi", userService.getCurrentUserOrNull());
+    }
 }

@@ -33,9 +33,7 @@ public class TopicController {
             summary = "Create a new topic",
             description = "Allows **ADMIN** to create a new topic under a subject"
     )
-    public ResponseEntity<ApiResponse<Void>> create(@RequestParam
-                                                    @NotNull
-                                                    UUID subjectId,
+    public ResponseEntity<ApiResponse<Void>> create(@RequestParam UUID subjectId,
                                                     @RequestParam
                                                     @NotBlank
                                                     @Schema(defaultValue = "Topic name")
@@ -71,9 +69,7 @@ public class TopicController {
             summary = "Get topics by subject ID",
             description = "Retrieves all topics belonging to a specific subject"
     )
-    public ResponseEntity<ApiResponse<List<Topic>>> getAllBySubject(@RequestParam
-                                                                    @NotNull
-                                                                    UUID subjectId) {
+    public ResponseEntity<ApiResponse<List<Topic>>> getAllBySubject(@RequestParam UUID subjectId) {
         List<Topic> topics = topicService.getAllBySubjectId(subjectId);
         return ResponseEntity.ok(
                 ApiResponse.build(
@@ -89,9 +85,7 @@ public class TopicController {
             summary = "Get topic by ID",
             description = "Retrieves a topic using its unique ID"
     )
-    public ResponseEntity<ApiResponse<Topic>> getById(@RequestParam
-                                                      @NotNull
-                                                      UUID id) {
+    public ResponseEntity<ApiResponse<Topic>> getById(@RequestParam UUID id) {
         Topic topic = topicService.getById(id);
         return ResponseEntity.ok(
                 ApiResponse.build(
@@ -144,9 +138,7 @@ public class TopicController {
             summary = "Delete topic",
             description = "Allows **ADMIN** to delete a topic by ID"
     )
-    public ResponseEntity<ApiResponse<Void>> delete(@RequestParam
-                                                    @NotNull
-                                                    UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@RequestParam UUID id) {
         topicService.delete(id);
         return ResponseEntity.ok(
                 ApiResponse.build(

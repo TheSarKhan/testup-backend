@@ -13,6 +13,7 @@ import com.exam.examapp.service.impl.exam.checker.AnswerCheckerFactory;
 import com.exam.examapp.service.interfaces.NotificationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AnswerService {
@@ -34,6 +36,7 @@ public class AnswerService {
     @Transactional
     public Map<UUID, AnswerStatus> checkAnswers(StudentExam studentExam,
                                                 List<Integer> correctAndWrongCounts) {
+        log.info("Cavablar yoxlanılır");
         Map<UUID, String> questionIdToAnswerMap = studentExam.getQuestionIdToAnswerMap();
         List<SubjectStructureQuestion> subjectStructureQuestions = studentExam.getExam().getSubjectStructureQuestions();
 
@@ -55,16 +58,18 @@ public class AnswerService {
                 }
             }
         }
-
+        log.info("Cavablar yoxlanıldı");
         return answerStatusMap;
     }
 
     public void handleUncheckedQuestions(StudentExam studentExam, Map<UUID, AnswerStatus> answerStatusMap) {
+        log.info("Yoxlanılmamış suallara baxılır");
         long count = answerStatusMap.values().stream()
                 .filter(AnswerStatus.WAITING_FOR_REVIEW::equals)
                 .count();
 
         if (count > 0) {
+            log.info("Yoxlanılmamış {} sual var", count);
             studentExam.getExam().getHasUncheckedQuestionStudentExamId().add(studentExam.getId());
             studentExam.setStatus(ExamStatus.WAITING_OPEN_ENDED_QUESTION);
             studentExam.setNumberOfNotCheckedYetQuestions((int) count);
@@ -73,20 +78,21 @@ public class AnswerService {
             String email = studentExam.getExam().getTeacher().getEmail();
 
             notificationService.sendNotification(new NotificationRequest(
-                    "TestUp Has Unchecked Question.",
-                    "You have unchecked question in your test. Please review it. Exam title: "
+                    "TestUp-da yoxlanılmamış sual var.",
+                    "Testinizdə işarələnməmiş sualınız var. Zəhmət olmasa nəzərdən keçirin. İmtahan adı: "
                             + studentExam.getExam().getExamTitle(),
                     email));
 
             emailService.sendEmail(email,
-                    "TestUp Has Unchecked Question.",
-                    "You have unchecked question in your test. Please review it. Exam title: "
+                    "TestUp-da yoxlanılmamış sual var.",
+                    "Testinizdə işarələnməmiş sualınız var. Zəhmət olmasa nəzərdən keçirin. İmtahan adı: "
                             + studentExam.getExam().getExamTitle());
         }
     }
 
     public <V> Map<String, Map<Integer, V>> mapStudentDataToSubjects(
             StudentExam studentExam, Map<UUID, V> questionIdToValueMap) {
+        log.info("Tələbənin məlumatları mövzuya çevrilir");
         Map<String, Map<Integer, V>> subjectToQuestionToValue = new HashMap<>();
 
         for (Map.Entry<UUID, V> entry : questionIdToValueMap.entrySet()) {
@@ -109,6 +115,7 @@ public class AnswerService {
                 }
             }
         }
+        log.info("Tələbənin məlumatları mövzuya çevrildi");
         return subjectToQuestionToValue;
     }
 }

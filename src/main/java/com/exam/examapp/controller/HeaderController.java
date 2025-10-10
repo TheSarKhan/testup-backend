@@ -27,6 +27,6 @@ public class HeaderController {
             description = "Retrieve application header information for authenticated users")
     public ResponseEntity<ApiResponse<HeaderResponse>> getHeader() {
         HeaderResponse headerInfo = headerService.getHeaderInfo();
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Header info received successfully", headerInfo));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Başlıq məlumatı uğurla qəbul edildi", headerInfo));
     }
 }

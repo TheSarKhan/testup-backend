@@ -6,11 +6,13 @@ import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.exam.StudentExam;
 import com.exam.examapp.repository.StudentExamRepository;
+import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.exam.ExamService;
 import com.exam.examapp.service.interfaces.FileService;
 import com.exam.examapp.service.interfaces.exam.StudentExamService;
 import com.exam.examapp.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StudentExamServiceImpl implements StudentExamService {
@@ -32,8 +35,11 @@ public class StudentExamServiceImpl implements StudentExamService {
 
     private final FileService fileService;
 
+    private final LogService logService;
+
     @Override
     public void addExam(UUID studentId, UUID examId) {
+        log.info("İmtahan sagirdə əlavə olunur");
         Exam exam = examService.getById(examId);
         List<StudentExam> byExamAndStudent =
                 studentExamRepository.getByExamAndStudent(exam, userService.getUserById(studentId)).stream()
@@ -41,7 +47,7 @@ public class StudentExamServiceImpl implements StudentExamService {
                         .toList();
 
         if (!byExamAndStudent.isEmpty())
-            throw new BadRequestException("You have already taken this exam.");
+            throw new BadRequestException("Bu imtahan Sagirdə mövcuddur");
 
         studentExamRepository.save(
                 StudentExam.builder()
@@ -56,6 +62,8 @@ public class StudentExamServiceImpl implements StudentExamService {
                         .status(ExamStatus.ACTIVE)
                         .exam(exam)
                         .build());
+        log.info("İmtahan sagirdə əlavə olundu");
+        logService.save("İmtahan sagirdə əlavə olundu", userService.getCurrentUserOrNull());
     }
 
     @Override
@@ -65,7 +73,7 @@ public class StudentExamServiceImpl implements StudentExamService {
         StudentExam studentExam = getById(studentExamId);
 
         if (user != null && !studentExam.getStudent().getId().equals(user.getId()))
-            throw new BadRequestException("You cannot update other student exam.");
+            throw new BadRequestException("Digər tələbə imtahanını yeniləyə bilməzsiniz");
 
         Map<UUID, Integer> listeningIdToPlayTimeMap = studentExam.getListeningIdToPlayTimeMap();
 
@@ -76,16 +84,18 @@ public class StudentExamServiceImpl implements StudentExamService {
 
         studentExam.setListeningIdToPlayTimeMap(listeningIdToPlayTimeMap);
         studentExamRepository.save(studentExam);
+        log.info("Dinləmə uğurla keçdi");
     }
 
     private StudentExam getById(UUID studentExamId) {
         return studentExamRepository
                 .findById(studentExamId)
-                .orElseThrow(() -> new IllegalArgumentException("Student Exam not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Tələbə İmtahanı tapılmadı"));
     }
 
     @Override
     public void saveAnswer(UUID studentExamId, UUID questionId, String answer, MultipartFile file) {
+        log.info("Cavab yadda saxlanılır");
         StudentExam studentExam = getById(studentExamId);
         Map<UUID, String> questionIdToAnswerMap =
                 studentExam.getQuestionIdToAnswerMap() == null
@@ -103,5 +113,6 @@ public class StudentExamServiceImpl implements StudentExamService {
         studentExam.setQuestionIdToIsAnswerPictureMap(questionIdToIsAnswerPictureMap);
 
         studentExamRepository.save(studentExam);
+        log.info("Cavab uğurla yadda saxlanıldı");
     }
 }

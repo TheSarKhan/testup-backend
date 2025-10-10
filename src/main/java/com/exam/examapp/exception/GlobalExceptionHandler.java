@@ -1,6 +1,5 @@
 package com.exam.examapp.exception;
 
-import com.exam.examapp.AppMessage;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.exception.custom.*;
 import jakarta.validation.ConstraintViolationException;
@@ -27,8 +26,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleResourceNotFound(
             ResourceNotFoundException ex, WebRequest request) {
-        String message =
-                AppMessage.RESOURCE_NOT_FOUND.getMessage().concat(": ").concat(ex.getMessage());
+        String message = "ResourceNotFoundException: ".concat(ex.getMessage());
         log.error(message);
         return buildErrorResponse(HttpStatus.NOT_FOUND, message, null);
     }
@@ -63,21 +61,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DirectoryException.class)
     public ResponseEntity<ApiResponse<Object>> handleDirectoryCreate(
             DirectoryException ex, WebRequest request) {
-        log.error("{}: {}", AppMessage.DIRECTORY_CREATE_FAILED.getMessage(), ex.getMessage());
+        log.error("{}: {}", "DirectoryException", ex.getMessage());
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);
     }
 
     @ExceptionHandler(FileException.class)
     public ResponseEntity<ApiResponse<Object>> handleFileSave(FileException ex, WebRequest request) {
-        log.error("{}: {}", AppMessage.FILE_SAVE_FAILED.getMessage(), ex.getMessage());
+        log.error("{}: {}", "FileException", ex.getMessage());
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);
     }
 
     @ExceptionHandler(UserNotLoginException.class)
     public ResponseEntity<ApiResponse<Object>> handleNotLoginUser(
             UserNotLoginException ex, WebRequest request) {
-        String message =
-                AppMessage.USER_NOT_LOGGED_IN.getMessage().concat(": ").concat(ex.getMessage());
+        String message = "UserNotLoginException: ".concat(ex.getMessage());
         log.error(message);
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, message, null);
     }
@@ -105,7 +102,7 @@ public class GlobalExceptionHandler {
                 .getFieldErrors()
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         return buildErrorResponse(
-                HttpStatus.BAD_REQUEST, AppMessage.VALIDATION_FAILED.getMessage(), errors);
+                HttpStatus.BAD_REQUEST, "MethodArgumentNotValidException", errors);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
@@ -129,8 +126,7 @@ public class GlobalExceptionHandler {
                                 })
                         .toList();
 
-        return buildErrorResponse(
-                HttpStatus.BAD_REQUEST, AppMessage.VALIDATION_FAILED.getMessage(), errors);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "HandlerMethodValidationException", errors);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -147,8 +143,7 @@ public class GlobalExceptionHandler {
                             errors.put(field, cv.getMessage());
                         });
 
-        return buildErrorResponse(
-                HttpStatus.BAD_REQUEST, AppMessage.VALIDATION_FAILED.getMessage(), errors);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "ConstraintViolationException", errors);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -157,9 +152,9 @@ public class GlobalExceptionHandler {
         log.warn("MissingServletRequestParameterException: {}", ex.getMessage());
 
         Map<String, String> errors =
-                Map.of(ex.getParameterName(), AppMessage.MISSING_PARAMETER.getMessage());
+                Map.of(ex.getParameterName(), "Missing parameter:");
         return buildErrorResponse(
-                HttpStatus.BAD_REQUEST, AppMessage.MISSING_PARAMETER.getMessage(), errors);
+                HttpStatus.BAD_REQUEST, "MissingServletRequestParameterException", errors);
     }
 
     @ExceptionHandler(Exception.class)

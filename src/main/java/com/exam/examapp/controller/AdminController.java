@@ -2,10 +2,14 @@ package com.exam.examapp.controller;
 
 import com.exam.examapp.dto.response.AdminStatisticsResponse;
 import com.exam.examapp.dto.response.ApiResponse;
+import com.exam.examapp.dto.response.exam.ExamBlockResponse;
+import com.exam.examapp.model.Log;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.service.interfaces.AdminService;
+import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.UserService;
+import com.exam.examapp.service.interfaces.exam.ExamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,32 +31,67 @@ import java.util.UUID;
 public class AdminController {
     private final AdminService adminService;
 
+    private final ExamService examService;
+
     private final UserService userService;
+
+    private final LogService logService;
 
     @GetMapping("/users-by-role")
     @Operation(summary = "Get Users by role", description = "Retrieve a list of users filtered by role.")
     public ResponseEntity<ApiResponse<List<User>>> getUsersByRole(@RequestParam Role role) {
         List<User> users = userService.getUsersByRole(role);
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Users retrieved successfully", users));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "İstifadəçilər uğurla əldə edildi", users));
     }
 
     @PatchMapping("/change-role/id")
     @Operation(summary = "Change role", description = "Allows an **ADMIN** to change the role of user by id.")
     public ResponseEntity<ApiResponse<Void>> changeRole(@RequestParam UUID id, @RequestParam Role role) {
         adminService.changeUserRoleViaId(id, role);
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Role changed successfully", null));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Rol uğurla dəyişdirildi", null));
     }
 
     @PatchMapping("/change-role/email")
     @Operation(summary = "Change role", description = "Allows an **ADMIN** to change the role of user by email.")
     public ResponseEntity<ApiResponse<Void>> changeRoleViaEmail(@RequestParam String email, @RequestParam Role role) {
         adminService.changeUserRoleViaEmail(email, role);
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Role changed successfully", null));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Rol uğurla dəyişdirildi", null));
     }
 
     @GetMapping("/statistics")
+    @Operation(summary = "Get Statistics", description = "Retrieve statistics.")
     public ResponseEntity<ApiResponse<AdminStatisticsResponse>> getStatistics() {
         AdminStatisticsResponse adminStatistics = adminService.getAdminStatistics();
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Statistics retrieved successfully", adminStatistics));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Statistika uğurla əldə edildi", adminStatistics));
+    }
+
+    @GetMapping("/logs")
+    @Operation(summary = "Get Logs", description = "Retrieve list of logs.")
+    public ResponseEntity<ApiResponse<List<Log>>> getLogs(@RequestParam int page,
+                                                          @RequestParam int size) {
+        List<Log> logs = logService.getAllOrderByCreatedAt(page, size);
+        return ResponseEntity.ok(
+                ApiResponse.build(
+                        HttpStatus.OK,
+                        "Qeydlər uğurla əldə edildi",
+                        logs));
+    }
+
+    @GetMapping("/all-exams")
+    @Operation(
+            summary = "Get exams",
+            description =
+                    "Retrieve list of exam blocks . Returns summary info used in dashboard.")
+    public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getAllExams(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Integer minCost,
+            @RequestParam(required = false) Integer maxCost,
+            @RequestParam(required = false) List<Integer> rating,
+            @RequestParam(required = false) List<UUID> tagIds,
+            @RequestParam(required = false) Integer pageNum
+    ) {
+        List<ExamBlockResponse> myExams = examService.getAllExamsForAdmin(name, minCost, maxCost, rating, tagIds, pageNum);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "İmtahanlar uğurla əldə edildi", myExams));
     }
 }

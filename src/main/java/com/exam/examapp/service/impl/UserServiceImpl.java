@@ -8,8 +8,10 @@ import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.repository.UserRepository;
 import com.exam.examapp.security.model.CustomUserDetails;
+import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -17,26 +19,33 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
+    private final LogService logService;
+
     @Override
     public User save(User user) {
-        return userRepository.save(user);
+        log.info("İstifadəçi yaradılır: {}", user.getEmail());
+        User save = userRepository.save(user);
+        log.info("İstifadəçi yaradıldı: {}", user.getEmail());
+        logService.save("İstifadəçi yaradıldı:" + user.getEmail(), getCurrentUserOrNull());
+        return save;
     }
 
     @Override
     public User getByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() ->
-                new ResourceNotFoundException("User not found."));
+                new ResourceNotFoundException("İstifadəçi tapılmadı"));
     }
 
     @Override
     public User getUserById(UUID userId) {
         return userRepository.findById(userId).orElseThrow(() ->
-                new ResourceNotFoundException("User not found."));
+                new ResourceNotFoundException("İstifadəçi tapılmadı"));
     }
 
     @Override
@@ -45,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
         if (authentication == null || !authentication.isAuthenticated()
                 || "anonymousUser".equals(authentication.getPrincipal()))
-            throw new UserNotLoginException("User not login.");
+            throw new UserNotLoginException("İstifadəçi tapılmadı");
 
         CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
 
@@ -56,7 +65,7 @@ public class UserServiceImpl implements UserService {
     public TeacherInfo getTeacherInfo() {
         User user = getCurrentUser();
         if (!Role.TEACHER.equals(user.getRole()))
-            throw new BadRequestException("You are not a teacher.");
+            throw new BadRequestException("Sən müəllim deyilsən");
 
         return user.getInfo();
     }

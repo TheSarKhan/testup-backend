@@ -7,8 +7,11 @@ import com.exam.examapp.model.enums.ContactImageType;
 import com.exam.examapp.model.information.Contact;
 import com.exam.examapp.repository.information.ContactRepository;
 import com.exam.examapp.service.interfaces.FileService;
+import com.exam.examapp.service.interfaces.LogService;
+import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.information.ContactService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ContactServiceImpl implements ContactService {
@@ -23,12 +27,17 @@ public class ContactServiceImpl implements ContactService {
 
     private final ContactRepository contactRepository;
 
+    private final UserService userService;
+
     private final FileService fileService;
+
+    private final LogService logService;
 
     @Override
     public void updateContact(ContactUpdateRequest request, List<MultipartFile> icons) {
+        log.info("Əlaqə yenilənir");
         if (request.contactNames().size() * 2 != icons.size())
-            throw new BadRequestException("Icons size not match");
+            throw new BadRequestException("Nişanların sayı uyğun gəlmir");
 
         Contact contact = contactRepository.findAll().getFirst();
         Contact updatedContact = ContactMapper.updateRequestTo(contact, request);
@@ -52,6 +61,8 @@ public class ContactServiceImpl implements ContactService {
         contact.setPhone(request.phone());
         contact.setEmail(request.email());
         contactRepository.save(updatedContact);
+        log.info("Əlaqə yeniləndi");
+        logService.save("Əlaqə yeniləndi", userService.getCurrentUserOrNull());
     }
 
     @Override

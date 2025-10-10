@@ -36,7 +36,7 @@ public class PaymentController {
         String paymentUrl = paymentService.initPayment(request);
         return ResponseEntity.ok(ApiResponse.build(
                 HttpStatus.OK,
-                "Payment initiated successfully",
+                "Ödəniş uğurla başladı",
                 paymentUrl));
     }
 
@@ -46,7 +46,7 @@ public class PaymentController {
             description = "This endpoint is called when the payment finish. Status is passed as query param."
     )
     public ResponseEntity<ApiResponse<String>> success() {
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Payment result", "Success"));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Ödəniş nəticəsi", "Success"));
     }
 
     @GetMapping("/verify")
@@ -57,7 +57,7 @@ public class PaymentController {
     )
     public ResponseEntity<ApiResponse<Void>> verify() {
         paymentResultService.updateResults();
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Payment result", null));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Ödəniş nəticəsi", null));
     }
 
     @GetMapping("/cancel")
@@ -66,7 +66,7 @@ public class PaymentController {
             description = "This endpoint is called when the payment finish. Status is passed as query param."
     )
     public ResponseEntity<ApiResponse<String>> cancel() {
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Payment result", "Cancelled"));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Ödəniş nəticəsi", "Cancelled"));
     }
 
     @GetMapping("/decline")
@@ -75,7 +75,7 @@ public class PaymentController {
             description = "This endpoint is called when the payment finish. Status is passed as query param."
     )
     public ResponseEntity<ApiResponse<String>> decline(@RequestParam String status) {
-        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Payment result", "Declined"));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Ödəniş nəticəsi", "Declined"));
     }
 
     @GetMapping
@@ -90,7 +90,7 @@ public class PaymentController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Payment results retrieved successfully",
+                        "Ödəniş nəticələri uğurla əldə edildi",
                         allPaymentResults));
     }
 
@@ -105,7 +105,7 @@ public class PaymentController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "My Payment results retrieved successfully",
+                        "Ödəniş nəticələrim uğurla əldə edildi",
                         myPaymentResults));
     }
 }

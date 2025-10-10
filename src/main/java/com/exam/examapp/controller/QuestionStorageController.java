@@ -48,7 +48,7 @@ public class QuestionStorageController {
         questionStorageService.addQuestionsToStorage(
                 request, titles, variantPictures, numberPictures, sounds);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.CREATED, "Question added to storage successfully", null));
+                ApiResponse.build(HttpStatus.CREATED, "Sual yaddaşa uğurla əlavə edildi", null));
     }
 
     @GetMapping("/my-storage")
@@ -60,7 +60,7 @@ public class QuestionStorageController {
     public ResponseEntity<ApiResponse<List<Question>>> getMyStorage() {
         List<Question> questions = questionStorageService.getAllQuestionsFromMyStorage();
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Questions retrieved successfully", questions));
+                ApiResponse.build(HttpStatus.OK, "Suallar uğurla əldə edildi", questions));
     }
 
     @GetMapping("/my-filtered")
@@ -79,7 +79,7 @@ public class QuestionStorageController {
                 questionStorageService.getQuestionsFromMyStorage(
                         type, difficulty, topicId, numberOfQuestions);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Questions retrieved successfully", questions));
+                ApiResponse.build(HttpStatus.OK, "Suallar uğurla əldə edildi", questions));
     }
 
     @GetMapping("/my-by-subject")
@@ -94,7 +94,7 @@ public class QuestionStorageController {
         List<Question> questions =
                 questionStorageService.getQuestionsFromMyStorage(subjectId);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Questions retrieved successfully", questions));
+                ApiResponse.build(HttpStatus.OK, "Suallar uğurla əldə edildi", questions));
     }
 
     @GetMapping("/admin-storage")
@@ -106,7 +106,7 @@ public class QuestionStorageController {
     public ResponseEntity<ApiResponse<List<Question>>> getAdminStorage() {
         List<Question> questions = questionStorageService.getAllQuestionsFromAdminStorage();
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Questions retrieved successfully", questions));
+                ApiResponse.build(HttpStatus.OK, "Suallar uğurla əldə edildi", questions));
     }
 
     @GetMapping("/admin-filtered")
@@ -125,7 +125,7 @@ public class QuestionStorageController {
                 questionStorageService.getQuestionFromAdminStorage(
                         type, difficulty, topicId, numberOfQuestions);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Questions retrieved successfully", questions));
+                ApiResponse.build(HttpStatus.OK, "Suallar uğurla əldə edildi", questions));
     }
 
     @GetMapping("/teachers")
@@ -138,7 +138,7 @@ public class QuestionStorageController {
     public ResponseEntity<ApiResponse<List<User>>> getTeachers() {
         List<User> response = questionStorageService.getTeachersHasQuestionStorage();
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Teachers retrieved successfully", response));
+                ApiResponse.build(HttpStatus.OK, "Müəllimlər uğurla tapıldı", response));
     }
 
     @GetMapping("/by-teacher")
@@ -151,7 +151,7 @@ public class QuestionStorageController {
     public ResponseEntity<ApiResponse<List<Question>>> getQuestionByTeacher(@RequestParam UUID teacherId) {
         List<Question> response = questionStorageService.getQuestionsByTeacherId(teacherId);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Questions retrieved successfully", response));
+                ApiResponse.build(HttpStatus.OK, "Suallar uğurla əldə edildi", response));
     }
 
     @PatchMapping
@@ -170,7 +170,7 @@ public class QuestionStorageController {
         questionStorageService.updateQuestionInStorage(
                 request, titles, variantPictures, numberPictures, sounds);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "Question updated successfully", null));
+                ApiResponse.build(HttpStatus.OK, "Sual uğurla yeniləndi", null));
     }
 
     @DeleteMapping
@@ -180,6 +180,6 @@ public class QuestionStorageController {
     public ResponseEntity<ApiResponse<Void>> deleteQuestionStorage(@RequestParam UUID questionId) {
         questionStorageService.removeQuestionsFromStorage(questionId);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.NO_CONTENT, "Question deleted successfully", null));
+                ApiResponse.build(HttpStatus.NO_CONTENT, "Sual uğurla silindi", null));
     }
 }

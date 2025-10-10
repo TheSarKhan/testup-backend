@@ -12,12 +12,14 @@ import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.question.QuestionStorage;
 import com.exam.examapp.model.subject.Topic;
 import com.exam.examapp.repository.QuestionStorageRepository;
+import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.question.QuestionService;
 import com.exam.examapp.service.interfaces.question.QuestionStorageService;
 import com.exam.examapp.service.interfaces.subject.TopicService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QuestionStorageServiceImpl implements QuestionStorageService {
@@ -36,6 +39,8 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
     private final QuestionService questionService;
 
     private final TopicService topicService;
+
+    private final LogService logService;
 
     @Value("${admin.email}")
     String adminEmail;
@@ -70,10 +75,11 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
+        log.info("Sual sual bazasına əlavə edilir");
         User user = userService.getCurrentUser();
 
         if (!user.getPack().isCanPrepareQuestionsDb())
-            throw new DoesNotHavePermissionException("You cannot prepare questions in your storage.");
+            throw new DoesNotHavePermissionException("Sual bazasına sual əlavə edə bilməzsiniz");
 
         Optional<QuestionStorage> questionStorageOptional =
                 questionStorageRepository.getByTeacher(user);
@@ -91,6 +97,8 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
             questionStorageRepository.save(
                     QuestionStorage.builder().teacher(user).questions(questions).build());
         }
+        log.info("Sual sual bazasına əlavə edildi");
+        logService.save("Sual sual bazasına əlavə edildi", userService.getCurrentUserOrNull());
     }
 
     @Override
@@ -98,12 +106,12 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
     public List<Question> getAllQuestionsFromMyStorage() {
         User user = userService.getCurrentUser();
         if (!user.getPack().isCanUseQuestionDb())
-            throw new DoesNotHavePermissionException("You cannot use questions in your storage.");
+            throw new DoesNotHavePermissionException("Sual bazasındaki suallardan istifadə edə bilməzsiniz");
 
         return questionStorageRepository
                 .getByTeacher(user)
                 .orElseThrow(
-                        () -> new ResourceNotFoundException("You don't have any question in your storage."))
+                        () -> new ResourceNotFoundException("Sual bazanızda heç bir sualınız yoxdur"))
                 .getQuestions();
     }
 
@@ -113,16 +121,16 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
             QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions) {
         User user = userService.getCurrentUser();
         if (!user.getPack().isCanUseQuestionDb())
-            throw new DoesNotHavePermissionException("You cannot use questions in your storage.");
+            throw new DoesNotHavePermissionException("Sual bazasındaki suallardan istifadə edə bilməzsiniz");
 
         if (numberOfQuestions <= 0)
-            throw new BadRequestException("Number of questions must be greater than 0.");
+            throw new BadRequestException("Sualların sayı 0-dan çox olmalıdır");
 
         List<Question> questions =
                 questionStorageRepository
                         .getByTeacher(user)
                         .orElseThrow(
-                                () -> new ResourceNotFoundException("You don't have any question in your storage."))
+                                () -> new ResourceNotFoundException("Sual bazanızda heç bir sualınız yoxdur"))
                         .getQuestions();
 
         return filterQuestions(type, difficulty, topicId, numberOfQuestions, questions);
@@ -133,14 +141,14 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
     public List<Question> getQuestionsFromMyStorage(UUID subjectId) {
         User user = userService.getCurrentUser();
         if (!user.getPack().isCanUseQuestionDb())
-            throw new DoesNotHavePermissionException("You cannot use questions in your storage.");
+            throw new DoesNotHavePermissionException("Sual bazasındaki suallardan istifadə edə bilməzsiniz");
 
         List<Topic> topics = topicService.getAllBySubjectId(subjectId);
 
         return questionStorageRepository
                 .getByTeacher(user)
                 .orElseThrow(
-                        () -> new ResourceNotFoundException("You don't have any question in your storage."))
+                        () -> new ResourceNotFoundException("Sual bazanızda heç bir sualınız yoxdur"))
                 .getQuestions()
                 .stream()
                 .filter(question -> topics.contains(question.getTopic()))
@@ -152,12 +160,12 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
     public List<Question> getAllQuestionsFromAdminStorage() {
         User user = userService.getCurrentUser();
         if (!user.getPack().isCanUseQuestionDb())
-            throw new DoesNotHavePermissionException("You cannot use questions in Admin storage.");
+            throw new DoesNotHavePermissionException("Adminin sual bazasındaki suallardan istifadə edə bilməzsiniz");
 
         return questionStorageRepository
                 .getByTeacher(userService.getByEmail(adminEmail))
                 .orElseThrow(
-                        () -> new ResourceNotFoundException("Admin don't have any question in Admin storage."))
+                        () -> new ResourceNotFoundException("Adminin sual bazasında heç bir sual yoxdur"))
                 .getQuestions();
     }
 
@@ -167,10 +175,10 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
             QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions) {
         User user = userService.getCurrentUser();
         if (!user.getPack().isCanUseQuestionDb())
-            throw new DoesNotHavePermissionException("You cannot use questions in Admin storage.");
+            throw new DoesNotHavePermissionException("Adminin sual bazasındaki suallardan istifadə edə bilməzsiniz");
 
         if (numberOfQuestions <= 0)
-            throw new BadRequestException("Number of questions must be greater than 0.");
+            throw new BadRequestException("Sualların sayı 0-dan çox olmalıdır");
 
         List<Question> questions =
                 questionStorageRepository
@@ -178,7 +186,7 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
                         .orElseThrow(
                                 () ->
                                         new ResourceNotFoundException(
-                                                "Admin don't have any question in Admin storage."))
+                                                "Adminin sual bazasında heç bir sual yoxdur"))
                         .getQuestions();
 
         return filterQuestions(type, difficulty, topicId, numberOfQuestions, questions);
@@ -197,7 +205,7 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
     @Transactional
     public List<Question> getQuestionsByTeacherId(UUID teacherId) {
         return questionStorageRepository.getByTeacher(userService.getUserById(teacherId)).orElseThrow(() ->
-                new ResourceNotFoundException("Question Storage Cannot Found.")).getQuestions();
+                new ResourceNotFoundException("Sual bazası tapılmadı.")).getQuestions();
     }
 
     @Override
@@ -208,23 +216,29 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
+        log.info("Sual bazasındaki sual yenilənir");
         User user = userService.getCurrentUser();
 
         if (!user.getPack().isCanPrepareQuestionsDb())
-            throw new DoesNotHavePermissionException("You cannot prepare questions in your storage.");
+            throw new DoesNotHavePermissionException("Sual bazasındaki sualı yeniləyə bilməzsiniz");
 
         questionService.update(request, titles, variantPictures, numberPictures, sounds);
+        log.info("Sual bazasındaki sual yeniləndi");
+        logService.save("Sual bazasındaki sual yeniləndi", userService.getCurrentUserOrNull());
     }
 
     @Override
     @Transactional
     public void removeQuestionsFromStorage(UUID questionId) {
+        log.info("Sual bazasındaki sual silinir");
         QuestionStorage questionStorage = questionStorageRepository
                 .getByTeacher(userService.getCurrentUser())
                 .orElseThrow(
-                        () -> new ResourceNotFoundException("You don't have any question in your storage."));
+                        () -> new ResourceNotFoundException("Sual bazanızda heç bir sualınız yoxdur"));
         questionStorage.getQuestions().removeIf(question -> question.getId().equals(questionId));
         questionService.delete(questionId);
         questionStorageRepository.save(questionStorage);
+        log.info("Sual bazasındaki sual silindi");
+        logService.save("Sual bazasındaki sual silindi", userService.getCurrentUserOrNull());
     }
 }

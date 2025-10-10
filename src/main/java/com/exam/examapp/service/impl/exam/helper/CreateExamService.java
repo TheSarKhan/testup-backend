@@ -11,6 +11,7 @@ import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.subject.SubjectStructure;
 import com.exam.examapp.model.subject.SubjectStructureQuestion;
 import com.exam.examapp.repository.ExamRepository;
+import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.TagService;
 import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.question.QuestionService;
@@ -38,6 +39,8 @@ public class CreateExamService {
 
     private final ExamRepository examRepository;
 
+    private final LogService logService;
+
     private static Exam buildExam(ExamRequest request, List<SubjectStructureQuestion> subjectStructureQuestions, List<Tag> tags, BigDecimal cost, User user) {
         return Exam.builder()
                 .examTitle(request.examTitle())
@@ -64,30 +67,30 @@ public class CreateExamService {
 
         if (Role.TEACHER.equals(user.getRole())) ExamValidationService.validateRequest(request, user);
 
-        log.info("Teacher validation passed. Creating exam");
+        log.info("Müəllim yoxlaması keçdi");
 
         List<SubjectStructureQuestion> subjectStructureQuestions =
                 buildSubjectStructureQuestions(
                         request.subjectStructures(), titles, variantPictures, numberPictures, sounds);
 
-        log.info("Subject structure questions created.");
+        log.info("Mövzu strukturu sualları yaradıldı");
 
         List<Tag> tags = buildTags(request);
 
-        log.info("Tags created.");
-
         BigDecimal cost = calculateCost(request, user);
+
+        log.info("Xərc hesabladı");
 
         Exam exam = buildExam(request, subjectStructureQuestions, tags, cost, user);
 
-        log.info("Exam created.");
+        log.info("İmtahan quruldu");
 
         exam.setNumberOfQuestions(QuestionCountService.getQuestionCount(exam));
 
-        log.info("Number of questions calculated.");
+        log.info("Sualların sayı Hesablanır");
         examRepository.save(exam);
 
-        log.info("Exam saved.");
+        log.info("İmtahan saxlanıldı");
         updateTeacherStatistics(user);
     }
 
@@ -97,6 +100,7 @@ public class CreateExamService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
+        log.info("Mövzu strukturu suallarının yaradılır");
 
         List<SubjectStructureQuestion> subjectStructureQuestions = new ArrayList<>();
 
@@ -110,16 +114,15 @@ public class CreateExamService {
                         req.subjectStructureRequest().subjectId()
                 );
             }
-            log.info("Subject structure created.");
+            log.info("Mövzu strukturu yaradılmışdır");
 
             List<Question> questions = new ArrayList<>();
             for (QuestionRequest questionRequest : req.questionRequests()) {
                 questions.add(questionService.save(questionRequest, titles, variantPictures, numberPictures, sounds));
-                log.info("Question created. Question title:{}", questionRequest.title());
+                log.info("Sual yaradıldı. Sualın başlığı:{}", questionRequest.title());
             }
 
-
-            log.info("Questions created.");
+            log.info("Suallar yaradıldı.");
             subjectStructureQuestions.add(
                     SubjectStructureQuestion.builder()
                             .subjectStructure(subjectStructure)
@@ -127,15 +130,19 @@ public class CreateExamService {
                             .build());
         }
 
+        log.info("Mövzu strukturu suallarının yaradıldı");
+
         return subjectStructureQuestions;
     }
 
     private List<Tag> buildTags(ExamRequest request) {
+        log.info("Etiketlər yaradılır");
         List<Tag> tags = new ArrayList<>();
         tags.add(tagService.getTagById(request.headerTagId()));
         if (request.otherTagIds() != null) {
             tags.addAll(request.otherTagIds().stream().map(tagService::getTagById).toList());
         }
+        log.info("Etiketlər yaradıldı");
         return tags;
     }
 
@@ -149,6 +156,7 @@ public class CreateExamService {
             user.getInfo().setCurrentlyTotalExamCount(user.getInfo().getCurrentlyTotalExamCount() + 1);
             user.getInfo().setThisMonthCreatedExamCount(user.getInfo().getThisMonthCreatedExamCount() + 1);
             userService.save(user);
+            log.info("İmtahan müəllim məlumatına əlavə edildi");
         }
     }
 }

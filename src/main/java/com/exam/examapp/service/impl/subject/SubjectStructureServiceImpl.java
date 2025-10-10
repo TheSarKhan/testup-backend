@@ -7,15 +7,19 @@ import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.mapper.SubjectStructureMapper;
 import com.exam.examapp.model.subject.SubjectStructure;
 import com.exam.examapp.repository.subject.SubjectStructureRepository;
+import com.exam.examapp.service.interfaces.LogService;
+import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.subject.SubjectService;
 import com.exam.examapp.service.interfaces.subject.SubjectStructureService;
 import com.exam.examapp.service.interfaces.subject.SubmoduleService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubjectStructureServiceImpl implements SubjectStructureService {
@@ -25,8 +29,13 @@ public class SubjectStructureServiceImpl implements SubjectStructureService {
 
     private final SubmoduleService submoduleService;
 
+    private final UserService userService;
+
+    private final LogService logService;
+
     @Override
     public SubjectStructure create(SubjectStructureRequest request) {
+        log.info("Mövzu strukturu yaradılır");
         SubjectStructure subjectStructure = SubjectStructureMapper.requestTo(request);
 
         subjectStructure.setSubject(subjectService.getById(request.subjectId()));
@@ -34,12 +43,15 @@ public class SubjectStructureServiceImpl implements SubjectStructureService {
 
         if (request.submoduleId() != null) {
             if (existsBySubmoduleAndSubjectId(request.submoduleId(), request.subjectId()))
-                throw new BadRequestException("Subject structure already exists");
+                throw new BadRequestException("Mövzu strukturu artıq mövcuddur");
             subjectStructure.setSubmodule(submoduleService.getById(request.submoduleId()));
             subjectStructure.setFree(false);
         }
 
-        return subjectStructureRepository.save(subjectStructure);
+        SubjectStructure save = subjectStructureRepository.save(subjectStructure);
+        log.info("Mövzu strukturu yaradılıdı");
+        logService.save("Mövzu strukturu yaradılıdı", userService.getCurrentUserOrNull());
+        return save;
     }
 
     @Override
@@ -59,7 +71,9 @@ public class SubjectStructureServiceImpl implements SubjectStructureService {
 
     @Override
     public SubjectStructure getBySubmoduleAndSubjectId(UUID submoduleId, UUID subjectId) {
-        return subjectStructureRepository.getBySubmodule_IdAndSubject_Id(submoduleId, subjectId).orElseThrow(() -> new ResourceNotFoundException("Subject structure not found"));
+        log.info("Mövcud struktur götürülür. Alt modul id: {}, fənn id:{}", submoduleId, subjectId);
+        return subjectStructureRepository.getBySubmodule_IdAndSubject_Id(submoduleId, subjectId).orElseThrow(() ->
+                new ResourceNotFoundException("Mövzu strukturu tapılmadı"));
     }
 
     @Override
@@ -69,11 +83,13 @@ public class SubjectStructureServiceImpl implements SubjectStructureService {
 
     @Override
     public SubjectStructure getById(UUID id) {
-        return subjectStructureRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Subject structure not found"));
+        return subjectStructureRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Mövzu strukturu tapılmadı"));
     }
 
     @Override
     public SubjectStructure update(SubjectStructureUpdateRequest request) {
+        log.info("Mövzu strukturu yenilənir");
         SubjectStructure byId = getById(request.id());
 
         SubjectStructure subjectStructure = SubjectStructureMapper.updateRequestTo(byId, request);
@@ -85,16 +101,22 @@ public class SubjectStructureServiceImpl implements SubjectStructureService {
             if (existsBySubmoduleAndSubjectId(
                     request.request().submoduleId(),
                     request.request().subjectId()))
-                throw new BadRequestException("Subject structure already exists");
+                throw new BadRequestException("Mövzu strukturu artıq mövcuddur");
             subjectStructure.setSubmodule(submoduleService.getById(request.request().submoduleId()));
             subjectStructure.setFree(false);
         }
 
-        return subjectStructureRepository.save(subjectStructure);
+        SubjectStructure save = subjectStructureRepository.save(subjectStructure);
+        log.info("Mövzu strukturu yeniləndi");
+        logService.save("Mövzu strukturu yeniləndi", userService.getCurrentUserOrNull());
+        return save;
     }
 
     @Override
     public void delete(UUID id) {
+        log.info("Mövzu strukturu silinir");
         subjectStructureRepository.deleteById(id);
+        log.info("Mövzu strukturu silindi");
+        logService.save("Mövzu strukturu silindi", userService.getCurrentUserOrNull());
     }
 }

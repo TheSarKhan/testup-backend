@@ -34,7 +34,7 @@ public class StudentExamController {
   public ResponseEntity<ApiResponse<Void>> addExam(
       @RequestParam UUID studentId, @RequestParam UUID examId) {
     studentExamService.addExam(studentId, examId);
-    return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Exam added successfully", null));
+    return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "İmtahan uğurla əlavə edildi", null));
   }
 
   @PatchMapping("/listening")
@@ -46,7 +46,7 @@ public class StudentExamController {
       @RequestParam UUID studentExamId, @RequestParam UUID listeningId) {
     studentExamService.listeningPlayed(studentExamId, listeningId);
     return ResponseEntity.ok(
-        ApiResponse.build(HttpStatus.OK, "Listening played successfully", null));
+        ApiResponse.build(HttpStatus.OK, "Dinləmə uğurla ifa olundu", null));
   }
 
   @PatchMapping(value = "/answer", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -60,6 +60,6 @@ public class StudentExamController {
       @RequestPart(required = false) String answer,
       @RequestPart(required = false) MultipartFile file) {
     studentExamService.saveAnswer(studentExamId, questionId, answer, file);
-    return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Answer saved successfully", null));
+    return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Cavab uğurla yadda saxlanıldı", null));
   }
 }

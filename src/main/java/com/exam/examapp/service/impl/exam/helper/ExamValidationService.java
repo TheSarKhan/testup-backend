@@ -13,10 +13,12 @@ import com.exam.examapp.exception.custom.ReachedLimitException;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.QuestionType;
 import com.exam.examapp.model.enums.Role;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class ExamValidationService {
     private static void validateExam(
             User user,
@@ -27,6 +29,7 @@ public class ExamValidationService {
             boolean hidden,
             int size,
             Integer integer) {
+        log.info("Validasiya davam edir");
         Optional<QuestionRequest> fistManualCheckQuestion =
                 questionRequests.stream()
                         .filter(
@@ -37,17 +40,18 @@ public class ExamValidationService {
                         .findFirst();
 
         if (!user.getPack().isCanAddManualCheckAutoQuestion() && fistManualCheckQuestion.isPresent())
-            throw new BadRequestException("You cannot add manual check question in this exam.");
+            throw new BadRequestException("Bu imtahana əl ilə yoxlama sualı əlavə edə bilməzsiniz");
 
         validatePack(user, hasPicture, hasPdfPicture, hasSound, hidden, size, integer);
     }
 
     public static void validateRequest(ExamRequest request, User user) {
+        log.info("Validasiya başladı");
         if (Role.TEACHER.equals(user.getRole())
                 && (user.getInfo().getThisMonthCreatedExamCount() >= user.getPack().getMonthlyExamCount()
                 || user.getInfo().getCurrentlyTotalExamCount() >= user.getPack().getTotalExamCount()))
             throw new ReachedLimitException(
-                    "You have reached the limit of exams for this month or total");
+                    "Bu ay və ya cəmi imtahan limitinə çatmısınız");
 
         Integer questionCountTotal =
                 request.subjectStructures().stream()
@@ -57,7 +61,7 @@ public class ExamValidationService {
                         .orElse(0);
 
         if (questionCountTotal >= user.getPack().getQuestionCountPerExam())
-            throw new ReachedLimitException("You have reached the limit of questions for this exam");
+            throw new ReachedLimitException("Bu imtahan üçün suallar limitinə çatdınız");
 
         List<QuestionRequest> questionRequests =
                 request.subjectStructures().stream()
@@ -67,7 +71,7 @@ public class ExamValidationService {
                                     a.addAll(b);
                                     return a;
                                 })
-                        .orElseThrow(() -> new BadRequestException("Questions cannot be empty."));
+                        .orElseThrow(() -> new BadRequestException("Sual boş ola bilməz"));
 
         ExamValidationService.validateExam(
                 user,
@@ -81,6 +85,7 @@ public class ExamValidationService {
     }
 
     public static void validationForUpdate(ExamUpdateRequest request, User user) {
+        log.info("İmtahan yeniləmə üçün təsdiqlənir");
         Integer questionCountTotal =
                 request.subjectStructures().stream()
                         .map(SubjectStructureQuestionsUpdateRequest::subjectStructureUpdateRequest)
@@ -90,7 +95,7 @@ public class ExamValidationService {
                         .orElse(0);
 
         if (questionCountTotal >= user.getPack().getQuestionCountPerExam())
-            throw new ReachedLimitException("You have reached the limit of questions for this exam");
+            throw new ReachedLimitException("Bu imtahan üçün suallar limitinə çatdınız");
 
         List<QuestionUpdateRequestForExam> questionRequests =
                 request.subjectStructures().stream()
@@ -100,7 +105,7 @@ public class ExamValidationService {
                                     a.addAll(b);
                                     return a;
                                 })
-                        .orElseThrow(() -> new BadRequestException("Questions cannot be empty."));
+                        .orElseThrow(() -> new BadRequestException("Suallar boş ola bilməz"));
 
         ExamValidationService.validateExamForUpdate(
                 user,
@@ -131,27 +136,27 @@ public class ExamValidationService {
                                                 && !questionRequest.questionDetails().isAuto()))
                         .findFirst();
         if (!user.getPack().isCanAddManualCheckAutoQuestion() && fistManualCheckQuestion.isPresent())
-            throw new BadRequestException("You cannot add manual check question in this exam.");
+            throw new BadRequestException("Bu imtahana əl ilə yoxlama sualı əlavə edə bilməzsiniz");
 
         validatePack(user, hasPicture, hasPdfPicture, hasSound, hidden, size, integer);
     }
 
     private static void validatePack(User user, boolean hasPicture, boolean hasPdfPicture, boolean hasSound, boolean hidden, int size, Integer integer) {
         if (!user.getPack().isCanAddPicture() && hasPicture)
-            throw new BadRequestException("You cannot add picture for this exam.");
+            throw new BadRequestException("Bu imtahan üçün şəkil əlavə edə bilməzsiniz");
 
         if (!user.getPack().isCanAddPdfSound() && (hasPdfPicture || hasSound))
-            throw new BadRequestException("You cannot add sound or pdf picture for this exam.");
+            throw new BadRequestException("Bu imtahan üçün səs və ya pdf şəkil əlavə edə bilməzsiniz");
 
         if (hidden && !user.getPack().isCanShareViaCode())
             throw new BadRequestException(
-                    "You cannot share this exam via code (cannot create hidden exam).");
+                    "Bu imtahanı kod vasitəsilə paylaşa bilməzsiniz (gizli imtahan yarada bilməz)");
 
         if (!user.getPack().isCanAddMultipleSubjectInOneExam() && size > 1)
-            throw new BadRequestException("You cannot add more than one subject in one exam.");
+            throw new BadRequestException("Bir imtahana birdən çox mövzu əlavə edə bilməzsiniz");
 
         if (integer != null && !user.getPack().isCanSelectExamDuration())
-            throw new BadRequestException("You cannot select exam duration.");
+            throw new BadRequestException("İmtahanın müddətini seçə bilməzsiniz");
     }
 
 }

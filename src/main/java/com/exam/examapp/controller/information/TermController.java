@@ -1,6 +1,5 @@
 package com.exam.examapp.controller.information;
 
-import com.exam.examapp.AppMessage;
 import com.exam.examapp.dto.request.information.TermRequest;
 import com.exam.examapp.dto.request.information.TermUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
@@ -56,7 +55,7 @@ public class TermController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        AppMessage.TERM_RETRIEVE_SUCCESS.getMessage(),
+                        "Şərtlər uğurla əldə edildi",
                         allTerms));
     }
 
@@ -73,7 +72,7 @@ public class TermController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        AppMessage.TERM_RETRIEVE_SUCCESS.getMessage(),
+                        "Şərtlər uğurla əldə edildi",
                         termByName));
     }
 
@@ -105,11 +104,11 @@ public class TermController {
     public ResponseEntity<ApiResponse<String>> delete(@RequestParam
                                                       @NotNull
                                                       UUID id) {
-        String term = termService.deleteTerm(id);
+        String response = termService.deleteTerm(id);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.NO_CONTENT,
-                        term,
+                        response,
                         null));
     }
 }

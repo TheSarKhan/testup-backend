@@ -37,7 +37,7 @@ public class NotificationController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.CREATED,
-                        "Notification sent successfully.",
+                        "Bildiriş uğurla göndərildi",
                         null));
     }
 
@@ -53,7 +53,7 @@ public class NotificationController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Notifications retrieved successfully",
+                        "Bildirişlər uğurla əldə edildi",
                         allNotifications));
     }
 
@@ -68,7 +68,7 @@ public class NotificationController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "My Notifications retrieved successfully",
+                        "Bildirişlərim uğurla əldə edildi",
                         myNotifications));
     }
 
@@ -86,7 +86,7 @@ public class NotificationController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Notifications retrieved successfully",
+                        "Bildirişlər uğurla əldə edildi",
                         notificationsByEmail));
     }
 
@@ -103,7 +103,7 @@ public class NotificationController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Notification received successfully",
+                        "Bildiriş uğurla alındı",
                         notification));
     }
 
@@ -119,7 +119,7 @@ public class NotificationController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
-                        "Notification updated successfully",
+                        "Bildiriş uğurla yeniləndi",
                         null));
     }
 
@@ -135,7 +135,7 @@ public class NotificationController {
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.NO_CONTENT,
-                        "Notification deleted successfully",
+                        "Bildiriş uğurla silindi",
                         null));
     }
 }

@@ -33,7 +33,7 @@ public class ProfileController {
         ProfileInfoResponse profileInfo = profileService.getProfileInfo();
         return ResponseEntity.ok(ApiResponse.build(
                 HttpStatus.OK,
-                "Profile info",
+                "Profil məlumatı",
                 profileInfo
         ));
     }
@@ -45,7 +45,7 @@ public class ProfileController {
         ProfileSettingsResponse profileSettings = profileService.getProfileSettings();
         return ResponseEntity.ok(ApiResponse.build(
                 HttpStatus.OK,
-                "Profile settings",
+                "Profil parametrləri",
                 profileSettings
         ));
     }
@@ -61,7 +61,7 @@ public class ProfileController {
         TeacherInfoResponse teacherInfo = profileService.getTeacherInfo();
         return ResponseEntity.ok(ApiResponse.build(
                 HttpStatus.OK,
-                "Teacher info",
+                "Müəllim məlumatı",
                 teacherInfo
         ));
     }
@@ -73,7 +73,7 @@ public class ProfileController {
         TokenResponse tokenResponse = profileService.updateProfileInfo(request);
         return ResponseEntity.ok(ApiResponse.build(
                 HttpStatus.OK,
-                "Profile settings updated successfully",
+                "Profil parametrləri uğurla yeniləndi",
                 tokenResponse
         ));
     }
@@ -85,7 +85,7 @@ public class ProfileController {
         profileService.updateProfilePicture(image);
         return ResponseEntity.ok(ApiResponse.build(
                 HttpStatus.OK,
-                "Profile picture updated successfully",
+                "Profil şəkli uğurla yeniləndi",
                 null
         ));
     }
