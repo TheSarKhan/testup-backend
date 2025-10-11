@@ -366,16 +366,16 @@ public class ExamServiceImpl implements ExamService {
         log.info("İmtahan id ilə silinir: {}", id);
         Exam exam = getById(id);
         List<SubjectStructureQuestion> subjectStructureQuestions = exam.getSubjectStructureQuestions();
+        examRepository.deleteById(id);
+        log.info("İmtahan silindi");
         for (SubjectStructureQuestion subjectStructureQuestion : subjectStructureQuestions) {
+            subjectStructureQuestionRepository.deleteById(subjectStructureQuestion.getId());
             List<Question> questions = subjectStructureQuestion.getQuestion();
             for (Question question : questions) {
                 questionService.delete(question.getId());
             }
             subjectStructureService.delete(subjectStructureQuestion.getSubjectStructure().getId());
-            subjectStructureQuestionRepository.deleteById(subjectStructureQuestion.getId());
         }
-        examRepository.deleteById(id);
-        log.info("İmtahan silindi");
         logService.save("İmtahan silindi", userService.getCurrentUserOrNull());
     }
 

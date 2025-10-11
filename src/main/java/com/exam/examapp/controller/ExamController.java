@@ -251,7 +251,6 @@ public class ExamController {
                     "Delete an exam by UUID. This operation typically marks exam as deleted or removes it permanently depending on service logic.")
     public ResponseEntity<ApiResponse<Void>> deleteExam(@RequestParam UUID id) {
         examService.deleteExam(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                .body(ApiResponse.build(HttpStatus.NO_CONTENT, "İmtahan uğurla silindi", null));
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.NO_CONTENT, "İmtahan uğurla silindi", null));
     }
 }
