@@ -374,7 +374,8 @@ public class ExamServiceImpl implements ExamService {
             for (Question question : questions) {
                 questionService.delete(question.getId());
             }
-            subjectStructureService.delete(subjectStructureQuestion.getSubjectStructure().getId());
+            if (subjectStructureQuestion.getSubjectStructure().getSubmodule() == null)
+                subjectStructureService.delete(subjectStructureQuestion.getSubjectStructure().getId());
         }
         logService.save("İmtahan silindi", userService.getCurrentUserOrNull());
     }
