@@ -2,6 +2,7 @@ package com.exam.examapp.controller;
 
 import com.exam.examapp.dto.response.AdminStatisticsResponse;
 import com.exam.examapp.dto.response.ApiResponse;
+import com.exam.examapp.dto.response.LogResponse;
 import com.exam.examapp.dto.response.exam.ExamBlockResponse;
 import com.exam.examapp.model.Log;
 import com.exam.examapp.model.User;
@@ -67,9 +68,9 @@ public class AdminController {
 
     @GetMapping("/logs")
     @Operation(summary = "Get Logs", description = "Retrieve list of logs.")
-    public ResponseEntity<ApiResponse<List<Log>>> getLogs(@RequestParam int page,
-                                                          @RequestParam int size) {
-        List<Log> logs = logService.getAllOrderByCreatedAt(page, size);
+    public ResponseEntity<ApiResponse<List<LogResponse>>> getLogs(@RequestParam int page,
+                                                                  @RequestParam int size) {
+        List<LogResponse> logs = logService.getAllOrderByCreatedAt(page, size);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
@@ -93,5 +94,12 @@ public class AdminController {
         List<ExamBlockResponse> myExams = examService.getAllExamsForAdmin(name, minCost, maxCost, rating, tagIds, pageNum);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "İmtahanlar uğurla əldə edildi", myExams));
+    }
+
+    @PatchMapping("/change-pack")
+    @Operation(summary = "Change pack", description = "Allows an **ADMIN** to change the pack of teacher by id.")
+    public ResponseEntity<ApiResponse<Void>> changePack(@RequestParam UUID id, @RequestParam UUID packId) {
+        adminService.changeTeacherPack(id, packId);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Paket uğurla dəyişdirildi", null));
     }
 }

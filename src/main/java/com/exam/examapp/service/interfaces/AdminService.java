@@ -11,4 +11,6 @@ public interface AdminService {
     void changeUserRoleViaId(UUID id, Role role);
 
     AdminStatisticsResponse getAdminStatistics();
+
+    void changeTeacherPack(UUID id, UUID packId);
 }

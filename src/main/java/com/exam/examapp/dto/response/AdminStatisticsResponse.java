@@ -1,7 +1,5 @@
 package com.exam.examapp.dto.response;
 
-import com.exam.examapp.model.Log;
-
 import java.util.List;
 
 public record AdminStatisticsResponse(
@@ -11,6 +9,9 @@ public record AdminStatisticsResponse(
         double differenceWithLastMonthProfit,
         long totalExam,
         int thisMonthCreatedExam,
-        List<Log> logs
+        List<LogResponse> logs,
+        GraphResponse profitGraph,
+        GraphResponse teacherRegisterGraph,
+        GraphResponse studentRegisterGraph
 ) {
 }

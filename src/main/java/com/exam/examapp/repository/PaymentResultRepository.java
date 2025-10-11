@@ -23,4 +23,7 @@ public interface PaymentResultRepository extends JpaRepository<PaymentResult, UU
     List<PaymentResult> getByStatusAndCreatedAtAfter(String status, Instant createdAtAfter);
 
     List<PaymentResult> getByStatus(String status);
+
+    @Query("select sum(amount) from PaymentResult where createdAt > :createdAtAfter and createdAt < :createdAtBefore")
+    Double getAmountPaidByRange(Instant createdAtAfter, Instant createdAtBefore);
 }

@@ -179,7 +179,6 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.password()));
         userService.save(user);
         log.info("Istifadəçi parolu yenilədi:{}", request.email());
-        logService.save("Istifadəçi parolu yenilədi: " + request.email(), user);
         return "Parolunuz yeniləndi";
     }
 
@@ -223,7 +222,7 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = jwtService.generateRefreshToken(currentUser.getEmail());
 
         log.info("Registrasiya sonlandı:{}", currentUser.getEmail());
-        logService.save("Registrasiya sonlandı:" + currentUser.getEmail(), currentUser);
+        logService.save("İstifadəçi qeydiyyatdan keçdi (google):" + currentUser.getEmail(), currentUser);
         return new TokenResponse(accessToken, refreshToken, currentUser.getRole(), currentUser.getPack());
     }
 }

@@ -215,6 +215,15 @@ public class ExamController {
                 ApiResponse.build(HttpStatus.OK, "İmtahan uğurla yayımlandı", null));
     }
 
+    @PatchMapping("/unpublish")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    public ResponseEntity<ApiResponse<Void>> unpublish(@RequestParam UUID id) {
+        examService.unpublishExam(id);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "İmtahan uğurla nəşrdən toplandı.", null));
+    }
+
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")

@@ -1,15 +1,19 @@
 package com.exam.examapp.service.impl;
 
 import com.exam.examapp.dto.response.AdminStatisticsResponse;
-import com.exam.examapp.model.Log;
+import com.exam.examapp.dto.response.LogResponse;
+import com.exam.examapp.exception.custom.BadRequestException;
+import com.exam.examapp.model.Pack;
 import com.exam.examapp.model.PaymentResult;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.repository.ExamRepository;
 import com.exam.examapp.repository.PaymentResultRepository;
 import com.exam.examapp.repository.UserRepository;
+import com.exam.examapp.service.GraphService;
 import com.exam.examapp.service.interfaces.AdminService;
 import com.exam.examapp.service.interfaces.LogService;
+import com.exam.examapp.service.interfaces.PackService;
 import com.exam.examapp.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +35,11 @@ public class AdminServiceImpl implements AdminService {
 
     private final ExamRepository examRepository;
 
+    private final PackService packService;
+
     private final LogService logService;
+
+    private final GraphService graphService;
 
     @Override
     public void changeUserRoleViaEmail(String email, Role role) {
@@ -82,7 +90,7 @@ public class AdminServiceImpl implements AdminService {
         long totalExams = examRepository.count();
         long thisMonthCreatedExam = examRepository.countByCreatedAtAfter(oneMonthAgo);
 
-        List<Log> logs = logService.getAllOrderByCreatedAt(1, 5);
+        List<LogResponse> logs = logService.getAllOrderByCreatedAt(1, 5);
 
         return new AdminStatisticsResponse(
                 (int) totalUsers,
@@ -91,8 +99,25 @@ public class AdminServiceImpl implements AdminService {
                 lastMonthAmount,
                 totalExams,
                 (int) thisMonthCreatedExam,
-                logs
+                logs,
+                graphService.fillGraph(graphService.getProfitGraph()),
+                graphService.fillGraph(graphService.getTeacherRegisterGraph()),
+                graphService.fillGraph(graphService.getStudentRegisterGraph())
         );
+    }
+
+    @Override
+    public void changeTeacherPack(UUID id, UUID packId) {
+        log.info("Admin müəllim paketini dəyişdirir");
+        User user = userService.getUserById(id);
+        if (Role.TEACHER.equals(user.getRole()) || Role.ADMIN.equals(user.getRole())) {
+            Pack pack = packService.getPackById(packId);
+            user.setPack(pack);
+            userService.save(user);
+            log.info("Admin müəllim paketini dəyişdirdi. Paket adı: {}", pack.getPackName());
+            logService.save("Admin müəllim paketini dəyişdirdi. Paket adı: " + pack.getPackName(), userService.getCurrentUserOrNull());
+        }
+        throw new BadRequestException("Yalnız müəllim və admin paketləri dəyişdirilə bilər.");
     }
 
     private void changeUserRole(User user, Role role) {

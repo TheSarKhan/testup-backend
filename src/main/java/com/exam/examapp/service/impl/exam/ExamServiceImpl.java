@@ -276,10 +276,20 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public void publishExam(UUID id) {
-        log.info("İmtahan id ilə nəşr olunur {}", id);
+        log.info("İmtahan id ilə nəşr olunur. Id: {}", id);
         Exam exam = getById(id);
         exam.setReadyForSale(true);
         examRepository.save(exam);
+        log.info("İmtahan id ilə nəşr olundu. Id: {}", id);
+    }
+
+    @Override
+    public void unpublishExam(UUID id) {
+        log.info("İmtahan id ilə nəşrdən toplanır. Id: {}", id);
+        Exam exam = getById(id);
+        exam.setReadyForSale(false);
+        examRepository.save(exam);
+        log.info("İmtahan id ilə nəşrdən toplandı. Id: {}", id);
     }
 
     @Override
@@ -374,7 +384,8 @@ public class ExamServiceImpl implements ExamService {
         log.info("İd ilə imtahan verilir: {}", id);
         return examRepository
                 .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("İmtahan tapılmadı"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("İmtahan tapılmadı"));
     }
 
     private StudentExam findStudentExamById(UUID studentExamId) {

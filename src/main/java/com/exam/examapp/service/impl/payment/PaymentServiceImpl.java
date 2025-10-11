@@ -163,15 +163,17 @@ public class PaymentServiceImpl implements PaymentService {
             UUID productId = result.getProductId();
             if (Role.STUDENT.equals(user.getRole())) {
                 studentExamService.addExam(user.getId(), productId);
+                log.info("Tələbə imtahan aldı. Imtahan id-si: {}", productId);
+                logService.save("Tələbə imtahan aldı. Imtahan id-si: " + productId, userService.getCurrentUserOrNull());
             } else if (Role.TEACHER.equals(user.getRole())) {
                 Pack pack = packService.getPackById(productId);
                 user.setPack(pack);
                 user.setNextPaymentDate(Instant.now().plusSeconds(2_629_743));
                 userService.save(user);
+                log.info("Müəllim yeni paket aldı. Paketin adı: {}", pack.getPackName());
+                logService.save("Müəllim yeni paket aldı. Paketin adı: " + pack.getPackName(), userService.getCurrentUserOrNull());
             }
         }
-        log.info("Ödəniş yeniləndi");
-        logService.save("Ödəniş yeniləndi", userService.getCurrentUserOrNull());
     }
 
     public PaymentInvoiceResponse getInvoice(String uuid) {

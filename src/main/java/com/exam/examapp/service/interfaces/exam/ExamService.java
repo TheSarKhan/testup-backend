@@ -63,6 +63,8 @@ public interface ExamService {
 
     void publishExam(UUID id);
 
+    void unpublishExam(UUID id);
+
     void updateExam(
             ExamUpdateRequest request,
             List<MultipartFile> titles,
