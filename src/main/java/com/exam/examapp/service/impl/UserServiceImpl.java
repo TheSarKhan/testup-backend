@@ -72,12 +72,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getCurrentUserOrNull() {
-        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = userDetails.getUsername();
-        if (email.equals("anonymousUser"))
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal()))
             return null;
 
-        return getByEmail(email);
+        CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
+
+        return getByEmail(principal.getUsername());
     }
 
     @Override

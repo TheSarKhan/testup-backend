@@ -58,6 +58,18 @@ public class LogServiceImpl implements LogService {
 
     private LogResponse logToResponse(Log log) {
         User user = log.getUser();
+        if (user == null)
+            return new LogResponse(
+                    log.getId(),
+                    log.getMessage(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    log.getDeletedAt(),
+                    log.getCreatedAt(),
+                    log.getUpdatedAt()
+            );
         return new LogResponse(
                 log.getId(),
                 log.getMessage(),
