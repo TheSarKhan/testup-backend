@@ -1,10 +1,10 @@
 package com.exam.examapp.controller;
 
+import com.exam.examapp.dto.request.UserFilterRequest;
 import com.exam.examapp.dto.response.AdminStatisticsResponse;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.dto.response.LogResponse;
 import com.exam.examapp.dto.response.exam.ExamBlockResponse;
-import com.exam.examapp.model.Log;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.service.interfaces.AdminService;
@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -101,5 +102,32 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Void>> changePack(@RequestParam UUID id, @RequestParam UUID packId) {
         adminService.changeTeacherPack(id, packId);
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Paket uğurla dəyişdirildi", null));
+    }
+
+    @PatchMapping("/deactivate-user")
+    @Operation(summary = "Deactivate user", description = "Allows an **ADMIN** to deactivate a user by id.")
+    public ResponseEntity<ApiResponse<Void>> deactivateUser(@RequestParam UUID id) {
+        adminService.deactivateUser(id);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Istifadəçi deaktiv edildi", null));
+    }
+
+    @PatchMapping("/activate-user")
+    @Operation(summary = "Activate user", description = "Allows an **ADMIN** to activate a user by id.")
+    public ResponseEntity<ApiResponse<Void>> activateUser(@RequestParam UUID id) {
+        adminService.activateUser(id);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Istifadəçi aktiv edildi", null));
+    }
+
+    @GetMapping("/filtered-emails")
+    @Operation(summary = "Get filtered emails", description = "Retrieve a list of filtered emails.")
+    public ResponseEntity<ApiResponse<List<String>>> getFilteredEmails(
+            @RequestParam(required = false) List<String> packNames,
+            @RequestParam(required = false) List<Role> roles,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) Instant createAtAfter,
+            @RequestParam(required = false) Instant createAtBefore) {
+        UserFilterRequest request = new UserFilterRequest(packNames, roles, isActive, createAtAfter, createAtBefore);
+        List<String> emailList = userService.getEmailList(request);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "E-poçtlar uğurla filtrləndi", emailList));
     }
 }

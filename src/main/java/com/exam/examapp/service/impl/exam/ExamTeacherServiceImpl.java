@@ -42,8 +42,7 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
         List<ExamTeacher> examTeachers = new ArrayList<>();
         for (Map.Entry<String, List<UUID>> emailListEntry : request.teacherEmailToSubjectIds().entrySet()) {
             if (!userService.existsByEmail(emailListEntry.getKey())) {
-                sb.append("E-poçt ilə müəllim").append(emailListEntry.getKey())
-                        .append(" mövcud deyil").append("\n");
+                sb.append(emailListEntry.getKey()).append(" E-poçt ilə müəllim mövcud deyil").append("\n");
                 continue;
             }
 
@@ -53,9 +52,10 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
             examTeachers.add(ExamTeacher.builder().exam(exam).teacher(teacher).subject(subjects).build());
         }
         examTeacherRepository.saveAll(examTeachers);
-
-        log.info(sb.isEmpty() ? sb.toString() : "Müəllim(lər) uğurla əlavə edildi.");
-        return sb.isEmpty() ? sb.toString() : "Müəllim(lər) uğurla əlavə edildi.";
+        String message = !sb.isEmpty() ? sb.toString() : "Müəllim(lər) uğurla əlavə edildi.";
+        log.info(message);
+        logService.save(message, userService.getCurrentUserOrNull());
+        return message;
     }
 
     @Override
@@ -63,7 +63,7 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
         log.info("Müəllim imtahandan kənarlaşdırılır");
         examTeacherRepository.deleteByTeacherAndExam(
                 userService.getUserById(teacherId), examService.getById(examId));
-        log.info("Müəllim imtahandan kənarlaşdırıldı:" + teacherId);
+        log.info("Müəllim imtahandan kənarlaşdırıldı:{}", teacherId);
         logService.save("Müəllim imtahandan kənarlaşdırıldı:" + teacherId, userService.getCurrentUserOrNull());
     }
 }

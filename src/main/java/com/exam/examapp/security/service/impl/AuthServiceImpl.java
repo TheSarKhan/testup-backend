@@ -109,7 +109,6 @@ public class AuthServiceImpl implements AuthService {
     public String logout(String email) {
         log.info("İstifadəçi logout olur:{}", email);
         cacheService.deleteContent(REFRESH_TOKEN_HEADER, email);
-
         log.info("İstifadəçi logout oldu");
         return "İstifadəçi logout oldu";
     }

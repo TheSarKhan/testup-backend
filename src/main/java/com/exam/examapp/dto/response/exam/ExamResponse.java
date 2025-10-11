@@ -23,6 +23,6 @@ public record ExamResponse(
     String explanationVideoUrl,
     int totalQuestionCount,
     boolean isHidden,
-    boolean isDeleted,
+    boolean isActive,
     Instant createAt,
     Instant updatedAt) {}

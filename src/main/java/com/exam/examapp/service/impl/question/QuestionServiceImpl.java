@@ -74,7 +74,7 @@ public class QuestionServiceImpl implements QuestionService {
         log.info("Başlıq uğurla yükləndi");
 
         try {
-            if (QuestionType.LISTENING.equals(request.questionType())) {
+            if (QuestionType.LISTENING.equals(request.type())) {
                 String soundUrl = fileService.uploadFile(SOUND_PATH, sounds.getFirst());
                 sounds.removeFirst();
                 question.setSoundUrl(soundUrl);
@@ -100,9 +100,9 @@ public class QuestionServiceImpl implements QuestionService {
 
         Map<Character, String> variantToContentMap = null;
         try {
-            if (!request.questionType().equals(QuestionType.LISTENING) &&
-                    !request.questionType().equals(QuestionType.TEXT_BASED) &&
-                    !request.questionType().equals(QuestionType.OPEN_ENDED))
+            if (!request.type().equals(QuestionType.LISTENING) &&
+                    !request.type().equals(QuestionType.TEXT_BASED) &&
+                    !request.type().equals(QuestionType.OPEN_ENDED))
                 variantToContentMap =
                         getCharacterStringMap(
                                 questionDetails.variantToContentMap(),
@@ -116,7 +116,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         Map<Character, String> numberToContentMap = null;
         try {
-            if (request.questionType().equals(QuestionType.MATCH))
+            if (request.type().equals(QuestionType.MATCH))
                 numberToContentMap =
                         getCharacterStringMap(
                                 questionDetails.numberToContentMap(),
@@ -210,7 +210,7 @@ public class QuestionServiceImpl implements QuestionService {
         }
         log.info("Sualın başlığı hazırdır");
 
-        if (QuestionType.LISTENING.equals(request.questionType())) {
+        if (QuestionType.LISTENING.equals(request.type())) {
             if (question.getSoundUrl() != null)
                 fileService.deleteFile(IMAGE_NUMBER_PATH, question.getSoundUrl());
             String soundUrl = fileService.uploadFile(SOUND_PATH, sounds.getFirst());

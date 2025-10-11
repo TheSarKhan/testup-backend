@@ -18,8 +18,6 @@ public class ExamSpecification {
                 cb.equal(root.get("tags").get("id"), tagId);
     }
 
-
-
     public static Specification<Exam> hasTags(List<UUID> tagIds) {
         return (root, query, criteriaBuilder) -> {
             if (tagIds == null || tagIds.isEmpty()) {
@@ -39,7 +37,6 @@ public class ExamSpecification {
             return inClause;
         };
     }
-
 
     public static Specification<Exam> hasRatingInRange(List<Integer> ratings) {
         return (root, query, criteriaBuilder) -> {

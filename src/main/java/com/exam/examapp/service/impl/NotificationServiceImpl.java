@@ -1,5 +1,6 @@
 package com.exam.examapp.service.impl;
 
+import com.exam.examapp.dto.request.MultiNotificationRequest;
 import com.exam.examapp.dto.request.NotificationRequest;
 import com.exam.examapp.dto.request.NotificationUpdateRequest;
 import com.exam.examapp.dto.response.NotificationResponse;
@@ -38,6 +39,13 @@ public class NotificationServiceImpl implements NotificationService {
         log.info("Bildiriş göndərildi");
         logService.save("Bildiriş göndərildi. " + request.message() + " mail: " + request.email(),
                 userService.getCurrentUserOrNull());
+    }
+
+    @Override
+    public void sendNotificationToAll(MultiNotificationRequest request) {
+        for (String email : request.emails()) {
+            sendNotification(new NotificationRequest(request.title(), request.message(), email));
+        }
     }
 
     @Override

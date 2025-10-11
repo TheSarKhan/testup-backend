@@ -12,5 +12,9 @@ public interface AdminService {
 
     AdminStatisticsResponse getAdminStatistics();
 
+    void deactivateUser(UUID id);
+
+    void activateUser(UUID id);
+
     void changeTeacherPack(UUID id, UUID packId);
 }

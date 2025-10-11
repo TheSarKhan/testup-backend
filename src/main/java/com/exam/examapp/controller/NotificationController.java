@@ -1,5 +1,6 @@
 package com.exam.examapp.controller;
 
+import com.exam.examapp.dto.request.MultiNotificationRequest;
 import com.exam.examapp.dto.request.NotificationRequest;
 import com.exam.examapp.dto.request.NotificationUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
@@ -38,6 +39,22 @@ public class NotificationController {
                 ApiResponse.build(
                         HttpStatus.CREATED,
                         "Bildiriş uğurla göndərildi",
+                        null));
+    }
+
+    @PostMapping("/multi")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Send notifications",
+            description = "Allows an **ADMIN** to send new notifications by providing necessary details."
+    )
+    public ResponseEntity<ApiResponse<Void>> sendNotifications(@RequestBody MultiNotificationRequest request) {
+        notificationService.sendNotificationToAll(request);
+        return ResponseEntity.ok(
+                ApiResponse.build(
+                        HttpStatus.CREATED,
+                        "Bildirişlər uğurla göndərildi",
                         null));
     }
 

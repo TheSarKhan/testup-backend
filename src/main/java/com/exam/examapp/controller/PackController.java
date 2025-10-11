@@ -12,13 +12,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -90,6 +91,20 @@ public class PackController {
                         HttpStatus.OK,
                         "Paket uğurla alındı",
                         pack));
+    }
+
+    @GetMapping("/pack-names")
+    @Operation(
+            summary = "Get name of packs",
+            description = "Retrieve name of packs."
+    )
+    public ResponseEntity<ApiResponse<List<String>>> getNames() {
+        List<String> packNames = packService.getPackNames();
+        return ResponseEntity.ok(
+                ApiResponse.build(
+                        HttpStatus.OK,
+                        "Paket adları uğurla alındı",
+                        packNames));
     }
 
     @PutMapping

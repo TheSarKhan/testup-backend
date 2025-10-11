@@ -1,16 +1,19 @@
 package com.exam.examapp.service.impl.exam;
 
+import com.exam.examapp.dto.request.NotificationRequest;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.exam.StudentExam;
 import com.exam.examapp.repository.StudentExamRepository;
-import com.exam.examapp.service.interfaces.LogService;
-import com.exam.examapp.service.interfaces.exam.ExamService;
+import com.exam.examapp.security.service.interfaces.EmailService;
 import com.exam.examapp.service.interfaces.FileService;
-import com.exam.examapp.service.interfaces.exam.StudentExamService;
+import com.exam.examapp.service.interfaces.LogService;
+import com.exam.examapp.service.interfaces.NotificationService;
 import com.exam.examapp.service.interfaces.UserService;
+import com.exam.examapp.service.interfaces.exam.ExamService;
+import com.exam.examapp.service.interfaces.exam.StudentExamService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,12 +40,17 @@ public class StudentExamServiceImpl implements StudentExamService {
 
     private final LogService logService;
 
+    private final NotificationService notificationService;
+
+    private final EmailService emailService;
+
     @Override
     public void addExam(UUID studentId, UUID examId) {
         log.info("İmtahan sagirdə əlavə olunur");
         Exam exam = examService.getById(examId);
+        User student = userService.getUserById(studentId);
         List<StudentExam> byExamAndStudent =
-                studentExamRepository.getByExamAndStudent(exam, userService.getUserById(studentId)).stream()
+                studentExamRepository.getByExamAndStudent(exam, student).stream()
                         .filter(e -> ExamStatus.ACTIVE.equals(e.getStatus()))
                         .toList();
 
@@ -58,10 +66,25 @@ public class StudentExamServiceImpl implements StudentExamService {
                                                         subjectStructureQuestion.getSubjectStructure().getQuestionCount())
                                         .mapToInt(Integer::intValue)
                                         .sum())
-                        .student(userService.getUserById(studentId))
+                        .student(student)
                         .status(ExamStatus.ACTIVE)
                         .exam(exam)
                         .build());
+
+        notificationService.sendNotification(
+                new NotificationRequest(
+                        "testup.az imtahanın əlavəsi",
+                        "Hesabınıza imtahan hesabınıza əlavə edildi. İmtahan adı: " + exam.getExamTitle(),
+                        student.getEmail()
+                )
+        );
+
+        emailService.sendEmail(
+                student.getEmail(),
+                "testup.az imtahanın əlavəsi",
+                "Hesabınıza imtahan hesabınıza əlavə edildi. İmtahan adı: " + exam.getExamTitle()
+        );
+
         log.info("İmtahan sagirdə əlavə olundu");
         logService.save("İmtahan sagirdə əlavə olundu", userService.getCurrentUserOrNull());
     }

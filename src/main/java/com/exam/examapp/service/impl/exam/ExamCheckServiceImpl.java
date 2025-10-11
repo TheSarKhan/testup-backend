@@ -18,7 +18,7 @@ import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.subject.SubjectStructureQuestion;
 import com.exam.examapp.repository.StudentExamRepository;
 import com.exam.examapp.security.service.interfaces.EmailService;
-import com.exam.examapp.service.impl.UserServiceImpl;
+import com.exam.examapp.service.impl.user.UserServiceImpl;
 import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.NotificationService;
 import com.exam.examapp.service.interfaces.exam.ExamCheckService;

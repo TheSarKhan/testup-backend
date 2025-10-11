@@ -1,5 +1,6 @@
 package com.exam.examapp.service.interfaces;
 
+import com.exam.examapp.dto.request.UserFilterRequest;
 import com.exam.examapp.model.TeacherInfo;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
@@ -21,6 +22,8 @@ public interface UserService {
   TeacherInfo getTeacherInfo();
 
   List<User> getUsersByRole(Role role);
+
+  List<String> getEmailList(UserFilterRequest request);
 
   boolean existsByEmail(String email);
 

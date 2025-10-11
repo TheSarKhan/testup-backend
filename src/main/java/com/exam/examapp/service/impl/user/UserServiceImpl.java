@@ -1,5 +1,6 @@
-package com.exam.examapp.service.impl;
+package com.exam.examapp.service.impl.user;
 
+import com.exam.examapp.dto.request.UserFilterRequest;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.exception.custom.UserNotLoginException;
@@ -12,6 +13,7 @@ import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     private final LogService logService;
+
+    private final UserSpecification userSpecification;
 
     @Override
     public User save(User user) {
@@ -86,6 +90,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getUsersByRole(Role role) {
         return userRepository.getAllByRole(role);
+    }
+
+    @Override
+    public List<String> getEmailList(UserFilterRequest request) {
+        Specification<User> specification = userSpecification.filter(request);
+        return userRepository.findAll(specification).stream().map(User::getEmail).toList();
     }
 
     @Override

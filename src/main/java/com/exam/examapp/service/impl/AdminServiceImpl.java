@@ -107,6 +107,24 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    public void deactivateUser(UUID id) {
+        User user = userService.getUserById(id);
+        user.setActive(false);
+        userService.save(user);
+        log.info("{} e-poçt ünvanı olan istifadəçi deaktiv edildi", user.getEmail());
+        logService.save(user.getEmail() + " e-poçt ünvanı olan istifadəçi deaktiv edildi", userService.getCurrentUserOrNull());
+    }
+
+    @Override
+    public void activateUser(UUID id) {
+        User user = userService.getUserById(id);
+        user.setActive(true);
+        userService.save(user);
+        log.info("{} e-poçt ünvanı olan istifadəçi aktiv edildi.", user.getEmail());
+        logService.save(user.getEmail() + " e-poçt ünvanı olan istifadəçi aktiv edildi", userService.getCurrentUserOrNull());
+    }
+
+    @Override
     public void changeTeacherPack(UUID id, UUID packId) {
         log.info("Admin müəllim paketini dəyişdirir");
         User user = userService.getUserById(id);

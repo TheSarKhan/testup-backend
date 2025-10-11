@@ -57,6 +57,11 @@ public class PackServiceImpl implements PackService {
     }
 
     @Override
+    public List<String> getPackNames() {
+        return packRepository.findAll().stream().map(Pack::getPackName).toList();
+    }
+
+    @Override
     public void updatePack(PackUpdateRequest request) {
         log.info("Paket yenilənir");
         Optional<Pack> packByPackName = packRepository.getPackByPackName(request.packName());

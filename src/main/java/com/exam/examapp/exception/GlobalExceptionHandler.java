@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleResourceNotFound(
             ResourceNotFoundException ex, WebRequest request) {
-        String message = "ResourceNotFoundException: ".concat(ex.getMessage());
+        String message = ex.getMessage();
         log.error(message);
         return buildErrorResponse(HttpStatus.NOT_FOUND, message, null);
     }
@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotLoginException.class)
     public ResponseEntity<ApiResponse<Object>> handleNotLoginUser(
             UserNotLoginException ex, WebRequest request) {
-        String message = "UserNotLoginException: ".concat(ex.getMessage());
+        String message = ex.getMessage();
         log.error(message);
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, message, null);
     }

@@ -16,6 +16,8 @@ public interface PackService {
 
     Pack getPackByName(String packName);
 
+    List<String> getPackNames();
+
     void updatePack(PackUpdateRequest request);
 
     void deletePack(UUID id);
