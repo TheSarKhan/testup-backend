@@ -100,7 +100,7 @@ public class ExamMapper {
                 exam.getExplanationVideoUrl(),
                 exam.getNumberOfQuestions(),
                 exam.isHidden(),
-                exam.isActive(),
+                exam.isDeleted(),
                 exam.getCreatedAt(),
                 exam.getUpdatedAt());
     }

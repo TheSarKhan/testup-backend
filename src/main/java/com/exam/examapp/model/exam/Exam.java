@@ -62,7 +62,7 @@ public class Exam {
 
   private List<UUID> hasUncheckedQuestionStudentExamId;
 
-  private boolean isActive;
+  private boolean isDeleted;
 
   private Instant createdAt;
 

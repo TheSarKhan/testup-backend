@@ -12,6 +12,7 @@ import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.subject.SubjectService;
 import com.exam.examapp.service.interfaces.subject.SubjectStructureService;
 import com.exam.examapp.service.interfaces.subject.SubmoduleService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,12 +35,14 @@ public class SubjectStructureServiceImpl implements SubjectStructureService {
     private final LogService logService;
 
     @Override
+    @Transactional
     public SubjectStructure create(SubjectStructureRequest request) {
         log.info("Mövzu strukturu yaradılır");
         SubjectStructure subjectStructure = SubjectStructureMapper.requestTo(request);
 
         subjectStructure.setSubject(subjectService.getById(request.subjectId()));
         subjectStructure.setFree(true);
+        subjectStructure.setActive(true);
 
         if (request.submoduleId() != null) {
             if (existsBySubmoduleAndSubjectId(request.submoduleId(), request.subjectId()))
@@ -56,29 +59,30 @@ public class SubjectStructureServiceImpl implements SubjectStructureService {
 
     @Override
     public List<SubjectStructure> getAll() {
-        return subjectStructureRepository.findAll();
+        return subjectStructureRepository.findByIsActive(true);
     }
 
     @Override
     public List<SubjectStructure> getBySubjectId(UUID subjectId) {
-        return subjectStructureRepository.getBySubject_Id(subjectId);
+        return subjectStructureRepository.getBySubject_IdAndIsActive(subjectId, true);
     }
 
     @Override
     public List<SubjectStructure> getBySubmoduleId(UUID submoduleId) {
-        return subjectStructureRepository.getBySubmodule_Id(submoduleId);
+        return subjectStructureRepository.getBySubmodule_IdAndIsActive(submoduleId, true);
     }
 
     @Override
     public SubjectStructure getBySubmoduleAndSubjectId(UUID submoduleId, UUID subjectId) {
         log.info("Mövcud struktur götürülür. Alt modul id: {}, fənn id:{}", submoduleId, subjectId);
-        return subjectStructureRepository.getBySubmodule_IdAndSubject_Id(submoduleId, subjectId).orElseThrow(() ->
-                new ResourceNotFoundException("Mövzu strukturu tapılmadı"));
+        return subjectStructureRepository.getBySubmodule_IdAndSubject_IdAndIsActive(submoduleId, subjectId, true)
+                .orElseThrow(() -> new ResourceNotFoundException("Mövzu strukturu tapılmadı"));
     }
 
     @Override
     public boolean existsBySubmoduleAndSubjectId(UUID submoduleId, UUID subjectId) {
-        return subjectStructureRepository.existsBySubmodule_IdAndSubject_Id(submoduleId, subjectId);
+        return subjectStructureRepository.existsBySubmodule_IdAndSubject_IdAndIsActive(
+                submoduleId, subjectId, true);
     }
 
     @Override
@@ -88,35 +92,26 @@ public class SubjectStructureServiceImpl implements SubjectStructureService {
     }
 
     @Override
+    @Transactional
     public SubjectStructure update(SubjectStructureUpdateRequest request) {
         log.info("Mövzu strukturu yenilənir");
-        SubjectStructure byId = getById(request.id());
+        deactivate(request.id());
 
-        SubjectStructure subjectStructure = SubjectStructureMapper.updateRequestTo(byId, request);
-
-        subjectStructure.setSubject(subjectService.getById(request.request().subjectId()));
-        subjectStructure.setFree(true);
-
-        if (request.request().submoduleId() != null) {
-            if (existsBySubmoduleAndSubjectId(
-                    request.request().submoduleId(),
-                    request.request().subjectId()))
-                throw new BadRequestException("Mövzu strukturu artıq mövcuddur");
-            subjectStructure.setSubmodule(submoduleService.getById(request.request().submoduleId()));
-            subjectStructure.setFree(false);
-        }
-
-        SubjectStructure save = subjectStructureRepository.save(subjectStructure);
-        log.info("Mövzu strukturu yeniləndi");
-        logService.save("Mövzu strukturu yeniləndi", userService.getCurrentUserOrNull());
-        return save;
+        return create(request.request());
     }
 
     @Override
     public void delete(UUID id) {
         log.info("Mövzu strukturu silinir");
-        subjectStructureRepository.deleteById(id);
-        log.info("Mövzu strukturu silindi");
-        logService.save("Mövzu strukturu silindi", userService.getCurrentUserOrNull());
+        deactivate(id);
+    }
+
+    private void deactivate(UUID id) {
+        SubjectStructure subjectStructure = getById(id);
+
+        subjectStructure.setActive(false);
+        subjectStructureRepository.save(subjectStructure);
+        log.info("Mövzu strukturu deactiv edildi");
+        logService.save("Mövzu strukturu deactiv edildi", userService.getCurrentUserOrNull());
     }
 }

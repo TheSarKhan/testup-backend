@@ -44,6 +44,8 @@ public class SubjectStructure {
     @Column(columnDefinition = "TEXT")
     private String formula;
 
+    private boolean isActive;
+
     private Instant createdAt;
 
     private Instant updatedAt;
