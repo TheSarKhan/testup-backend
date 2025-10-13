@@ -45,8 +45,8 @@ public class AdvertisementServiceImpl implements AdvertisementService {
         String imageUrl = fileService.uploadFile(IMAGE_PATH, image);
         advertisement.setImageUrl(imageUrl);
         advertisementRepository.save(advertisement);
-        log.info("Reklam yaradıldı");
-        logService.save("Reklam yaradıldı", userService.getCurrentUserOrNull());
+        log.info("Reklam yaradıldı. Reklam adı: {}", request.title());
+        logService.save("Reklam yaradıldı. Reklam adı: " + request.title(), userService.getCurrentUserOrNull());
     }
 
     @Override
@@ -82,7 +82,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
         advertisement.setImageUrl(fileService.uploadFile(IMAGE_PATH, image));
         advertisementRepository.save(updatedAdvertisement);
         log.info("Reklam yeniləndi");
-        logService.save("Reklam yeniləndi", userService.getCurrentUserOrNull());
+        logService.save("Reklam yeniləndi. Reklam adı: " + request.title(), userService.getCurrentUserOrNull());
     }
 
     @Override

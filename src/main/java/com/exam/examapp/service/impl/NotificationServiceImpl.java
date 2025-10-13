@@ -36,9 +36,9 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = NotificationMapper.requestTo(request);
         notification.setUser(userService.getByEmail(request.email()));
         notificationRepository.save(notification);
-        log.info("Bildiriş göndərildi");
-        logService.save("Bildiriş göndərildi. " + request.message() + " mail: " + request.email(),
-                userService.getCurrentUserOrNull());
+        String message = "Bildiriş göndərildi. Message:" + request.message() + " mail: " + request.email();
+        log.info(message);
+        logService.save(message, userService.getCurrentUserOrNull());
     }
 
     @Override
@@ -101,9 +101,9 @@ public class NotificationServiceImpl implements NotificationService {
         updatedNotification.setRead(false);
         updatedNotification.setUser(userService.getByEmail(request.email()));
         notificationRepository.save(updatedNotification);
-        log.info("Bildiriş yeniləndi");
-        logService.save("Bildiriş yeniləndi." + request.message() + " mail: " + request.email(),
-                userService.getCurrentUserOrNull());
+        String message = "Bildiriş yeniləndi. Message" + request.message() + " mail: " + request.email();
+        log.info(message);
+        logService.save(message, userService.getCurrentUserOrNull());
     }
 
     @Override
@@ -111,6 +111,7 @@ public class NotificationServiceImpl implements NotificationService {
         log.info("Bildiriş silinir");
         notificationRepository.deleteById(id);
         log.info("Bildiriş silindi");
+        logService.save("Bildiriş silindi", userService.getCurrentUserOrNull());
     }
 
     private Notification getById(UUID id) {

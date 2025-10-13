@@ -18,6 +18,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserSpecification {
     private final PackRepository packRepository;
+    public Specification<User> hasNameOrEmailLike(String searchTerm) {
+        return (root, query, cb) -> {
+            if (searchTerm == null || searchTerm.trim().isEmpty()) return null;
+            String pattern = "%" + searchTerm.toLowerCase() + "%";
+            return cb.or(
+                    cb.like(cb.lower(root.get("fullName")), pattern),
+                    cb.like(cb.lower(root.get("email")), pattern)
+            );
+        };
+    }
 
     public Specification<User> filter(UserFilterRequest filter) {
         Specification<User> specification = Specification.unrestricted();
@@ -29,7 +39,7 @@ public class UserSpecification {
                 .and(createdBefore(filter.createAtBefore()));
     }
 
-    private Specification<User> hasPackNames(List<String> packNames) {
+    public Specification<User> hasPackNames(List<String> packNames) {
         return (root, query, cb) -> {
             if (packNames == null || packNames.isEmpty()) return null;
 
@@ -43,28 +53,28 @@ public class UserSpecification {
         };
     }
 
-    private Specification<User> hasRoles(List<Role> roles) {
+    public Specification<User> hasRoles(List<Role> roles) {
         return (root, query, cb) -> {
             if (roles == null || roles.isEmpty()) return null;
             return root.get("role").in(roles);
         };
     }
 
-    private Specification<User> hasActiveStatus(Boolean isActive) {
+    public Specification<User> hasActiveStatus(Boolean isActive) {
         return (root, query, cb) -> {
             if (isActive == null) return null;
             return cb.equal(root.get("isActive"), isActive);
         };
     }
 
-    private Specification<User> createdAfter(Instant after) {
+    public Specification<User> createdAfter(Instant after) {
         return (root, query, cb) -> {
             if (after == null) return null;
             return cb.greaterThanOrEqualTo(root.get("createdAt"), after);
         };
     }
 
-    private Specification<User> createdBefore(Instant before) {
+    public Specification<User> createdBefore(Instant before) {
         return (root, query, cb) -> {
             if (before == null) return null;
             return cb.lessThanOrEqualTo(root.get("createdAt"), before);

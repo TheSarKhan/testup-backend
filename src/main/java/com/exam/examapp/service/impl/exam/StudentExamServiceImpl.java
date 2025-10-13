@@ -85,8 +85,10 @@ public class StudentExamServiceImpl implements StudentExamService {
                 "Hesabınıza imtahan hesabınıza əlavə edildi. İmtahan adı: " + exam.getExamTitle()
         );
 
-        log.info("İmtahan sagirdə əlavə olundu");
-        logService.save("İmtahan sagirdə əlavə olundu", userService.getCurrentUserOrNull());
+        String message = "İmtahan sagirdə əlavə olundu. Email: " + student.getEmail() +" imtahan adı: "+ exam.getExamTitle();
+
+        log.info(message);
+        logService.save(message, userService.getCurrentUserOrNull());
     }
 
     @Override

@@ -1,7 +1,10 @@
 package com.exam.examapp.service.impl;
 
+import com.exam.examapp.dto.request.StudentFilter;
+import com.exam.examapp.dto.request.TeacherFilter;
 import com.exam.examapp.dto.response.AdminStatisticsResponse;
 import com.exam.examapp.dto.response.LogResponse;
+import com.exam.examapp.dto.response.UsersForAdminResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.model.Pack;
 import com.exam.examapp.model.PaymentResult;
@@ -11,16 +14,21 @@ import com.exam.examapp.repository.ExamRepository;
 import com.exam.examapp.repository.PaymentResultRepository;
 import com.exam.examapp.repository.UserRepository;
 import com.exam.examapp.service.GraphService;
+import com.exam.examapp.service.impl.user.UserSpecification;
 import com.exam.examapp.service.interfaces.AdminService;
 import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.PackService;
 import com.exam.examapp.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -40,6 +48,8 @@ public class AdminServiceImpl implements AdminService {
     private final LogService logService;
 
     private final GraphService graphService;
+
+    private final UserSpecification userSpecification;
 
     @Override
     public void changeUserRoleViaEmail(String email, Role role) {
@@ -107,6 +117,59 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    public Map<Integer, List<UsersForAdminResponse>> getTeachersByNameOrEmail(int page, int size, String search) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Specification<User> specification = Specification.unrestricted();
+        specification = specification.and(userSpecification.hasNameOrEmailLike(search))
+                .and(userSpecification.hasRoles(List.of(Role.TEACHER)));
+        int totalTeachersCount = userRepository.findAll(specification).size();
+        List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
+                .stream().map(this::mapUser).toList();
+        return Map.of(totalTeachersCount / size, list);
+    }
+
+    @Override
+    public Map<Integer, List<UsersForAdminResponse>> getStudentsByNameOrEmail(int page, int size, String search) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Specification<User> specification = Specification.unrestricted();
+        specification = specification.and(userSpecification.hasNameOrEmailLike(search))
+                .and(userSpecification.hasRoles(List.of(Role.STUDENT)));
+        int totalTeachersCount = userRepository.findAll(specification).size();
+        List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
+                .stream().map(this::mapUser).toList();
+        return Map.of(totalTeachersCount / size, list);
+    }
+
+    @Override
+    public Map<Integer, List<UsersForAdminResponse>> getTeachersByFiltered(TeacherFilter filter) {
+        Pageable pageable = PageRequest.of(filter.page() - 1, filter.size());
+        Specification<User> specification = Specification.unrestricted();
+        specification = specification.and(userSpecification.hasPackNames(filter.packNames()))
+                .and(userSpecification.hasRoles(List.of(Role.TEACHER)))
+                .and(userSpecification.hasActiveStatus(filter.isActive()))
+                .and(userSpecification.createdAfter(filter.createAtAfter()))
+                .and(userSpecification.createdBefore(filter.createAtBefore()));
+        int totalTeachersCount = userRepository.findAll(specification).size();
+        List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
+                .stream().map(this::mapUser).toList();
+        return Map.of(totalTeachersCount / filter.size(), list);
+    }
+
+    @Override
+    public Map<Integer, List<UsersForAdminResponse>> getStudentsByFiltered(StudentFilter filter) {
+        Pageable pageable = PageRequest.of(filter.page() - 1, filter.size());
+        Specification<User> specification = Specification.unrestricted();
+        specification = specification.and(userSpecification.hasRoles(List.of(Role.STUDENT)))
+                .and(userSpecification.hasActiveStatus(filter.isActive()))
+                .and(userSpecification.createdAfter(filter.createAtAfter()))
+                .and(userSpecification.createdBefore(filter.createAtBefore()));
+        int totalTeachersCount = userRepository.findAll(specification).size();
+        List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
+                .stream().map(this::mapUser).toList();
+        return Map.of(totalTeachersCount / filter.size(), list);
+    }
+
+    @Override
     public void deactivateUser(UUID id) {
         User user = userService.getUserById(id);
         user.setActive(false);
@@ -132,8 +195,9 @@ public class AdminServiceImpl implements AdminService {
             Pack pack = packService.getPackById(packId);
             user.setPack(pack);
             userService.save(user);
-            log.info("Admin müəllim paketini dəyişdirdi. Paket adı: {}", pack.getPackName());
-            logService.save("Admin müəllim paketini dəyişdirdi. Paket adı: " + pack.getPackName(), userService.getCurrentUserOrNull());
+            String message = "Admin " + user.getEmail() + " e-poçt ünvanı sahibinin paketini dəyişdirdi. Paket adı: " + pack.getPackName();
+            log.info(message);
+            logService.save(message, userService.getCurrentUserOrNull());
         }
         throw new BadRequestException("Yalnız müəllim və admin paketləri dəyişdirilə bilər.");
     }
@@ -142,4 +206,19 @@ public class AdminServiceImpl implements AdminService {
         user.setRole(role);
         userService.save(user);
     }
+
+    private UsersForAdminResponse mapUser(User user) {
+        return new UsersForAdminResponse(
+                user.getId(),
+                user.getProfilePictureUrl(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getRole(),
+                user.getPack().getPackName(),
+                user.getPhoneNumber(),
+                user.getCreatedAt(),
+                user.isActive());
+    }
+
+
 }

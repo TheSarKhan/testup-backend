@@ -8,6 +8,8 @@ import com.exam.examapp.dto.response.exam.ExamBlockResponse;
 import com.exam.examapp.dto.response.exam.ExamDetailedResponse;
 import com.exam.examapp.dto.response.exam.ExamResponse;
 import com.exam.examapp.dto.response.exam.StartExamResponse;
+import com.exam.examapp.service.impl.exam.helper.ExamSort;
+import com.exam.examapp.service.impl.exam.helper.ExamType;
 import com.exam.examapp.service.interfaces.exam.ExamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -55,7 +57,6 @@ public class ExamController {
 
     @GetMapping
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
     @Operation(
             summary = "Get my exams",
             description =
@@ -64,6 +65,18 @@ public class ExamController {
         List<ExamBlockResponse> myExams = examService.getMyExams();
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "İmtahanlarım uğurla əldə edildi", myExams));
+    }
+
+    @GetMapping("/user")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+            summary = "Get user exams",
+            description =
+                    "Retrieve list of exam blocks . Returns summary info used in dashboard.")
+    public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getUserExams(@RequestParam UUID id) {
+        List<ExamBlockResponse> exams = examService.getExamsByUserId(id);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "İmtahanlar uğurla əldə edildi", exams));
     }
 
     @GetMapping("/all")
@@ -77,9 +90,11 @@ public class ExamController {
             @RequestParam(required = false) Integer maxCost,
             @RequestParam(required = false) List<Integer> rating,
             @RequestParam(required = false) List<UUID> tagIds,
-            @RequestParam(required = false) Integer pageNum
+            @RequestParam(required = false) Integer pageNum,
+            @RequestParam ExamSort sort,
+            @RequestParam ExamType type
     ) {
-        List<ExamBlockResponse> myExams = examService.getAllExams(name, minCost, maxCost, rating, tagIds, pageNum);
+        List<ExamBlockResponse> myExams = examService.getAllExams(name, minCost, maxCost, rating, tagIds, sort, type, pageNum);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "İmtahanlar uğurla əldə edildi", myExams));
     }
@@ -150,9 +165,9 @@ public class ExamController {
     @Operation(
             summary = "Get exam access link",
             description =
-                    "Get link for sharing/starting an exam. Returned link with student if needed.")
+                    "Get link for sharing an exam. Returned link with student if needed.")
     public ResponseEntity<ApiResponse<String>> getExamAccessLink(@RequestParam UUID id) {
-        String link = examService.getExamStartLink(id);
+        String link = examService.getExamLink(id);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "Link uğurla alındı", link));
     }

@@ -1,6 +1,7 @@
 package com.exam.examapp.repository;
 
 import com.exam.examapp.model.User;
+import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.exam.StudentExam;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +20,8 @@ public interface StudentExamRepository extends JpaRepository<StudentExam, UUID> 
     Optional<StudentExam> getByExamAndStudentName(Exam exam, String studentName);
 
     List<StudentExam> getByExam_Id(UUID examId);
+
+    List<StudentExam> findByStudentAndStatus(User student, ExamStatus status);
+
+    List<StudentExam> findByStudentAndStatusNotIn(User student, List<ExamStatus> statuses);
 }

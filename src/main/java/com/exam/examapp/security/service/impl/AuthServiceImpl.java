@@ -78,9 +78,11 @@ public class AuthServiceImpl implements AuthService {
                                         : null)
                         .build();
         User save = userService.save(user);
-        log.info("İstifadəçi qeydiyyatdan keçdi:{}", request.email());
-        logService.save("İstifadəçi qeydiyyatdan keçdi:" + request.email(), save);
-        return "İstifadəçi qeydiyyatdan keçdi";
+        String message = Role.TEACHER.equals(request.role()) ? "Müəllim " : "Tələbə ";
+        message = message.concat("qeydiyyatdan keçdi: ").concat(request.fullName());
+        log.info(message);
+        logService.save(message, save);
+        return message;
     }
 
     @Override
@@ -220,8 +222,11 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(currentUser.getEmail());
         String refreshToken = jwtService.generateRefreshToken(currentUser.getEmail());
 
-        log.info("Registrasiya sonlandı:{}", currentUser.getEmail());
-        logService.save("İstifadəçi qeydiyyatdan keçdi (google):" + currentUser.getEmail(), currentUser);
+        String message = Role.TEACHER.equals(role) ? "Müəllim " : "Tələbə ";
+        message = message.concat("qeydiyyatdan keçdi (google): ").concat(currentUser.getEmail());
+
+        log.info(message);
+        logService.save(message, currentUser);
         return new TokenResponse(accessToken, refreshToken, currentUser.getRole(), currentUser.getPack());
     }
 }

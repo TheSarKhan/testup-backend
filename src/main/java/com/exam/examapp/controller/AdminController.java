@@ -1,12 +1,17 @@
 package com.exam.examapp.controller;
 
+import com.exam.examapp.dto.request.StudentFilter;
+import com.exam.examapp.dto.request.TeacherFilter;
 import com.exam.examapp.dto.request.UserFilterRequest;
 import com.exam.examapp.dto.response.AdminStatisticsResponse;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.dto.response.LogResponse;
+import com.exam.examapp.dto.response.UsersForAdminResponse;
 import com.exam.examapp.dto.response.exam.ExamBlockResponse;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
+import com.exam.examapp.service.impl.exam.helper.ExamSort;
+import com.exam.examapp.service.impl.exam.helper.ExamType;
 import com.exam.examapp.service.interfaces.AdminService;
 import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.UserService;
@@ -22,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -67,6 +73,55 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Statistika uğurla əldə edildi", adminStatistics));
     }
 
+    @GetMapping("/teachers-by-search")
+    @Operation(summary = "Get Teachers by search", description = "Retrieve a list of teachers filtered by search.")
+    public ResponseEntity<ApiResponse<Map<Integer, List<UsersForAdminResponse>>>> getTeachersBySearch(
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String search) {
+        Map<Integer, List<UsersForAdminResponse>> map =
+                adminService.getTeachersByNameOrEmail(page, size, search);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Müəllimlər uğurla əldə edildi", map));
+    }
+
+    @GetMapping("/students-by-search")
+    @Operation(summary = "Get Students by search", description = "Retrieve a list of students filtered by search.")
+    public ResponseEntity<ApiResponse<Map<Integer, List<UsersForAdminResponse>>>> getStudentsBySearch(
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String search) {
+        Map<Integer, List<UsersForAdminResponse>> map =
+                adminService.getStudentsByNameOrEmail(page, size, search);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Tələbələr uğurla əldə edildi", map));
+    }
+
+    @GetMapping("/teachers-by-filter")
+    @Operation(summary = "Get Teachers by filter", description = "Retrieve a list of teachers filtered.")
+    public ResponseEntity<ApiResponse<Map<Integer, List<UsersForAdminResponse>>>> getTeachersByFilter(
+            @RequestParam List<String> packNames,
+            @RequestParam Boolean isActive,
+            @RequestParam Instant createAtAfter,
+            @RequestParam Instant createAtBefore,
+            @RequestParam int page,
+            @RequestParam int size) {
+        TeacherFilter filter = new TeacherFilter(packNames, isActive, createAtAfter, createAtBefore, page, size);
+        Map<Integer, List<UsersForAdminResponse>> map = adminService.getTeachersByFiltered(filter);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Müəllimlər uğurla əldə edildi", map));
+    }
+
+    @GetMapping("/students-by-filter")
+    @Operation(summary = "Get Students by filter", description = "Retrieve a list of students filtered.")
+    public ResponseEntity<ApiResponse<Map<Integer, List<UsersForAdminResponse>>>> getStudentsByFilter(
+            @RequestParam Boolean isActive,
+            @RequestParam Instant createAtAfter,
+            @RequestParam Instant createAtBefore,
+            @RequestParam int page,
+            @RequestParam int size) {
+        StudentFilter filter = new StudentFilter(isActive, createAtAfter, createAtBefore, page, size);
+        Map<Integer, List<UsersForAdminResponse>> map = adminService.getStudentsByFiltered(filter);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Tələbələr uğurla əldə edildi", map));
+    }
+
     @GetMapping("/logs")
     @Operation(summary = "Get Logs", description = "Retrieve list of logs.")
     public ResponseEntity<ApiResponse<List<LogResponse>>> getLogs(@RequestParam int page,
@@ -90,9 +145,11 @@ public class AdminController {
             @RequestParam(required = false) Integer maxCost,
             @RequestParam(required = false) List<Integer> rating,
             @RequestParam(required = false) List<UUID> tagIds,
-            @RequestParam(required = false) Integer pageNum
+            @RequestParam(required = false) Integer pageNum,
+            @RequestParam ExamSort sort,
+            @RequestParam ExamType type
     ) {
-        List<ExamBlockResponse> myExams = examService.getAllExamsForAdmin(name, minCost, maxCost, rating, tagIds, pageNum);
+        List<ExamBlockResponse> myExams = examService.getAllExamsForAdmin(name, minCost, maxCost, rating, tagIds, sort, type, pageNum);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "İmtahanlar uğurla əldə edildi", myExams));
     }

@@ -1,6 +1,10 @@
 package com.exam.examapp.service.impl.exam.helper;
 
+import com.exam.examapp.model.User;
+import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.exam.Exam;
+import com.exam.examapp.model.exam.StudentExam;
+import com.exam.examapp.repository.StudentExamRepository;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Path;
@@ -88,4 +92,48 @@ public class ExamSpecification {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.like(criteriaBuilder.lower(root.get("examTitle")), "%" + name + "%");
     }
+
+    public static Specification<Exam> hasType(ExamType type,
+                                                User currentUser,
+                                                StudentExamRepository studentExamRepository) {
+        return (root, query, cb) -> {
+            if (type == null || type == ExamType.ALL) {
+                return cb.conjunction();
+            }
+
+            return switch (type) {
+                case FREE -> cb.equal(root.get("cost"), BigDecimal.ZERO);
+                case PAID -> cb.greaterThan(root.get("cost"), BigDecimal.ZERO);
+                case BOUGHT -> {
+                    List<StudentExam> studentExams = studentExamRepository.findByStudentAndStatus(
+                            currentUser, ExamStatus.ACTIVE
+                    );
+                    List<UUID> boughtExamIds = studentExams.stream()
+                            .map(studentExam -> studentExam.getExam().getId())
+                            .toList();
+
+                    if (boughtExamIds.isEmpty())
+                        yield cb.disjunction();
+
+                    yield root.get("id").in(boughtExamIds);
+                }
+                case FINISHED -> {
+                    List<StudentExam> studentExams = studentExamRepository.findByStudentAndStatusNotIn(
+                            currentUser, List.of(ExamStatus.ACTIVE, ExamStatus.STARTED)
+                    );
+
+                    List<UUID> finishedExamIds = studentExams.stream()
+                            .map(studentExam -> studentExam.getExam().getId())
+                            .toList();
+
+                    if (finishedExamIds.isEmpty())
+                        yield cb.disjunction();
+
+                    yield root.get("id").in(finishedExamIds);
+                }
+                default -> cb.conjunction();
+            };
+        };
+    }
+
 }

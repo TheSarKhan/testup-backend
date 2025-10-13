@@ -35,8 +35,8 @@ public class PackServiceImpl implements PackService {
             throw new BadRequestException(request.packName() + " adlı paket artıq mövcuddur");
         Pack pack = PackMapper.requestTo(request);
         packRepository.save(pack);
-        log.info("Paket yaradıldı");
-        logService.save("Paket yaradıldı", userService.getCurrentUserOrNull());
+        log.info("Paket yaradıldı. Paket: {}", request.packName());
+        logService.save("Paket yaradıldı. Paket: " + request.packName(), userService.getCurrentUserOrNull());
     }
 
     @Override
@@ -52,7 +52,7 @@ public class PackServiceImpl implements PackService {
 
     @Override
     public Pack getPackByName(String packName) {
-        return packRepository.getPackByPackName(packName).orElseThrow(()->
+        return packRepository.getPackByPackName(packName).orElseThrow(() ->
                 new ResourceNotFoundException("Paket tapılmadı."));
     }
 
@@ -75,7 +75,7 @@ public class PackServiceImpl implements PackService {
         Pack updatedPack = PackMapper.updateRequestTo(pack, request);
         packRepository.save(updatedPack);
         log.info("Paket yeniləndi");
-        logService.save("Paket yeniləndi", userService.getCurrentUserOrNull());
+        logService.save("Paket yeniləndi. Paket: " + updatedPack.getPackName(), userService.getCurrentUserOrNull());
     }
 
     @Override

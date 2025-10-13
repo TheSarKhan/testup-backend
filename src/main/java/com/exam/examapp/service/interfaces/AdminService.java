@@ -1,8 +1,13 @@
 package com.exam.examapp.service.interfaces;
 
+import com.exam.examapp.dto.request.StudentFilter;
+import com.exam.examapp.dto.request.TeacherFilter;
 import com.exam.examapp.dto.response.AdminStatisticsResponse;
+import com.exam.examapp.dto.response.UsersForAdminResponse;
 import com.exam.examapp.model.enums.Role;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface AdminService {
@@ -11,6 +16,14 @@ public interface AdminService {
     void changeUserRoleViaId(UUID id, Role role);
 
     AdminStatisticsResponse getAdminStatistics();
+
+    Map<Integer, List<UsersForAdminResponse>> getTeachersByNameOrEmail(int page, int size, String search);
+
+    Map<Integer, List<UsersForAdminResponse>> getStudentsByNameOrEmail(int page, int size, String search);
+
+    Map<Integer, List<UsersForAdminResponse>> getTeachersByFiltered(TeacherFilter filter);
+
+    Map<Integer, List<UsersForAdminResponse>> getStudentsByFiltered(StudentFilter filter);
 
     void deactivateUser(UUID id);
 

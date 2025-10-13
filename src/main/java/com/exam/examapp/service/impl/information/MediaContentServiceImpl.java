@@ -99,7 +99,7 @@ public class MediaContentServiceImpl implements MediaContentService {
 
     private MediaContent getById(UUID id) {
         return mediaContentRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Media Content not found."));
+                new ResourceNotFoundException("Media məzmunu tapılmadı"));
     }
 
     private MediaContentResponse toResponse(MediaContent mediaContent) {

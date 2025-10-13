@@ -52,7 +52,7 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
             examTeachers.add(ExamTeacher.builder().exam(exam).teacher(teacher).subject(subjects).build());
         }
         examTeacherRepository.saveAll(examTeachers);
-        String message = !sb.isEmpty() ? sb.toString() : "Müəllim(lər) uğurla əlavə edildi.";
+        String message = !sb.isEmpty() ? sb.toString() : "Müəllim(lər) uğurla əlavə edildi";
         log.info(message);
         logService.save(message, userService.getCurrentUserOrNull());
         return message;
@@ -63,7 +63,7 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
         log.info("Müəllim imtahandan kənarlaşdırılır");
         examTeacherRepository.deleteByTeacherAndExam(
                 userService.getUserById(teacherId), examService.getById(examId));
-        log.info("Müəllim imtahandan kənarlaşdırıldı:{}", teacherId);
-        logService.save("Müəllim imtahandan kənarlaşdırıldı:" + teacherId, userService.getCurrentUserOrNull());
+        log.info("Müəllim imtahandan kənarlaşdırıldı. Id:{}", teacherId);
+        logService.save("Müəllim imtahandan kənarlaşdırıldı. Id:" + teacherId, userService.getCurrentUserOrNull());
     }
 }

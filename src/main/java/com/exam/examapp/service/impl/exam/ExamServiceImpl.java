@@ -10,6 +10,7 @@ import com.exam.examapp.dto.response.exam.ExamResponse;
 import com.exam.examapp.dto.response.exam.StartExamResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
+import com.exam.examapp.exception.custom.UserNotLoginException;
 import com.exam.examapp.mapper.ExamMapper;
 import com.exam.examapp.mapper.QuestionMapper;
 import com.exam.examapp.model.Tag;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,7 +58,7 @@ import java.util.function.Function;
 public class ExamServiceImpl implements ExamService {
     private static final String EXAM_CODE_PREFIX = "exam_code_";
 
-    private static final String EXAM_START_LINK_PREFIX = "/api/v1/exam/start?id=";
+    private static final String EXAM_START_LINK_PREFIX = "/api/v1/exam/detailed/id?id=";
 
     private final ExamRepository examRepository;
 
@@ -84,8 +86,12 @@ public class ExamServiceImpl implements ExamService {
 
     private final LogService logService;
 
-    @Value("${app.base-url}")
-    private String baseUrl;
+    @Value("${app.front-base-url}")
+    private String frontBaseUrl;
+
+    private static void printStartExam(Exam exam) {
+        log.info("İmtahan başladı. İmtahan: {}", exam.getExamTitle());
+    }
 
     @Override
     @Transactional
@@ -107,8 +113,10 @@ public class ExamServiceImpl implements ExamService {
                                                Integer maxCost,
                                                List<Integer> rating,
                                                List<UUID> tagIds,
+                                               ExamSort sort,
+                                               ExamType type,
                                                Integer pageNum) {
-        Page<Exam> page = getExamPage(name, minCost, maxCost, rating, tagIds, pageNum);
+        Page<Exam> page = getExamPage(name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
 
         return page.getContent()
                 .stream()
@@ -124,8 +132,10 @@ public class ExamServiceImpl implements ExamService {
                                                        Integer maxCost,
                                                        List<Integer> rating,
                                                        List<UUID> tagIds,
+                                                       ExamSort sort,
+                                                       ExamType type,
                                                        Integer pageNum) {
-        Page<Exam> page = getExamPage(name, minCost, maxCost, rating, tagIds, pageNum);
+        Page<Exam> page = getExamPage(name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
 
         return page.getContent()
                 .stream()
@@ -137,6 +147,16 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public List<ExamBlockResponse> getMyExams() {
         User user = userService.getCurrentUser();
+        return getExamBlockResponses(user);
+    }
+
+    @Override
+    public List<ExamBlockResponse> getExamsByUserId(UUID id) {
+        User user = userService.getUserById(id);
+        return getExamBlockResponses(user);
+    }
+
+    private List<ExamBlockResponse> getExamBlockResponses(User user) {
         if (Role.TEACHER.equals(user.getRole()) || Role.ADMIN.equals(user.getRole())) {
             return examRepository.getByTeacher(user).stream()
                     .map(exam -> ExamMapper.toBlockResponse(exam, null))
@@ -219,9 +239,9 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
-    public String getExamStartLink(UUID id) {
+    public String getExamLink(UUID id) {
         Exam exam = getById(id);
-        return baseUrl + EXAM_START_LINK_PREFIX + exam.getStartId();
+        return frontBaseUrl + EXAM_START_LINK_PREFIX + exam.getStartId();
     }
 
     @Override
@@ -231,8 +251,8 @@ public class ExamServiceImpl implements ExamService {
         String examId = cacheService.getContent(EXAM_CODE_PREFIX, examCode.substring(1));
         Exam exam = getById(UUID.fromString(examId));
         StartExamResponse result = startExamService.startExam(studentName, exam);
-        log.info("İmtahan başladı");
-        logService.save("İmtahan başladı", userService.getCurrentUserOrNull());
+        printStartExam(exam);
+        logService.save("İmtahan başladı. İmtahan: " + exam.getExamTitle(), userService.getCurrentUserOrNull());
         return result;
     }
 
@@ -243,8 +263,8 @@ public class ExamServiceImpl implements ExamService {
         Exam exam = examRepository.getExamByStartId(id).orElseThrow(() ->
                 new ResourceNotFoundException("İmtahan tapılmadı"));
         StartExamResponse result = startExamService.startExam(studentName, exam);
-        log.info("İmtahan başladı");
-        logService.save("İmtahan başladı", userService.getCurrentUserOrNull());
+        printStartExam(exam);
+        logService.save("İmtahan başladı. İmtahan: " + exam.getExamTitle(), userService.getCurrentUserOrNull());
         return result;
     }
 
@@ -356,8 +376,8 @@ public class ExamServiceImpl implements ExamService {
         }
         exam.setSubjectStructureQuestions(subjectStructureQuestions);
         examRepository.save(exam);
-        log.info("İmtahan yeniləndi");
-        logService.save("İmtahan yeniləndi", userService.getCurrentUserOrNull());
+        log.info("İmtahan yeniləndi. Id: {}", exam.getId());
+        logService.save("İmtahan yeniləndi. Id: " + exam.getId(), userService.getCurrentUserOrNull());
     }
 
     @Override
@@ -409,17 +429,45 @@ public class ExamServiceImpl implements ExamService {
         };
     }
 
-    private Page<Exam> getExamPage(String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, Integer pageNum) {
+    private Page<Exam> getExamPage(String name,
+                                   Integer minCost,
+                                   Integer maxCost,
+                                   List<Integer> rating,
+                                   List<UUID> tagIds,
+                                   Integer pageNum,
+                                   ExamSort sort,
+                                   ExamType type) {
         Specification<Exam> specification = Specification.unrestricted();
-        specification = specification.and(ExamSpecification.hasName(name));
-        specification = specification.and(ExamSpecification.hasCostBetween(minCost, maxCost));
-        specification = specification.and(ExamSpecification.hasRatingInRange(rating));
-        specification = specification.and(ExamSpecification.hasTags(tagIds));
+        specification = specification.and(ExamSpecification.hasName(name))
+                .and(ExamSpecification.hasCostBetween(minCost, maxCost))
+                .and(ExamSpecification.hasRatingInRange(rating))
+                .and(ExamSpecification.hasTags(tagIds));
+
+        User currentUser = userService.getCurrentUserOrNull();
+        if ((type == ExamType.BOUGHT || type == ExamType.FINISHED) && currentUser == null) {
+            throw new UserNotLoginException("User must be logged in to see bought or finished exams");
+        }
+
+        specification = specification.and(
+                ExamSpecification.hasType(type, currentUser, studentExamRepository)
+        );
+
+        Sort sortBy = switch (sort) {
+            case COST_ASC -> Sort.by("cost").ascending();
+            case COST_DESC -> Sort.by("cost").descending();
+            case RATING_ASC -> Sort.by("rating").ascending();
+            case RATING_DESC -> Sort.by("rating").descending();
+            case QUESTION_COUNT_ASC -> Sort.by("numberOfQuestions").ascending();
+            case QUESTION_COUNT_DESC -> Sort.by("numberOfQuestions").descending();
+            case CREATED_DATE_ASC -> Sort.by("createdAt").ascending();
+            case CREATED_DATE_DESC -> Sort.by("createdAt").descending();
+            default -> Sort.unsorted();
+        };
 
         pageNum = (pageNum != null && pageNum > 0) ? pageNum - 1 : 0;
         int pageSize = 10;
 
-        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sortBy);
 
         return examRepository.findAll(specification, pageable);
     }

@@ -8,6 +8,8 @@ import com.exam.examapp.dto.response.exam.ExamDetailedResponse;
 import com.exam.examapp.dto.response.exam.ExamResponse;
 import com.exam.examapp.dto.response.exam.StartExamResponse;
 import com.exam.examapp.model.exam.Exam;
+import com.exam.examapp.service.impl.exam.helper.ExamSort;
+import com.exam.examapp.service.impl.exam.helper.ExamType;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -26,16 +28,22 @@ public interface ExamService {
                                         Integer maxCost,
                                         List<Integer> rating,
                                         List<UUID> tagIds,
+                                        ExamSort sort,
+                                        ExamType type,
                                         Integer pageNum);
 
     List<ExamBlockResponse> getAllExamsForAdmin(String name,
-                                        Integer minCost,
-                                        Integer maxCost,
-                                        List<Integer> rating,
-                                        List<UUID> tagIds,
-                                        Integer pageNum);
+                                                Integer minCost,
+                                                Integer maxCost,
+                                                List<Integer> rating,
+                                                List<UUID> tagIds,
+                                                ExamSort sort,
+                                                ExamType type,
+                                                Integer pageNum);
 
     List<ExamBlockResponse> getMyExams();
+
+    List<ExamBlockResponse> getExamsByUserId(UUID id);
 
     List<ExamBlockResponse> getAdminCooperationExams();
 
@@ -51,7 +59,7 @@ public interface ExamService {
 
     Integer getExamCode(UUID id);
 
-    String getExamStartLink(UUID id);
+    String getExamLink(UUID id);
 
     StartExamResponse startExamViaCode(String studentName, String examCode);
 
