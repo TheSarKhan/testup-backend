@@ -13,13 +13,14 @@ public record ExamBlockResponse(
         String examTitle,
         Tag headerTag,
         List<Tag> otherTags,
-        int durationInSeconds,
+        Integer durationInSeconds,
         BigDecimal cost,
-        double rating,
+        Double rating,
         boolean isHidden,
-        int totalQuestionCount,
+        Integer totalQuestionCount,
         Boolean hasUncheckedAnswer,
         ExamStatus examStatus,
         Instant createAt,
         Instant updatedAt
-) {}
+) {
+}

@@ -125,7 +125,7 @@ public class AdminServiceImpl implements AdminService {
         int totalTeachersCount = userRepository.findAll(specification).size();
         List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
                 .stream().map(this::mapUser).toList();
-        return Map.of(totalTeachersCount / size, list);
+        return Map.of((totalTeachersCount / size) + 1, list);
     }
 
     @Override
@@ -134,10 +134,10 @@ public class AdminServiceImpl implements AdminService {
         Specification<User> specification = Specification.unrestricted();
         specification = specification.and(userSpecification.hasNameOrEmailLike(search))
                 .and(userSpecification.hasRoles(List.of(Role.STUDENT)));
-        int totalTeachersCount = userRepository.findAll(specification).size();
+        int totalStudentsCount = userRepository.findAll(specification).size();
         List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
                 .stream().map(this::mapUser).toList();
-        return Map.of(totalTeachersCount / size, list);
+        return Map.of((totalStudentsCount / size) + 1, list);
     }
 
     @Override
@@ -152,7 +152,7 @@ public class AdminServiceImpl implements AdminService {
         int totalTeachersCount = userRepository.findAll(specification).size();
         List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
                 .stream().map(this::mapUser).toList();
-        return Map.of(totalTeachersCount / filter.size(), list);
+        return Map.of((totalTeachersCount / filter.size()) + 1, list);
     }
 
     @Override
@@ -163,10 +163,10 @@ public class AdminServiceImpl implements AdminService {
                 .and(userSpecification.hasActiveStatus(filter.isActive()))
                 .and(userSpecification.createdAfter(filter.createAtAfter()))
                 .and(userSpecification.createdBefore(filter.createAtBefore()));
-        int totalTeachersCount = userRepository.findAll(specification).size();
+        int totalStudentsCount = userRepository.findAll(specification).size();
         List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
                 .stream().map(this::mapUser).toList();
-        return Map.of(totalTeachersCount / filter.size(), list);
+        return Map.of((totalStudentsCount / filter.size()) + 1, list);
     }
 
     @Override
@@ -219,6 +219,4 @@ public class AdminServiceImpl implements AdminService {
                 user.getCreatedAt(),
                 user.isActive());
     }
-
-
 }
