@@ -67,6 +67,7 @@ app:
   name: ExamApp
   base-url: ${APP_BASE_URL}
   front-base-url: ${FRONT_BASE_URL}
+  default-pack-name: ${DEFAULT_PACK_NAME}
 
 admin:
   email: ${ADMIN_EMAIL}

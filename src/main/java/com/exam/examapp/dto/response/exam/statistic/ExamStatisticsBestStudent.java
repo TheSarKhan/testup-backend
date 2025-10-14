@@ -6,7 +6,7 @@ public record ExamStatisticsBestStudent(
         UUID id,
         UUID studentExamId,
         String name,
-        long durationInSeconds,
+        Long durationInSeconds,
         double score
 ) {
 }

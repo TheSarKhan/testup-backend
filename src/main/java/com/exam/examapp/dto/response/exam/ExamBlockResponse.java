@@ -16,7 +16,7 @@ public record ExamBlockResponse(
         Integer durationInSeconds,
         BigDecimal cost,
         Double rating,
-        boolean isHidden,
+        Boolean isHidden,
         Integer totalQuestionCount,
         Boolean hasUncheckedAnswer,
         ExamStatus examStatus,

@@ -2,6 +2,7 @@ package com.exam.examapp.init;
 
 import com.exam.examapp.model.Pack;
 import com.exam.examapp.repository.PackRepository;
+import io.lettuce.core.dynamic.annotation.Value;
 import jakarta.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PackInitializer {
     private final PackRepository packRepository;
+
+    @Value("${.pack-name}")
 
     @PostConstruct
     public void init() {
