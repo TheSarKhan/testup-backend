@@ -2,13 +2,14 @@ package com.exam.examapp.init;
 
 import com.exam.examapp.model.Pack;
 import com.exam.examapp.repository.PackRepository;
-import io.lettuce.core.dynamic.annotation.Value;
 import jakarta.annotation.PostConstruct;
-import java.math.BigDecimal;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -16,20 +17,8 @@ import org.springframework.stereotype.Component;
 public class PackInitializer {
     private final PackRepository packRepository;
 
-    @Value("${.pack-name}")
-
-    @PostConstruct
-    public void init() {
-        if (packRepository.count() == 0) {
-            packRepository.saveAll(
-                    List.of(
-                            getFree(),
-                            getPro(),
-                            getProPlus(),
-                            getAdmin()));
-            log.info("Packs initialized.");
-        }
-    }
+    @Value("${app.default-pack-name}")
+    String defaultPackName;
 
     private static Pack getProPlus() {
         return Pack.builder()
@@ -125,5 +114,18 @@ public class PackInitializer {
                 .canUseQuestionDb(true)
                 .canPrepareQuestionsDb(true)
                 .build();
+    }
+
+    @PostConstruct
+    public void init() {
+        if (packRepository.count() == 0) {
+            packRepository.saveAll(
+                    List.of(
+                            getFree(),
+                            getPro(),
+                            getProPlus(),
+                            getAdmin()));
+            log.info("Packs initialized.");
+        }
     }
 }
