@@ -125,7 +125,7 @@ public class AdminServiceImpl implements AdminService {
         int totalTeachersCount = userRepository.findAll(specification).size();
         List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
                 .stream().map(this::mapUser).toList();
-        return Map.of((totalTeachersCount / size) + 1, list);
+        return Map.of(totalTeachersCount, list);
     }
 
     @Override
@@ -137,7 +137,7 @@ public class AdminServiceImpl implements AdminService {
         int totalStudentsCount = userRepository.findAll(specification).size();
         List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
                 .stream().map(this::mapUser).toList();
-        return Map.of((totalStudentsCount / size) + 1, list);
+        return Map.of(totalStudentsCount, list);
     }
 
     @Override
@@ -152,7 +152,7 @@ public class AdminServiceImpl implements AdminService {
         int totalTeachersCount = userRepository.findAll(specification).size();
         List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
                 .stream().map(this::mapUser).toList();
-        return Map.of((totalTeachersCount / filter.size()) + 1, list);
+        return Map.of(totalTeachersCount, list);
     }
 
     @Override
@@ -166,7 +166,7 @@ public class AdminServiceImpl implements AdminService {
         int totalStudentsCount = userRepository.findAll(specification).size();
         List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
                 .stream().map(this::mapUser).toList();
-        return Map.of((totalStudentsCount / filter.size()) + 1, list);
+        return Map.of(totalStudentsCount, list);
     }
 
     @Override

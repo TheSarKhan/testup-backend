@@ -78,7 +78,7 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Map<Integer, List<UsersForAdminResponse>>>> getTeachersBySearch(
             @RequestParam int page,
             @RequestParam int size,
-            @RequestParam String search) {
+            @RequestParam(required = false) String search) {
         Map<Integer, List<UsersForAdminResponse>> map =
                 adminService.getTeachersByNameOrEmail(page, size, search);
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Müəllimlər uğurla əldə edildi", map));
@@ -89,7 +89,7 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Map<Integer, List<UsersForAdminResponse>>>> getStudentsBySearch(
             @RequestParam int page,
             @RequestParam int size,
-            @RequestParam String search) {
+            @RequestParam(required = false) String search) {
         Map<Integer, List<UsersForAdminResponse>> map =
                 adminService.getStudentsByNameOrEmail(page, size, search);
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Tələbələr uğurla əldə edildi", map));
@@ -98,10 +98,10 @@ public class AdminController {
     @GetMapping("/teachers-by-filter")
     @Operation(summary = "Get Teachers by filter", description = "Retrieve a list of teachers filtered.")
     public ResponseEntity<ApiResponse<Map<Integer, List<UsersForAdminResponse>>>> getTeachersByFilter(
-            @RequestParam List<String> packNames,
-            @RequestParam Boolean isActive,
-            @RequestParam Instant createAtAfter,
-            @RequestParam Instant createAtBefore,
+            @RequestParam(required = false) List<String> packNames,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) Instant createAtAfter,
+            @RequestParam(required = false) Instant createAtBefore,
             @RequestParam int page,
             @RequestParam int size) {
         TeacherFilter filter = new TeacherFilter(packNames, isActive, createAtAfter, createAtBefore, page, size);
@@ -112,9 +112,9 @@ public class AdminController {
     @GetMapping("/students-by-filter")
     @Operation(summary = "Get Students by filter", description = "Retrieve a list of students filtered.")
     public ResponseEntity<ApiResponse<Map<Integer, List<UsersForAdminResponse>>>> getStudentsByFilter(
-            @RequestParam Boolean isActive,
-            @RequestParam Instant createAtAfter,
-            @RequestParam Instant createAtBefore,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) Instant createAtAfter,
+            @RequestParam(required = false) Instant createAtBefore,
             @RequestParam int page,
             @RequestParam int size) {
         StudentFilter filter = new StudentFilter(isActive, createAtAfter, createAtBefore, page, size);

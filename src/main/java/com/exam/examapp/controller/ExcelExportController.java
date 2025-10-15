@@ -9,7 +9,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +25,7 @@ import java.util.List;
 public class ExcelExportController {
     private final ExcelService excelService;
 
-    @GetMapping("/users")
+    @PostMapping("/users")
     @Operation(summary = "Export Users to Excel", description = "Exports a list of users to an excel file")
     public ResponseEntity<InputStreamResource> exportUsers(@RequestBody List<UsersForAdminResponse> users) throws IOException {
         ByteArrayInputStream in = excelService.exportUsers(users);
