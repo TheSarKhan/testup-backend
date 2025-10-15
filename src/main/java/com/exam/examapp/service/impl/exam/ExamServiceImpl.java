@@ -4,10 +4,7 @@ import com.exam.examapp.dto.request.QuestionUpdateRequestForExam;
 import com.exam.examapp.dto.request.exam.ExamRequest;
 import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
 import com.exam.examapp.dto.response.ResultStatisticResponse;
-import com.exam.examapp.dto.response.exam.ExamBlockResponse;
-import com.exam.examapp.dto.response.exam.ExamDetailedResponse;
-import com.exam.examapp.dto.response.exam.ExamResponse;
-import com.exam.examapp.dto.response.exam.StartExamResponse;
+import com.exam.examapp.dto.response.exam.*;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.exception.custom.UserNotLoginException;
@@ -58,7 +55,7 @@ import java.util.function.Function;
 public class ExamServiceImpl implements ExamService {
     private static final String EXAM_CODE_PREFIX = "exam_code_";
 
-    private static final String EXAM_START_LINK_PREFIX = "/api/v1/exam/detailed/id?id=";
+    private static final String EXAM_START_LINK_PREFIX = "/api/v1/exam//start-info?id=";
 
     private final ExamRepository examRepository;
 
@@ -224,6 +221,19 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional
+    public ExamStartLinkResponse getExamStartInformationById(UUID id) {
+        Exam exam = examRepository.getExamByStartId(id).orElseThrow(() ->
+                new ResourceNotFoundException("İmtahan tapılmadı"));
+        List<String> subjectNames = exam.getSubjectStructureQuestions()
+                .stream()
+                .map(subjectStructureQuestion ->
+                        subjectStructureQuestion.getSubjectStructure().getSubject().getName())
+                .toList();
+        return ExamMapper.toStartLinkResponse(exam, subjectNames);
+    }
+
+    @Override
+    @Transactional
     public ExamResponse getExamById(UUID id) {
         return ExamMapper.toResponse(getById(id));
     }
@@ -297,7 +307,10 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public void publishExam(UUID id) {
         log.info("İmtahan id ilə nəşr olunur. Id: {}", id);
+        User user = userService.getCurrentUser();
         Exam exam = getById(id);
+        if (!Role.ADMIN.equals(user.getRole()) || exam.getTeacher().getId() != user.getId())
+            throw new BadRequestException("Əgər admin deyilsinizsə, başqasının imtahanını dərc edə bilməzsiniz.");
         exam.setReadyForSale(true);
         examRepository.save(exam);
         log.info("İmtahan id ilə nəşr olundu. Id: {}", id);
@@ -306,7 +319,10 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public void unpublishExam(UUID id) {
         log.info("İmtahan id ilə nəşrdən toplanır. Id: {}", id);
+        User user = userService.getCurrentUser();
         Exam exam = getById(id);
+        if (!Role.ADMIN.equals(user.getRole()) || exam.getTeacher().getId() != user.getId())
+            throw new BadRequestException("Əgər admin deyilsinizsə, başqasının imtahanını dərcinə mane ola bilməzsiniz.");
         exam.setReadyForSale(false);
         examRepository.save(exam);
         log.info("İmtahan id ilə nəşrdən toplandı. Id: {}", id);
@@ -384,7 +400,10 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public void deleteExam(UUID id) {
         log.info("İmtahan id ilə silinir: {}", id);
+        User user = userService.getCurrentUser();
         Exam exam = getById(id);
+        if (!Role.ADMIN.equals(user.getRole()) || exam.getTeacher().getId() != user.getId())
+            throw new BadRequestException("Əgər admin deyilsinizsə, başqasının imtahanını silə bilməzsiniz.");
         List<SubjectStructureQuestion> subjectStructureQuestions = exam.getSubjectStructureQuestions();
         examRepository.deleteById(id);
         log.info("İmtahan silindi");

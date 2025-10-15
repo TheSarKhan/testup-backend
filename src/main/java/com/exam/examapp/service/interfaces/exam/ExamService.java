@@ -3,10 +3,7 @@ package com.exam.examapp.service.interfaces.exam;
 import com.exam.examapp.dto.request.exam.ExamRequest;
 import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
 import com.exam.examapp.dto.response.ResultStatisticResponse;
-import com.exam.examapp.dto.response.exam.ExamBlockResponse;
-import com.exam.examapp.dto.response.exam.ExamDetailedResponse;
-import com.exam.examapp.dto.response.exam.ExamResponse;
-import com.exam.examapp.dto.response.exam.StartExamResponse;
+import com.exam.examapp.dto.response.exam.*;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.service.impl.exam.helper.ExamSort;
 import com.exam.examapp.service.impl.exam.helper.ExamType;
@@ -52,6 +49,8 @@ public interface ExamService {
     List<ExamBlockResponse> getLastCreatedExams();
 
     ExamDetailedResponse getExamDetailedById(UUID id);
+
+    ExamStartLinkResponse getExamStartInformationById(UUID id);
 
     ExamResponse getExamById(UUID id);
 

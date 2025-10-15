@@ -87,7 +87,11 @@ public class SecurityConfig {
                                 "/api/v1/header", "/api/v1/test/**",
                                 "/api/v1/home", "/api/v1/payment/success",
                                 "/api/v1/payment/cancel", "/api/v1/payment/decline",
-                                "/api/v1/oauth2/login", "/api/v1/exam/all"
+                                "/api/v1/oauth2/login", "/api/v1/exam/all",
+                                "/api/v1/exam/get-link", "/api/v1/exam/tags",
+                                "/api/v1/exam/last-created", "/api/v1/exam/start/code",
+                                "/api/v1/exam/start", "/api/v1/exam/finish",
+                                "/api/v1/exam/result"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/tag/**", "/api/v1/pack/**",

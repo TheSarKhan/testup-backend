@@ -18,7 +18,7 @@ public class PackInitializer {
     private final PackRepository packRepository;
 
     @Value("${app.default-pack-name}")
-    String defaultPackName;
+    private static String defaultPackName;
 
     private static Pack getProPlus() {
         return Pack.builder()
@@ -71,7 +71,7 @@ public class PackInitializer {
     private static Pack getFree() {
         return Pack.builder()
                 .header("Default")
-                .packName("Free")
+                .packName(defaultPackName)
                 .price(BigDecimal.ZERO)
                 .monthlyExamCount(3)
                 .questionCountPerExam(15)

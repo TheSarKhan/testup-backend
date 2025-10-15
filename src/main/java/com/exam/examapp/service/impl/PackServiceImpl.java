@@ -12,6 +12,7 @@ import com.exam.examapp.service.interfaces.PackService;
 import com.exam.examapp.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +28,9 @@ public class PackServiceImpl implements PackService {
     private final UserService userService;
 
     private final LogService logService;
+
+    @Value("${app.default-pack-name}")
+    String defaultPackName;
 
     @Override
     public void createPack(PackRequest request) {
@@ -70,8 +74,8 @@ public class PackServiceImpl implements PackService {
         if (packByPackName.isPresent() && !packByPackName.get().getId().equals(request.id()))
             throw new BadRequestException(request.packName() + " adlı paket artıq mövcuddur");
 
-        if ("Free".equals(pack.getPackName()) && !"Free".equals(request.packName()))
-            throw new BadRequestException("Free paketin adı yenilənə bilməz");
+        if (defaultPackName.equals(pack.getPackName()) && !defaultPackName.equals(request.packName()))
+            throw new BadRequestException(defaultPackName+" paketin adı yenilənə bilməz");
         Pack updatedPack = PackMapper.updateRequestTo(pack, request);
         packRepository.save(updatedPack);
         log.info("Paket yeniləndi");
@@ -81,6 +85,8 @@ public class PackServiceImpl implements PackService {
     @Override
     public void deletePack(UUID id) {
         log.info("Paket silinir");
+        if (defaultPackName.equals(getPackById(id).getPackName()))
+            throw new BadRequestException(defaultPackName+" paket silinə bilməz");
         packRepository.deleteById(id);
         log.info("Paket silindi");
         logService.save("Paket silindi", userService.getCurrentUserOrNull());

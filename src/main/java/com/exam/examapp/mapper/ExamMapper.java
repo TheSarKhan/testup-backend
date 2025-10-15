@@ -5,6 +5,7 @@ import com.exam.examapp.dto.response.UserResponseForExam;
 import com.exam.examapp.dto.response.exam.ExamBlockResponse;
 import com.exam.examapp.dto.response.exam.ExamDetailedResponse;
 import com.exam.examapp.dto.response.exam.ExamResponse;
+import com.exam.examapp.dto.response.exam.ExamStartLinkResponse;
 import com.exam.examapp.model.Tag;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.ExamStatus;
@@ -69,6 +70,17 @@ public class ExamMapper {
                 examStatus,
                 exam.getCreatedAt(),
                 exam.getUpdatedAt());
+    }
+
+    public static ExamStartLinkResponse toStartLinkResponse(Exam exam, List<String> subjectNames) {
+        return new ExamStartLinkResponse(
+                exam.getId(),
+                exam.getStartId(),
+                exam.getExamTitle(),
+                exam.getDurationInSeconds(),
+                exam.getNumberOfQuestions(),
+                subjectNames,
+                exam.isHidden());
     }
 
     private static Result getResult(Exam exam) {

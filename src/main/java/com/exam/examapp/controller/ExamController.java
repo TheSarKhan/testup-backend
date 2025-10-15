@@ -4,10 +4,7 @@ import com.exam.examapp.dto.request.exam.ExamRequest;
 import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.dto.response.ResultStatisticResponse;
-import com.exam.examapp.dto.response.exam.ExamBlockResponse;
-import com.exam.examapp.dto.response.exam.ExamDetailedResponse;
-import com.exam.examapp.dto.response.exam.ExamResponse;
-import com.exam.examapp.dto.response.exam.StartExamResponse;
+import com.exam.examapp.dto.response.exam.*;
 import com.exam.examapp.service.impl.exam.helper.ExamSort;
 import com.exam.examapp.service.impl.exam.helper.ExamType;
 import com.exam.examapp.service.interfaces.exam.ExamService;
@@ -69,6 +66,7 @@ public class ExamController {
 
     @GetMapping("/user")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Get user exams",
             description =
@@ -133,6 +131,16 @@ public class ExamController {
     public ResponseEntity<ApiResponse<ExamDetailedResponse>> getDetailedExamById(@RequestParam UUID id) {
         ExamDetailedResponse exam = examService.getExamDetailedById(id);
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "İmtahan uğurla alındı", exam));
+    }
+
+    @GetMapping("/start-info")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+            summary = "Get Exam info by id",
+            description = "Retrieve exam info by exam start UUID.")
+    public ResponseEntity<ApiResponse<ExamStartLinkResponse>> getStartInfoById(@RequestParam UUID id) {
+        ExamStartLinkResponse exam = examService.getExamStartInformationById(id);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "İmtahan info uğurla alındı", exam));
     }
 
     @GetMapping("/id")

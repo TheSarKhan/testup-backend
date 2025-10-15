@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -16,5 +17,10 @@ public class TestController {
     @GetMapping("/hello")
     public ResponseEntity<ApiResponse<String>> hello() {
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Test işi", "Salam Dünya"));
+    }
+
+    @GetMapping("/hello-url")
+    public ResponseEntity<ApiResponse<String>> helloUrl(@RequestParam String url) {
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Url", url));
     }
 }

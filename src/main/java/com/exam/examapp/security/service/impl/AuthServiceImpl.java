@@ -36,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final String FORGET_PASSWORD_HEADER = "refresh_token_";
 
     private final String ACCESS_RESET_PASSWORD = "access_reset_password_";
+
     private final UserService userService;
     private final CacheService cacheService;
     private final JwtService jwtService;
@@ -43,6 +44,9 @@ public class AuthServiceImpl implements AuthService {
     private final PackService packService;
     private final PasswordEncoder passwordEncoder;
     private final LogService logService;
+
+    @Value("${app.default-pack-name}")
+    private String defaultPackName;
 
     @Value("${app.name}")
     private String appName;
@@ -67,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
                 User.builder()
                         .email(request.email())
                         .role(request.role())
-                        .pack(Role.TEACHER.equals(request.role()) ? packService.getPackByName("Free") : null)
+                        .pack(Role.TEACHER.equals(request.role()) ? packService.getPackByName(defaultPackName) : null)
                         .password(passwordEncoder.encode(request.password()))
                         .fullName(request.fullName())
                         .phoneNumber(request.phoneNumber())
@@ -211,7 +215,7 @@ public class AuthServiceImpl implements AuthService {
         if (Role.ADMIN.equals(role) || Role.EMPTY.equals(role))
             throw new BadRequestException("Rol boş və ya admin ola bilməz");
 
-        currentUser.setPack(Role.TEACHER.equals(role) ? packService.getPackByName("Free") : null);
+        currentUser.setPack(Role.TEACHER.equals(role) ? packService.getPackByName(defaultPackName) : null);
 
         currentUser.setInfo(
                 Role.TEACHER.equals(role) ? new TeacherInfo(Instant.now(), 0, 0, new HashMap<>()) : null);
