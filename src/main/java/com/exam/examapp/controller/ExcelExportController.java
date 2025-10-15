@@ -35,7 +35,7 @@ public class ExcelExportController {
         ByteArrayInputStream in = excelService.exportUsers(users);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment; filename=students.xlsx");
+        headers.add("Content-Disposition", "attachment; filename=users.xlsx");
 
         return ResponseEntity.ok()
                 .headers(headers)
