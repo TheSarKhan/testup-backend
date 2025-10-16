@@ -25,7 +25,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class SubmoduleServiceImpl implements SubmoduleService {
-    private static final String IMAGE_PATH= "uploads/images/sub-modules";
+    private static final String IMAGE_PATH = "uploads/images/sub-modules";
 
     private final SubmoduleRepository submoduleRepository;
 
@@ -33,17 +33,16 @@ public class SubmoduleServiceImpl implements SubmoduleService {
 
     private final ModuleService moduleService;
 
-    private final FileService  fileService;
+    private final FileService fileService;
 
     private final LogService logService;
 
     @Override
     public void create(SubmoduleRequest request, MultipartFile logo) {
         log.info("Alt modul yaradılır");
-        if (submoduleRepository.existsByName(request.name()))
-            throw new BadRequestException("Alt modul artıq mövcuddur.");
-
         Module module = moduleService.getModuleById(request.moduleId());
+        if (submoduleRepository.existsByNameAndModule(request.name(), module))
+            throw new BadRequestException("Alt modul artıq mövcuddur.");
         Submodule build = Submodule.builder().name(request.name()).module(module).build();
         String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);
         build.setLogoUrl(logoUrl);
@@ -64,13 +63,13 @@ public class SubmoduleServiceImpl implements SubmoduleService {
 
     @Override
     public Submodule getById(UUID id) {
-        return submoduleRepository.findById(id).orElseThrow(()->
+        return submoduleRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException("Alt modul tapılmadı"));
     }
 
     @Override
     public Submodule getByName(String name) {
-        return submoduleRepository.getByName(name).orElseThrow(()->
+        return submoduleRepository.getByName(name).orElseThrow(() ->
                 new ResourceNotFoundException("Alt modul tapılmadı"));
     }
 

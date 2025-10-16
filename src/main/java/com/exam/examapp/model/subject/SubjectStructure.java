@@ -36,7 +36,7 @@ public class SubjectStructure {
     private Map<QuestionType, Integer> questionTypeCountMap;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    private Map<QuestionType, Map<Integer, Integer>> textListeningQuestionToCountMap;
+    private Map<QuestionType, Map<Integer, Map<QuestionType, Integer>>> textListeningQuestionToCountMap;
 
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<Integer, Integer> questionToPointMap;

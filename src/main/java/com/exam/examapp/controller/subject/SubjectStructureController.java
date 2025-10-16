@@ -95,6 +95,38 @@ public class SubjectStructureController {
                         structures));
     }
 
+    @GetMapping("/free")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Get free subject structures",
+            description = "Retrieve all free subject structures. Accessible by **ADMIN** role."
+    )
+    public ResponseEntity<ApiResponse<List<SubjectStructure>>> getFree() {
+        List<SubjectStructure> structures = subjectStructureService.getFreeStructures();
+        return ResponseEntity.ok(
+                ApiResponse.build(
+                        HttpStatus.OK,
+                        "Mövzu strukturları uğurla qəbul edildi",
+                        structures));
+    }
+
+    @GetMapping("/structured")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Get structured subject structures",
+            description = "Retrieve all structured subject structures. Accessible by **ADMIN** role."
+    )
+    public ResponseEntity<ApiResponse<List<SubjectStructure>>> getStructured() {
+        List<SubjectStructure> structures = subjectStructureService.getStructuredStructures();
+        return ResponseEntity.ok(
+                ApiResponse.build(
+                        HttpStatus.OK,
+                        "Mövzu strukturları uğurla qəbul edildi",
+                        structures));
+    }
+
     @GetMapping("/id")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")

@@ -17,6 +17,10 @@ public interface SubjectStructureService {
 
     List<SubjectStructure> getBySubmoduleId(UUID submoduleId);
 
+    List<SubjectStructure> getFreeStructures();
+
+    List<SubjectStructure> getStructuredStructures();
+
     SubjectStructure getBySubmoduleAndSubjectId(UUID submoduleId, UUID subjectId);
 
     boolean existsBySubmoduleAndSubjectId(UUID submoduleId, UUID subjectId);

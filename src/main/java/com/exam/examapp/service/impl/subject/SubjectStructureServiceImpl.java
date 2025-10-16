@@ -73,6 +73,16 @@ public class SubjectStructureServiceImpl implements SubjectStructureService {
     }
 
     @Override
+    public List<SubjectStructure> getFreeStructures() {
+        return subjectStructureRepository.getBySubmodule_IdAndIsActive(null, true);
+    }
+
+    @Override
+    public List<SubjectStructure> getStructuredStructures() {
+        return subjectStructureRepository.getBySubmoduleIsNotNullAndIsActive(true);
+    }
+
+    @Override
     public SubjectStructure getBySubmoduleAndSubjectId(UUID submoduleId, UUID subjectId) {
         log.info("Mövcud struktur götürülür. Alt modul id: {}, fənn id:{}", submoduleId, subjectId);
         return subjectStructureRepository.getBySubmodule_IdAndSubject_IdAndIsActive(submoduleId, subjectId, true)

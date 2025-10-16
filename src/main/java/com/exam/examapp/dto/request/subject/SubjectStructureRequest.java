@@ -11,6 +11,6 @@ public record SubjectStructureRequest(
     UUID submoduleId,
     @Schema(defaultValue = "10") int questionCount,
     Map<QuestionType, Integer> questionTypeCountMap,
-    Map<QuestionType, Map<Integer, Integer>> textListeningQuestionToCountMap,
+    Map<QuestionType, Map<Integer, Map<QuestionType, Integer>>> textListeningQuestionToCountMap,
     Map<Integer, Integer> questionToPointMap,
     String formula) {}
