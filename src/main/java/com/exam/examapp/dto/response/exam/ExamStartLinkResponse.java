@@ -10,6 +10,7 @@ public record ExamStartLinkResponse(
         Integer durationInSeconds,
         Integer totalQuestionCount,
         List<String> subjectNames,
+        Boolean isReadyForSale,
         boolean isHidden
 ) {
 }

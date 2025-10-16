@@ -32,6 +32,7 @@ public class ExamMapper {
                 exam.isHidden(),
                 exam.getNumberOfQuestions(),
                 hasUnchecked,
+                exam.isReadyForSale(),
                 examStatus,
                 exam.getCreatedAt(),
                 exam.getUpdatedAt());
@@ -67,6 +68,7 @@ public class ExamMapper {
                 exam.isHidden(),
                 exam.getNumberOfQuestions(),
                 hasUnchecked,
+                exam.isReadyForSale(),
                 examStatus,
                 exam.getCreatedAt(),
                 exam.getUpdatedAt());
@@ -80,6 +82,7 @@ public class ExamMapper {
                 exam.getDurationInSeconds(),
                 exam.getNumberOfQuestions(),
                 subjectNames,
+                exam.isReadyForSale(),
                 exam.isHidden());
     }
 
@@ -111,6 +114,7 @@ public class ExamMapper {
                 !exam.getHasUncheckedQuestionStudentExamId().isEmpty(),
                 exam.getExplanationVideoUrl(),
                 exam.getNumberOfQuestions(),
+                exam.isReadyForSale(),
                 exam.isHidden(),
                 exam.isDeleted(),
                 exam.getCreatedAt(),

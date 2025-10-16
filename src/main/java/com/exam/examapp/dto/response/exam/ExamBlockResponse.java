@@ -19,6 +19,7 @@ public record ExamBlockResponse(
         Boolean isHidden,
         Integer totalQuestionCount,
         Boolean hasUncheckedAnswer,
+        Boolean isReadyForSale,
         ExamStatus examStatus,
         Instant createAt,
         Instant updatedAt

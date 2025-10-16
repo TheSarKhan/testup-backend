@@ -22,6 +22,7 @@ public record ExamResponse(
     Boolean hasUncheckedAnswer,
     String explanationVideoUrl,
     Integer totalQuestionCount,
+    Boolean isReadyForSale,
     Boolean isHidden,
     Boolean isActive,
     Instant createAt,
