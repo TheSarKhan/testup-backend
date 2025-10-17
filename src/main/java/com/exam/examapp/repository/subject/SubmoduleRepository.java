@@ -16,4 +16,6 @@ public interface SubmoduleRepository extends JpaRepository<Submodule, UUID> {
     Optional<Submodule> getByName(String name);
 
     boolean existsByNameAndModule(String name, Module module);
+
+    long countByModule(Module module);
 }

@@ -1,10 +1,12 @@
 package com.exam.examapp.repository.subject;
 
+import com.exam.examapp.model.exam.Submodule;
 import com.exam.examapp.model.subject.SubjectStructure;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,4 +25,8 @@ public interface SubjectStructureRepository extends JpaRepository<SubjectStructu
 
     @Query("from SubjectStructure where submodule is not null and isActive = :isActive")
     List<SubjectStructure> getBySubmoduleIsNotNullAndIsActive(boolean isActive);
+
+    List<SubjectStructure> getBySubmoduleIn(Collection<Submodule> submodules);
+
+    List<SubjectStructure> getBySubmodule(Submodule submodule);
 }

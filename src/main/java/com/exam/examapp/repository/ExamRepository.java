@@ -14,16 +14,7 @@ import java.util.UUID;
 
 @Repository
 public interface ExamRepository extends JpaRepository<Exam, UUID>, JpaSpecificationExecutor<Exam> {
-    @Query(
-            """
-                    SELECT e
-                    FROM Exam e
-                    LEFT JOIN FETCH e.teacher
-                    LEFT JOIN FETCH e.subjectStructureQuestions ssq
-                    LEFT JOIN FETCH ssq.subjectStructure s
-                    LEFT JOIN FETCH s.subject
-                    """)
-    List<Exam> getByTeacher_Id(UUID teacherId);
+    long countBySubjectStructureQuestions_IdIn(List<UUID> questionIds);
 
     List<Exam> getByTeacher(User teacher);
 

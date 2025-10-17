@@ -1,13 +1,21 @@
 package com.exam.examapp.service.impl.subject;
 
+import com.exam.examapp.dto.response.ModuleResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.model.exam.Module;
+import com.exam.examapp.model.exam.Submodule;
+import com.exam.examapp.model.subject.SubjectStructure;
+import com.exam.examapp.repository.ExamRepository;
 import com.exam.examapp.repository.subject.ModuleRepository;
+import com.exam.examapp.repository.subject.SubjectStructureQuestionRepository;
+import com.exam.examapp.repository.subject.SubjectStructureRepository;
+import com.exam.examapp.repository.subject.SubmoduleRepository;
 import com.exam.examapp.service.impl.LocalFileServiceImpl;
 import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.subject.ModuleService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,6 +39,14 @@ public class ModuleServiceImpl implements ModuleService {
 
     private final LogService logService;
 
+    private final SubmoduleRepository submoduleRepository;
+
+    private final ExamRepository examRepository;
+
+    private final SubjectStructureRepository subjectStructureRepository;
+
+    private final SubjectStructureQuestionRepository subjectStructureQuestionRepository;
+
     @Override
     public void createModule(String moduleName, MultipartFile logo) {
         log.info("Modul yaradılır");
@@ -52,9 +68,18 @@ public class ModuleServiceImpl implements ModuleService {
     }
 
     @Override
-    public Module getModuleByName(String moduleName) {
-        return moduleRepository.getModuleByName(moduleName).orElseThrow(() ->
-                new ResourceNotFoundException("Modul tapılmadı"));
+    @Transactional
+    public List<ModuleResponse> getAllModulesResponse() {
+        return getAllModules().stream().map(
+                module -> {
+                    List<Submodule> submodules = submoduleRepository.getAllByModule_Id(module.getId());
+                    List<SubjectStructure> subjectStructures = subjectStructureRepository.getBySubmoduleIn(submodules);
+                    List<UUID> subjectStructureQuestionIds = subjectStructureQuestionRepository
+                            .getIdsBySubjectStructureIn(subjectStructures);
+                    long examCount = examRepository.countBySubjectStructureQuestions_IdIn(subjectStructureQuestionIds);
+                    return new ModuleResponse(module, submodules.size(), examCount);
+                }
+        ).toList();
     }
 
     @Override

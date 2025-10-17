@@ -3,6 +3,7 @@ package com.exam.examapp.controller.subject;
 import com.exam.examapp.dto.request.subject.SubmoduleRequest;
 import com.exam.examapp.dto.request.subject.SubmoduleUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
+import com.exam.examapp.dto.response.SubmoduleResponse;
 import com.exam.examapp.model.exam.Submodule;
 import com.exam.examapp.service.interfaces.subject.SubmoduleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,7 +12,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -64,6 +64,22 @@ public class SubmoduleController {
                         HttpStatus.OK,
                         "Alt modullar uğurla əldə edildi",
                         submodules));
+    }
+
+    @GetMapping("/all-responses")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Get all submodule responses",
+            description = "Retrieves a list of all submodule responses. Accessible by **ADMIN** roles."
+    )
+    public ResponseEntity<ApiResponse<List<SubmoduleResponse>>> getAllResponses() {
+        List<SubmoduleResponse> submoduleResponses = submoduleService.getAllSubmoduleResponse();
+        return ResponseEntity.ok(
+                ApiResponse.build(
+                        HttpStatus.OK,
+                        "Alt modullar və detallar uğurla əldə edildi",
+                        submoduleResponses));
     }
 
     @GetMapping("/module")

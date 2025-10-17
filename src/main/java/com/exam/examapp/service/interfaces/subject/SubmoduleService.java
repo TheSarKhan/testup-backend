@@ -2,6 +2,7 @@ package com.exam.examapp.service.interfaces.subject;
 
 import com.exam.examapp.dto.request.subject.SubmoduleRequest;
 import com.exam.examapp.dto.request.subject.SubmoduleUpdateRequest;
+import com.exam.examapp.dto.response.SubmoduleResponse;
 import com.exam.examapp.model.exam.Submodule;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +15,8 @@ public interface SubmoduleService {
     List<Submodule> getAll();
 
     List<Submodule> getAllByModule(UUID moduleId);
+
+    List<SubmoduleResponse> getAllSubmoduleResponse();
 
     Submodule getById(UUID id);
 

@@ -1,6 +1,7 @@
 package com.exam.examapp.controller.subject;
 
 import com.exam.examapp.dto.response.ApiResponse;
+import com.exam.examapp.dto.response.ModuleResponse;
 import com.exam.examapp.model.exam.Module;
 import com.exam.examapp.service.interfaces.subject.ModuleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,6 +62,22 @@ public class ModuleController {
                         HttpStatus.OK,
                         "Modullar uğurla əldə edildi",
                         allModules));
+    }
+
+    @GetMapping("/all-response")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Retrieve all module responses",
+            description = "Fetches a list of all module responses. Accessible by **ADMIN** roles."
+    )
+    public ResponseEntity<ApiResponse<List<ModuleResponse>>> getAllResponses() {
+        List<ModuleResponse> allModuleResponses = moduleService.getAllModulesResponse();
+        return ResponseEntity.ok(
+                ApiResponse.build(
+                        HttpStatus.OK,
+                        "Modullar və detallar uğurla əldə edildi",
+                        allModuleResponses));
     }
 
     @GetMapping("/id")
