@@ -8,6 +8,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,7 +37,7 @@ public class SubjectStructure {
     private Map<QuestionType, Integer> questionTypeCountMap;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    private Map<QuestionType, Map<Integer, Map<QuestionType, Integer>>> textListeningQuestionToCountMap;
+    private Map<QuestionType, Map<Integer, Map<QuestionType, List<Integer>>>> textListeningQuestionToCountMap;
 
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<Integer, Integer> questionToPointMap;
