@@ -34,7 +34,7 @@ public class SubjectStructure {
     private int questionCount;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    private Map<QuestionType, Integer> questionTypeCountMap;
+    private Map<QuestionType, List<Integer>> questionTypeCountMap;
 
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<QuestionType, Map<Integer, Map<QuestionType, List<Integer>>>> textListeningQuestionToCountMap;

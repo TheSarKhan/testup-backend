@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public record SubjectStructureRequest(@NotNull UUID subjectId, UUID submoduleId,
                                       @Schema(defaultValue = "10") int questionCount,
-                                      Map<QuestionType, Integer> questionTypeCountMap,
+                                      Map<QuestionType, List<Integer>> questionTypeCountMap,
                                       Map<QuestionType, Map<Integer, Map<QuestionType, List<Integer>>>> textListeningQuestionToCountMap,
                                       Map<Integer, Integer> questionToPointMap, String formula) {
 }
