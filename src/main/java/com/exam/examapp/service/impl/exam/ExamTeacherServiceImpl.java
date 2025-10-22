@@ -1,24 +1,25 @@
 package com.exam.examapp.service.impl.exam;
 
 import com.exam.examapp.dto.request.exam.AddExamTeacherRequest;
+import com.exam.examapp.dto.response.ExamTeacherResponse;
+import com.exam.examapp.dto.response.TeacherResponse;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.exam.ExamTeacher;
 import com.exam.examapp.model.subject.Subject;
+import com.exam.examapp.model.subject.SubjectStructureQuestion;
 import com.exam.examapp.repository.ExamTeacherRepository;
 import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.exam.ExamService;
 import com.exam.examapp.service.interfaces.exam.ExamTeacherService;
 import com.exam.examapp.service.interfaces.subject.SubjectService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -33,6 +34,31 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
     private final SubjectService subjectService;
 
     private final LogService logService;
+
+    private static Map<Subject, Integer> getSubjectIntegerMap(Exam exam) {
+        Map<Subject, Integer> subjectToQuestionCountMap = new HashMap<>();
+        for (SubjectStructureQuestion structureQuestion : exam.getSubjectStructureQuestions()) {
+            Subject subject = structureQuestion.getSubjectStructure().getSubject();
+            int size = structureQuestion.getQuestion().size();
+            subjectToQuestionCountMap.put(subject, size);
+        }
+        return subjectToQuestionCountMap;
+    }
+
+    private static List<TeacherResponse> getTeachers(List<ExamTeacher> teachers) {
+        return teachers.stream()
+                .map(examTeacher -> {
+                    User teacher = examTeacher.getTeacher();
+                    return new TeacherResponse(
+                            teacher.getId(),
+                            teacher.getFullName(),
+                            teacher.getProfilePictureUrl(),
+                            teacher.getEmail(),
+                            examTeacher.getSubject()
+                    );
+                })
+                .toList();
+    }
 
     @Override
     public String addExamTeacher(AddExamTeacherRequest request) {
@@ -56,6 +82,20 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
         log.info(message);
         logService.save(message, userService.getCurrentUserOrNull());
         return message;
+    }
+
+    @Override
+    @Transactional
+    public ExamTeacherResponse getExamTeacher(UUID examId) {
+        Exam exam = examService.getById(examId);
+        List<ExamTeacher> teachers = examTeacherRepository.getByExam(exam);
+        List<TeacherResponse> teacherResponses = getTeachers(teachers);
+        Map<Subject, Integer> subjectToQuestionCountMap = getSubjectIntegerMap(exam);
+        return new ExamTeacherResponse(
+                examId,
+                teacherResponses,
+                subjectToQuestionCountMap
+        );
     }
 
     @Override

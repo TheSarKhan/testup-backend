@@ -14,4 +14,6 @@ public interface ExamTeacherRepository extends JpaRepository<ExamTeacher, UUID> 
     void deleteByTeacherAndExam(User teacher, Exam exam);
 
     List<ExamTeacher> getByTeacher(User teacher);
+
+    List<ExamTeacher> getByExam(Exam exam);
 }

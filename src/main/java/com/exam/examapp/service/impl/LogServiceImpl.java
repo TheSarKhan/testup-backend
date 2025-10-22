@@ -4,9 +4,13 @@ import com.exam.examapp.dto.response.LogResponse;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.model.Log;
 import com.exam.examapp.model.User;
+import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.repository.LogRepository;
 import com.exam.examapp.service.interfaces.LogService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -30,6 +34,32 @@ public class LogServiceImpl implements LogService {
                 stream()
                 .map(this::logToResponse)
                 .toList();
+    }
+
+    @Override
+    public List<LogResponse> getAllByFilter(List<Role> roles, List<String> filters, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Specification<Log> specification = Specification.unrestricted();
+        specification.and(hasRole(roles));
+        for (String filter : filters) addSpec(filter);
+
+        return logRepository.findAll(specification, pageable)
+                .stream().map(this::logToResponse).toList();
+    }
+
+    private Specification<Log> hasRole(List<Role> roles) {
+        if (roles == null || roles.isEmpty()) return null;
+        return (root, query, cb) -> root.get("user").get("role").in(roles);
+    }
+
+    private Specification<Log> addSpec(String filter) {
+        Specification<Log> specification = Specification.unrestricted();
+        switch (filter){
+            case "" -> {}
+            default -> {}
+        }
+
+        return specification;
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.exam.examapp.controller;
 
 import com.exam.examapp.dto.request.exam.AddExamTeacherRequest;
 import com.exam.examapp.dto.response.ApiResponse;
+import com.exam.examapp.dto.response.ExamTeacherResponse;
 import com.exam.examapp.service.interfaces.exam.ExamTeacherService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -38,6 +39,19 @@ public class ExamTeacherController {
         String response = examTeacherService.addExamTeacher(request);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, response, null));
+    }
+
+    @GetMapping("/get-info")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Get exam info",
+            description = "Retrieve exam details by exam UUID."
+    )
+    public ResponseEntity<ApiResponse<ExamTeacherResponse>> addExamTeacher(@RequestParam UUID examId) {
+        ExamTeacherResponse examTeacher = examTeacherService.getExamTeacher(examId);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Retrieve exam info", examTeacher));
     }
 
     @GetMapping("/remove")

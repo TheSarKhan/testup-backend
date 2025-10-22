@@ -222,7 +222,7 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public ExamStartLinkResponse getExamStartInformationById(UUID id) {
-        Exam exam = examRepository.getExamByStartId(id).orElseThrow(() ->
+        Exam exam = examRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException("İmtahan tapılmadı"));
         List<String> subjectNames = exam.getSubjectStructureQuestions()
                 .stream()
@@ -339,7 +339,7 @@ public class ExamServiceImpl implements ExamService {
         log.info("İmtahan id ilə yenilənir: {}", request.id());
         Exam exam = getById(request.id());
 
-        ExamValidationService.validationForUpdate(request, userService.getCurrentUser());
+        ExamValidationService.validationForUpdate(request, exam.getTeacher());
 
         log.info("Imtahan validasiyadan keçdi");
         ExamMapper.update(exam, request);
