@@ -54,27 +54,6 @@ public class StartExamService {
             log.info("Tələbə imtahanı siyahısı boşdur");
             updateExamStudentCount(exam.getId(), examCreator);
             return createStudentExamEntry(exam, user);
-        } else if (!activeStudentExamByExamAndStudent.isEmpty()) {
-            log.info("Tələbənin aktiv imtahanı var");
-            StudentExam studentExam = activeStudentExamByExamAndStudent.getFirst();
-            studentExam.setStatus(ExamStatus.STARTED);
-            studentExam.setStartTime(Instant.now());
-
-            List<CurrentExam> currentExams = user.getCurrentExams();
-            currentExams.add(new CurrentExam(
-                    Instant.now(),
-                    exam.getDurationInSeconds(),
-                    studentExam.getId(),
-                    exam.getId()));
-            userService.save(user);
-
-            return new StartExamResponse(
-                    studentExam.getId(),
-                    ExamStatus.STARTED,
-                    Map.of(),
-                    Map.of(),
-                    Instant.now(),
-                    ExamMapper.toResponse(exam));
         } else if (!startedStudentExamByExamAndStudent.isEmpty()) {
             log.info("Tələbə hazırda bu imtahanı işləyir");
             StudentExam first = startedStudentExamByExamAndStudent.getFirst();
@@ -106,6 +85,27 @@ public class StartExamService {
                     throw new ExamExpiredException("Imtahanın vaxtı bitib");
                 }
             }
+        } else if (!activeStudentExamByExamAndStudent.isEmpty()) {
+            log.info("Tələbənin aktiv imtahanı var");
+            StudentExam studentExam = activeStudentExamByExamAndStudent.getFirst();
+            studentExam.setStatus(ExamStatus.STARTED);
+            studentExam.setStartTime(Instant.now());
+
+            List<CurrentExam> currentExams = user.getCurrentExams();
+            currentExams.add(new CurrentExam(
+                    Instant.now(),
+                    exam.getDurationInSeconds(),
+                    studentExam.getId(),
+                    exam.getId()));
+            userService.save(user);
+
+            return new StartExamResponse(
+                    studentExam.getId(),
+                    ExamStatus.STARTED,
+                    Map.of(),
+                    Map.of(),
+                    Instant.now(),
+                    ExamMapper.toResponse(exam));
         } else {
             return createStudentExamEntry(exam, user);
         }

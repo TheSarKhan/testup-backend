@@ -12,7 +12,7 @@ public interface LogService {
 
     List<LogResponse> getAllOrderByCreatedAt(int page, int size);
 
-    List<LogResponse> getAllByFilter(List<Role> roles, List<String> filters, int page, int size);
+    List<LogResponse> getAllByFilter(Role role, List<String> filters, int page, int size);
 
     LogResponse getById(UUID id);
 

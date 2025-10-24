@@ -134,6 +134,20 @@ public class AdminController {
                         logs));
     }
 
+    @GetMapping("/logs-filtered")
+    @Operation(summary = "Get Logs", description = "Retrieve list of logs.")
+    public ResponseEntity<ApiResponse<List<LogResponse>>> getLogsFiltered(@RequestParam(required = false) Role role,
+                                                                          @RequestParam(required = false) List<String> filters,
+                                                                          @RequestParam int page,
+                                                                          @RequestParam int size) {
+        List<LogResponse> logs = logService.getAllByFilter(role, filters, page, size);
+        return ResponseEntity.ok(
+                ApiResponse.build(
+                        HttpStatus.OK,
+                        "Qeydlər uğurla əldə edildi",
+                        logs));
+    }
+
     @GetMapping("/all-exams")
     @Operation(
             summary = "Get exams",

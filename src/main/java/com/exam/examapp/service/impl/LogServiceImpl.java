@@ -7,6 +7,7 @@ import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.repository.LogRepository;
 import com.exam.examapp.service.interfaces.LogService;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,29 +39,52 @@ public class LogServiceImpl implements LogService {
     }
 
     @Override
-    public List<LogResponse> getAllByFilter(List<Role> roles, List<String> filters, int page, int size) {
+    public List<LogResponse> getAllByFilter(Role role, List<String> filters, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Specification<Log> specification = Specification.unrestricted();
-        specification.and(hasRole(roles));
-        for (String filter : filters) addSpec(filter);
+        specification.and(hasRole(role));
+        specification.and(hasFilter(filters));
 
         return logRepository.findAll(specification, pageable)
                 .stream().map(this::logToResponse).toList();
     }
 
-    private Specification<Log> hasRole(List<Role> roles) {
-        if (roles == null || roles.isEmpty()) return null;
-        return (root, query, cb) -> root.get("user").get("role").in(roles);
+    private Specification<Log> hasRole(Role role) {
+        if (role == null) return null;
+        return (root, query, cb) -> root.get("user").get("role").in(role);
     }
 
-    private Specification<Log> addSpec(String filter) {
-        Specification<Log> specification = Specification.unrestricted();
-        switch (filter){
-            case "" -> {}
-            default -> {}
-        }
+    private Specification<Log> hasFilter(List<String> filters) {
+        return (root, query, cb) -> {
+            if (filters == null || filters.isEmpty()) {
+                return cb.conjunction();
+            }
 
-        return specification;
+            List<Predicate> orPredicates = new ArrayList<>();
+
+            for (String filter : filters) {
+                switch (filter) {
+                    case "Qeydiyyatdan keçən şagirdlər" -> orPredicates.add(cb.like(root.get("message"), "%Tələbə qeydiyyatdan keçdi%"));
+                    case "Qeydiyyatdan keçən müəllimlər" -> orPredicates.add(cb.like(root.get("message"), "%Müəllim qeydiyyatdan keçdi%"));
+                    case "Aktiv edilən hesablar" -> orPredicates.add(cb.like(root.get("message"), "%aktiv edildi%"));
+                    case "Deaktiv edilən hesablar" -> orPredicates.add(cb.like(root.get("message"), "%deaktiv edildi%"));
+                    case "Planı dəyişdirilən müəllimlər" -> orPredicates.add(cb.like(root.get("message"), "%paketini dəyişdirdi%"));
+                    case "Alınan planlar" -> orPredicates.add(cb.like(root.get("message"), "%paket aldı%"));
+                    case "Yaradılan imtahanlar" -> orPredicates.add(cb.like(root.get("message"), "%İmtahanın yaradılması tamamlandı%"));
+                    case "Düzəliş edilən imtahanlar" -> orPredicates.add(cb.like(root.get("message"), "%İmtahan yeniləndi%"));
+                    case "Silinən imtahanlar" -> orPredicates.add(cb.like(root.get("message"), "%İmtahan silindi%"));
+                    case "Alınan imtahanlar" -> orPredicates.add(cb.like(root.get("message"), "%Tələbə imtahan aldı%"));
+                    case "Birləşmiş imtahana əlavə edilən müəllimlər" -> orPredicates.add(cb.like(root.get("message"), "%Müəllim(lər) uğurla əlavə edildi%"));
+                    case "Şagirdlərə əlavə olunan imtahanlar" -> orPredicates.add(cb.like(root.get("message"), "%İmtahan sagirdə əlavə olundu%"));
+                    default -> {}
+                }
+            }
+
+            if (orPredicates.isEmpty()) {
+                return cb.conjunction();
+            }
+            return cb.or(orPredicates.toArray(new Predicate[0]));
+        };
     }
 
     @Override
