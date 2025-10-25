@@ -1,5 +1,6 @@
 package com.exam.examapp.controller.subject;
 
+import com.exam.examapp.dto.request.ModuleUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.dto.response.ModuleResponse;
 import com.exam.examapp.model.exam.Module;
@@ -106,14 +107,9 @@ public class ModuleController {
             summary = "Update an existing module",
             description = "Allows an **ADMIN** to update a module's name and logo by providing its ID."
     )
-    public ResponseEntity<ApiResponse<Void>> update(@RequestPart
-                                                    UUID id,
-                                                    @RequestPart
-                                                    @Schema(defaultValue = "Module name")
-                                                    String moduleName,
-                                                    @RequestPart
-                                                    MultipartFile logo) {
-        moduleService.updateModule(id, moduleName, logo);
+    public ResponseEntity<ApiResponse<Void>> update(@RequestPart ModuleUpdateRequest request,
+                                                    @RequestPart MultipartFile logo) {
+        moduleService.updateModule(request, logo);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,

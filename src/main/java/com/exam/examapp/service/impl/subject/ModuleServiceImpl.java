@@ -1,5 +1,6 @@
 package com.exam.examapp.service.impl.subject;
 
+import com.exam.examapp.dto.request.ModuleUpdateRequest;
 import com.exam.examapp.dto.response.ModuleResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
@@ -89,15 +90,15 @@ public class ModuleServiceImpl implements ModuleService {
     }
 
     @Override
-    public void updateModule(UUID id, String moduleName, MultipartFile logo) {
+    public void updateModule(ModuleUpdateRequest request, MultipartFile logo) {
         log.info("Modul yenilənir");
-        Module module = getModuleById(id);
-        Optional<Module> moduleByName = moduleRepository.getModuleByName(moduleName);
+        Module module = getModuleById(request.id());
+        Optional<Module> moduleByName = moduleRepository.getModuleByName(request.moduleName());
 
-        if (moduleByName.isPresent() && !moduleByName.get().getId().equals(id))
-            throw new BadRequestException(moduleName + " adlı modul artıq mövcuddur.");
+        if (moduleByName.isPresent() && !moduleByName.get().getId().equals(request.id()))
+            throw new BadRequestException(request.moduleName() + " adlı modul artıq mövcuddur.");
 
-        module.setName(moduleName);
+        module.setName(request.moduleName());
         fileService.deleteFile(IMAGE_PATH, module.getLogoUrl());
         module.setLogoUrl(fileService.uploadFile(IMAGE_PATH, logo));
         moduleRepository.save(module);

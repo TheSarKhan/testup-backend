@@ -1,5 +1,6 @@
 package com.exam.examapp.service.interfaces.subject;
 
+import com.exam.examapp.dto.request.ModuleUpdateRequest;
 import com.exam.examapp.dto.response.ModuleResponse;
 import com.exam.examapp.model.exam.Module;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +17,7 @@ public interface ModuleService {
 
     Module getModuleById(UUID id);
 
-    void updateModule(UUID id, String moduleName, MultipartFile logo);
+    void updateModule(ModuleUpdateRequest request, MultipartFile logo);
 
     void deleteModule(UUID id);
 }
