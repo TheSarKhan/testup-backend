@@ -13,6 +13,7 @@ import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.exam.StudentExam;
 import com.exam.examapp.repository.StudentExamRepository;
 import com.exam.examapp.service.interfaces.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class StartExamService {
 
     private final ExamResultService examResultService;
 
+    @Transactional
     public StartExamResponse startExam(String studentName, Exam exam) {
         log.info("İmtahan id ilə başlayır: {}", exam.getId());
         User user = userService.getCurrentUserOrNull();

@@ -46,6 +46,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -267,7 +268,7 @@ public class ExamServiceImpl implements ExamService {
         StartExamResponse result = startExamService.startExam(studentName, exam);
         printStartExam(exam);
         logService.save("İmtahan başladı. İmtahan: " + exam.getExamTitle(), userService.getCurrentUserOrNull());
-        return result;
+        return getResponse(result);
     }
 
     @Override
@@ -493,5 +494,15 @@ public class ExamServiceImpl implements ExamService {
         Pageable pageable = PageRequest.of(pageNum, pageSize, sortBy);
 
         return examRepository.findAll(specification, pageable);
+    }
+
+    private StartExamResponse getResponse(StartExamResponse response) {
+        return new StartExamResponse(
+                response.studentExamId(),
+                response.status(),
+                response.questionIdToAnswerMap(),
+                response.listeningIdToPlayTimeMap(),
+                response.startTime(),
+                ExamMapper.toResponse(getById(response.exam().id())));
     }
 }
