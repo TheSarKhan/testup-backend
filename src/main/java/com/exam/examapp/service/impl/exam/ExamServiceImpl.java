@@ -207,13 +207,17 @@ public class ExamServiceImpl implements ExamService {
     public ExamDetailedResponse getExamDetailedById(UUID id) {
         Exam exam = getById(id);
         User user = userService.getCurrentUserOrNull();
+        log.info("point 1");
         if (user != null) {
             List<StudentExam> studentExams = studentExamRepository.getByStudent(user);
+            log.info("point 2");
             List<StudentExam> filteredExams = studentExams
                     .stream()
                     .filter(studentExam -> studentExam.getExam().equals(exam))
                     .toList();
+            log.info("point 3");
             StudentExam last = filteredExams.getLast();
+            log.info("point 4");
             return ExamMapper.toDetailedResponse(exam, last == null ? null : last.getStatus());
         }
         return ExamMapper.toDetailedResponse(exam, null);
@@ -251,7 +255,7 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public String getExamLink(UUID id) {
         Exam exam = getById(id);
-        return frontBaseUrl + EXAM_START_LINK_PREFIX + exam.getStartId();
+        return frontBaseUrl + EXAM_START_LINK_PREFIX + exam.getId();
     }
 
     @Override
