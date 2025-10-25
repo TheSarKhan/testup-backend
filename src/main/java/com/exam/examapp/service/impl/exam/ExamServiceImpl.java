@@ -55,7 +55,7 @@ import java.util.function.Function;
 public class ExamServiceImpl implements ExamService {
     private static final String EXAM_CODE_PREFIX = "exam_code_";
 
-    private static final String EXAM_START_LINK_PREFIX = "/api/v1/exam//start-info?id=";
+    private static final String EXAM_START_LINK_PREFIX = "/exam/start-info?id=";
 
     private final ExamRepository examRepository;
 
