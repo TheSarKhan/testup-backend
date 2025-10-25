@@ -37,6 +37,9 @@ public class AnswerService {
     public Map<UUID, AnswerStatus> checkAnswers(StudentExam studentExam,
                                                 List<Integer> correctAndWrongCounts) {
         log.info("Cavablar yoxlanılır");
+        if (studentExam.getQuestionIdToAnswerMap() == null) {
+            return new HashMap<>();
+        }
         Map<UUID, String> questionIdToAnswerMap = studentExam.getQuestionIdToAnswerMap();
         List<SubjectStructureQuestion> subjectStructureQuestions = studentExam.getExam().getSubjectStructureQuestions();
 

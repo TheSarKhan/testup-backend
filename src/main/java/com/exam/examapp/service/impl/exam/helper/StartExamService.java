@@ -68,7 +68,7 @@ public class StartExamService {
                         first.getStartTime(),
                         ExamMapper.toResponse(exam));
             } else {
-                if (Instant.now().plusSeconds(exam.getDurationInSeconds()).isBefore(first.getStartTime())) {
+                if (first.getStartTime().plusSeconds(first.getExam().getDurationInSeconds()).isBefore(Instant.now())) {
                     log.info("Hazırki imtahan başladılır");
                     return new StartExamResponse(
                             first.getId(),
