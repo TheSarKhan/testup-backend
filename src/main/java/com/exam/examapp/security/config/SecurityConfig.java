@@ -91,7 +91,8 @@ public class SecurityConfig {
                                 "/api/v1/exam/get-link", "/api/v1/exam/tags",
                                 "/api/v1/exam/last-created", "/api/v1/exam/start/code",
                                 "/api/v1/exam/start", "/api/v1/exam/finish",
-                                "/api/v1/exam/result", "/api/v1/exam/detailed/**"
+                                "/api/v1/exam/result", "/api/v1/exam/detailed/**",
+                                "/api/v1/exam/start/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/tag/**", "/api/v1/pack/**",
