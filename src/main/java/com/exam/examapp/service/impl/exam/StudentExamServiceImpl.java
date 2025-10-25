@@ -14,6 +14,7 @@ import com.exam.examapp.service.interfaces.NotificationService;
 import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.exam.ExamService;
 import com.exam.examapp.service.interfaces.exam.StudentExamService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,7 @@ public class StudentExamServiceImpl implements StudentExamService {
     private final EmailService emailService;
 
     @Override
+    @Transactional
     public void addExam(UUID studentId, UUID examId) {
         log.info("İmtahan sagirdə əlavə olunur");
         Exam exam = examService.getById(examId);
