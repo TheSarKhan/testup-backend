@@ -97,7 +97,7 @@ public class AnswerService {
             StudentExam studentExam, Map<UUID, V> questionIdToValueMap) {
         log.info("Tələbənin məlumatları mövzuya çevrilir");
         Map<String, Map<Integer, V>> subjectToQuestionToValue = new HashMap<>();
-
+        questionIdToValueMap = questionIdToValueMap == null ? new HashMap<>() : questionIdToValueMap;
         for (Map.Entry<UUID, V> entry : questionIdToValueMap.entrySet()) {
             UUID key = entry.getKey();
             V value = entry.getValue();

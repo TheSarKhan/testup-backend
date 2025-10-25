@@ -80,6 +80,7 @@ public class StudentExam {
         id = UUID.randomUUID();
         status = ExamStatus.ACTIVE;
         createdAt = updatedAt = Instant.now();
+        questionIdToAnswerMap = Map.of();
     }
 
     @PreUpdate
