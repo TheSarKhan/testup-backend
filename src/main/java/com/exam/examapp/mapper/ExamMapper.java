@@ -111,7 +111,8 @@ public class ExamMapper {
                 teacher,
                 exam.getSubjectStructureQuestions(),
                 exam.getExamDescription(),
-                !exam.getHasUncheckedQuestionStudentExamId().isEmpty(),
+                !(exam.getHasUncheckedQuestionStudentExamId() == null ||
+                        exam.getHasUncheckedQuestionStudentExamId().isEmpty()),
                 exam.getExplanationVideoUrl(),
                 exam.getNumberOfQuestions(),
                 exam.isReadyForSale(),
