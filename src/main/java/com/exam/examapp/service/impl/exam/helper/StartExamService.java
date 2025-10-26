@@ -117,8 +117,8 @@ public class StartExamService {
         log.info("Girişsiz imtahan başlayır");
         updateExamStudentCount(id, examCreator);
 
-        studentExamRepository.getByExamAndStudentName(exam, studentName).orElseThrow(() ->
-                new BadRequestException("Bu tələbə adı artıq bu imtahanda mövcuddur."));
+        if (studentExamRepository.getByExamAndStudentName(exam, studentName).isEmpty())
+            throw new BadRequestException("Bu tələbə adı artıq bu imtahanda mövcuddur.");
 
         StudentExam save =
                 studentExamRepository.save(
