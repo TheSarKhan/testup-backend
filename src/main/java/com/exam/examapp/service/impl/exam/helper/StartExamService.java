@@ -114,7 +114,7 @@ public class StartExamService {
     }
 
     private StartExamResponse startExamWithoutLogin(String studentName, UUID id, User examCreator, Exam exam) {
-        log.info("Girişsiz imtahan başlayır");
+        log.info("Girişsiz imtahan başlayır. StudentName: {}", studentName);
         updateExamStudentCount(id, examCreator);
 
         if (studentExamRepository.getByExamAndStudentName(exam, studentName).isEmpty())
