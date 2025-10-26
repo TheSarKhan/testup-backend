@@ -90,7 +90,7 @@ public class SecurityConfig {
                                 "/api/v1/oauth2/login", "/api/v1/exam/all",
                                 "/api/v1/exam/get-link", "/api/v1/exam/tags",
                                 "/api/v1/exam/last-created", "/api/v1/exam/start/code",
-                                "/api/v1/exam/start", "/api/v1/exam/finish",
+                                "/api/v1/exam/finish", "/api/v1/exam/start-info/**",
                                 "/api/v1/exam/result", "/api/v1/exam/detailed/**",
                                 "/api/v1/exam/start/**"
                         ).permitAll()

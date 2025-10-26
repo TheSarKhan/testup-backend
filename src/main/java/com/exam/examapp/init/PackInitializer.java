@@ -71,7 +71,7 @@ public class PackInitializer {
     private static Pack getFree() {
         return Pack.builder()
                 .header("Default")
-                .packName(defaultPackName)
+                .packName(defaultPackName == null ? "Pulsuz" : defaultPackName)
                 .price(BigDecimal.ZERO)
                 .monthlyExamCount(3)
                 .questionCountPerExam(15)
