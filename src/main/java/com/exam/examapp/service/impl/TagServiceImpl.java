@@ -55,8 +55,8 @@ public class TagServiceImpl implements TagService {
     public void updateTag(UUID id, String tagName) {
         log.info("Etiket yeniləir:{}", tagName);
         Tag tag = getTagById(id);
-        if (!getTagByName(tagName).getId().equals(id))
-            throw new BadRequestException("Etiket tapılmadı");
+        if (tagRepository.existsByTagName(tagName))
+            throw new BadRequestException("Etiket movcuddur");
         tag.setTagName(tagName);
         tagRepository.save(tag);
         log.info("Etiket yeniləndi:{}", tagName);
