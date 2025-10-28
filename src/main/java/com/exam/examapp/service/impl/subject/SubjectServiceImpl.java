@@ -1,5 +1,6 @@
 package com.exam.examapp.service.impl.subject;
 
+import com.exam.examapp.dto.request.subject.SubjectRequest;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.model.subject.Subject;
@@ -32,15 +33,16 @@ public class SubjectServiceImpl implements SubjectService {
     private final LogService logService;
 
     @Override
-    public void save(String name, boolean isSupportMath, MultipartFile logo) {
+    public void save(SubjectRequest request, MultipartFile logo) {
         log.info("Mövzu yaradılır");
-        if (subjectRepository.existsSubjectByName(name))
+        if (subjectRepository.existsSubjectByName(request.name()))
             throw new BadRequestException("Mövzu artıq mövcuddur");
 
         Subject build = Subject.builder()
-                .name(name)
-                .isSupportMath(isSupportMath)
+                .name(request.name())
+                .isSupportMath(request.isSupportMath())
                 .build();
+
         String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);
         build.setLogoUrl(logoUrl);
         subjectRepository.save(build);

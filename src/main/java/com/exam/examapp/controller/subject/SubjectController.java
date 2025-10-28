@@ -1,5 +1,6 @@
 package com.exam.examapp.controller.subject;
 
+import com.exam.examapp.dto.request.subject.SubjectRequest;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.model.subject.Subject;
 import com.exam.examapp.service.interfaces.subject.SubjectService;
@@ -7,9 +8,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,16 +37,10 @@ public class SubjectController {
             summary = "Create a new subject",
             description = "Allows an **ADMIN** to create a subject by providing its name and uploading a logo file."
     )
-    public ResponseEntity<ApiResponse<Void>> save(@RequestPart
-                                                  @NotBlank
-                                                  @Schema(defaultValue = "Subject name")
-                                                  String name,
-                                                  @RequestPart
-                                                  @Schema(defaultValue = "false")
-                                                  boolean isSupportMath,
+    public ResponseEntity<ApiResponse<Void>> save(@RequestPart @Valid SubjectRequest request,
                                                   @RequestPart
                                                   MultipartFile logo) {
-        subjectService.save(name, isSupportMath, logo);
+        subjectService.save(request, logo);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.CREATED,
