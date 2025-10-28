@@ -35,11 +35,9 @@ spring:
       mail:
         smtp:
           auth: true
-          ssl:
+          starttls:
             enable: true
-          socketFactory:
-            port: ${MAIL_PORT}
-            class: javax.net.ssl.SSLSocketFactory
+            required: true
 
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
