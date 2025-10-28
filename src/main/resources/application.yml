@@ -30,12 +30,16 @@ spring:
     port: ${MAIL_PORT}
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
+    protocol: smtp
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+            required: true
+          ssl:
+            trust: ${MAIL_HOST}
 
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
