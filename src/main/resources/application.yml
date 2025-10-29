@@ -32,12 +32,16 @@ spring:
     password: ${MAIL_PASSWORD}
     protocol: smtp
     properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.debug: true
+      #mail:
+       # smtp:
+        #  auth: true
+         # starttls:
+          #  enable: true
+           # required: true
 
   datasource:
     type: com.zaxxer.hikari.HikariDataSource

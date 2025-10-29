@@ -19,6 +19,7 @@ public class SmtpEmailServiceImpl implements EmailService {
     public String sendEmail(String to, String subject, String content) {
         log.info("Email göndərilir");
         SimpleMailMessage message = new SimpleMailMessage();
+	message.setFrom(System.getenv("MAIL_FROM")); // must be set
         message.setTo(to);
         message.setSubject(subject);
         message.setText(content);
