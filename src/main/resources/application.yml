@@ -28,6 +28,7 @@ spring:
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
+    from: ${MAIL_FROM}
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     protocol: smtp
@@ -36,12 +37,6 @@ spring:
       mail.smtp.starttls.enable: true
       mail.smtp.starttls.required: true
       mail.debug: true
-      #mail:
-       # smtp:
-        #  auth: true
-         # starttls:
-          #  enable: true
-           # required: true
 
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
