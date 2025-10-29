@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() ->
-                new ResourceNotFoundException("İstifadəçi tapılmadı"));
+                new ResourceNotFoundException("İstifadəçi tapılmadı: "));
     }
 
     @Override
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
 
         if (authentication == null || !authentication.isAuthenticated()
                 || "anonymousUser".equals(authentication.getPrincipal()))
-            throw new UserNotLoginException("İstifadəçi tapılmadı");
+            throw new UserNotLoginException("İstifadəçi Login olmayıb");
 
         CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
 
