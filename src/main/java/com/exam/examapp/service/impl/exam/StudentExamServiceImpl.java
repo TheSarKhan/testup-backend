@@ -2,6 +2,7 @@ package com.exam.examapp.service.impl.exam;
 
 import com.exam.examapp.dto.request.NotificationRequest;
 import com.exam.examapp.exception.custom.BadRequestException;
+import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.exam.Exam;
@@ -117,7 +118,7 @@ public class StudentExamServiceImpl implements StudentExamService {
     private StudentExam getById(UUID studentExamId) {
         return studentExamRepository
                 .findById(studentExamId)
-                .orElseThrow(() -> new IllegalArgumentException("Tələbə İmtahanı tapılmadı"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tələbə İmtahanı tapılmadı"));
     }
 
     @Override
