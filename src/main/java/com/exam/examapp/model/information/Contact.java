@@ -49,6 +49,12 @@ public class Contact {
     void prePersist() {
         id = UUID.randomUUID();
         createdAt = updatedAt = Instant.now();
+        if (nameToRedirectUrl == null) {
+            nameToRedirectUrl = Map.of();
+        }
+        if (nameToImageUrls == null) {
+            nameToImageUrls = Map.of();
+        }
     }
 
     @PreUpdate

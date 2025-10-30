@@ -232,7 +232,7 @@ public class AdminServiceImpl implements AdminService {
                 user.getEmail(),
                 user.getFullName(),
                 user.getRole(),
-                user.getPack().getPackName(),
+                user.getPack() == null ? null : user.getPack().getPackName(),
                 user.getPhoneNumber(),
                 user.getCreatedAt(),
                 user.isActive());
