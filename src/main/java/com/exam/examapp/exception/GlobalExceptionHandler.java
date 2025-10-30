@@ -12,7 +12,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -25,30 +24,26 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiResponse<Object>> handleResourceNotFound(
-            ResourceNotFoundException ex, WebRequest request) {
+    public ResponseEntity<ApiResponse<Object>> handleResourceNotFound(ResourceNotFoundException ex) {
         String message = ex.getMessage();
         log.error(message);
         return buildErrorResponse(HttpStatus.NOT_FOUND, message, null);
     }
 
     @ExceptionHandler(ReachedLimitException.class)
-    public ResponseEntity<ApiResponse<Object>> handleReachedLimitException(
-            ReachedLimitException ex, WebRequest request) {
+    public ResponseEntity<ApiResponse<Object>> handleReachedLimitException(ReachedLimitException ex) {
         log.error(ex.getMessage());
         return buildErrorResponse(HttpStatus.METHOD_NOT_ALLOWED, ex.getMessage(), null);
     }
 
     @ExceptionHandler(ExamExpiredException.class)
-    public ResponseEntity<ApiResponse<Object>> handleExamExpiredException(
-            ExamExpiredException ex, WebRequest request) {
+    public ResponseEntity<ApiResponse<Object>> handleExamExpiredException(ExamExpiredException ex) {
         log.error(ex.getMessage());
         return buildErrorResponse(HttpStatus.NOT_ACCEPTABLE, ex.getMessage(), null);
     }
 
     @ExceptionHandler(DoesNotHavePermissionException.class)
-    public ResponseEntity<ApiResponse<Object>> handleDoesNotHavePermissionException(
-            DoesNotHavePermissionException ex, WebRequest request) {
+    public ResponseEntity<ApiResponse<Object>> handleDoesNotHavePermissionException(DoesNotHavePermissionException ex) {
         log.error(ex.getMessage());
         return buildErrorResponse(HttpStatus.METHOD_NOT_ALLOWED, ex.getMessage(), null);
     }
@@ -60,36 +55,33 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DirectoryException.class)
-    public ResponseEntity<ApiResponse<Object>> handleDirectoryCreate(
-            DirectoryException ex, WebRequest request) {
+    public ResponseEntity<ApiResponse<Object>> handleDirectoryCreate(DirectoryException ex) {
         log.error("{}: {}", "DirectoryException", ex.getMessage());
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);
     }
 
     @ExceptionHandler(FileException.class)
-    public ResponseEntity<ApiResponse<Object>> handleFileSave(FileException ex, WebRequest request) {
+    public ResponseEntity<ApiResponse<Object>> handleFileSave(FileException ex) {
         log.error("{}: {}", "FileException", ex.getMessage());
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);
     }
 
     @ExceptionHandler(UserNotLoginException.class)
-    public ResponseEntity<ApiResponse<Object>> handleNotLoginUser(
-            UserNotLoginException ex, WebRequest request) {
+    public ResponseEntity<ApiResponse<Object>> handleNotLoginUser(UserNotLoginException ex) {
         String message = ex.getMessage();
         log.error(message);
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, message, null);
     }
 
     @ExceptionHandler(JwtException.class)
-    public ResponseEntity<ApiResponse<Object>> handleJwtException(
-            JwtException ex, WebRequest request) {
+    public ResponseEntity<ApiResponse<Object>> handleJwtException(JwtException ex) {
         log.error(ex.getMessage());
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), null);
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ApiResponse<Object>> handleNotLoginUser(
-            InvalidCredentialsException ex, WebRequest request) {
+            InvalidCredentialsException ex) {
         log.error("InvalidCredentialsException : {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
     }
@@ -103,7 +95,7 @@ public class GlobalExceptionHandler {
                 .getFieldErrors()
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         return buildErrorResponse(
-                HttpStatus.BAD_REQUEST, "MethodArgumentNotValidException", errors);
+                HttpStatus.BAD_REQUEST, "Verilən məlumatlar gözlənilən parametrlərlə uyğun gəlmir.", errors);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
@@ -133,7 +125,7 @@ public class GlobalExceptionHandler {
                                 })
                         .toList();
 
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, "HandlerMethodValidationException", errors);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Verilən məlumatlar gözlənilən parametrlərlə uyğun gəlmir.", errors);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -150,7 +142,7 @@ public class GlobalExceptionHandler {
                             errors.put(field, cv.getMessage());
                         });
 
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, "ConstraintViolationException", errors);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Verilən məlumatlar gözlənilən parametrlərlə uyğun gəlmir.", errors);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -161,12 +153,11 @@ public class GlobalExceptionHandler {
         Map<String, String> errors =
                 Map.of(ex.getParameterName(), "Missing parameter:");
         return buildErrorResponse(
-                HttpStatus.BAD_REQUEST, "MissingServletRequestParameterException", errors);
+                HttpStatus.BAD_REQUEST, "Verilən məlumatlar gözlənilən parametrlərlə uyğun gəlmir.", errors);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleGlobalException(
-            Exception ex, WebRequest request) {
+    public ResponseEntity<ApiResponse<Object>> handleGlobalException(Exception ex) {
         log.error("Exception: {} , Global exception: {}", ex.getMessage(), ex.getClass().getName());
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);
     }

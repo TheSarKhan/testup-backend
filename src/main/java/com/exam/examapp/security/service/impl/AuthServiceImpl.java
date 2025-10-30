@@ -58,8 +58,8 @@ public class AuthServiceImpl implements AuthService {
         if (!request.isAcceptTerms())
             throw new BadRequestException("İstifadəçi şərtləri qəbul etmədi");
 
-        if (request.role() == Role.ADMIN)
-            throw new BadRequestException("İstifadəçi rolu admin ola bilməz");
+        if (request.role() == Role.ADMIN || request.role() == Role.EMPTY)
+            throw new BadRequestException("İstifadəçi rolu admin və ya empty ola bilməz");
 
         if (userService.existsByEmail(request.email()))
             throw new BadRequestException("Email artıq mövcuddur");

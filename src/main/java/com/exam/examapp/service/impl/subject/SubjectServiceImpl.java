@@ -1,5 +1,6 @@
 package com.exam.examapp.service.impl.subject;
 
+import com.exam.examapp.dto.request.SubjectUpdateRequest;
 import com.exam.examapp.dto.request.subject.SubjectRequest;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
@@ -68,15 +69,15 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public void update(UUID id, String name, boolean isSupportMath, MultipartFile logo) {
+    public void update(SubjectUpdateRequest request, MultipartFile logo) {
         log.info("Mövzu yenilənir");
-        Subject subject = getById(id);
-        Optional<Subject> byName = subjectRepository.getByName(name);
-        if (byName.isPresent() && !byName.get().getId().equals(id))
+        Subject subject = getById(request.id());
+        Optional<Subject> byName = subjectRepository.getByName(request.name());
+        if (byName.isPresent() && !byName.get().getId().equals(request.id()))
             throw new BadRequestException("Mövzu artıq mövcuddur");
 
-        subject.setName(name);
-        subject.setSupportMath(isSupportMath);
+        subject.setName(request.name());
+        subject.setSupportMath(request.isSupportMath());
         fileService.deleteFile(IMAGE_PATH, subject.getLogoUrl());
         String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);
         subject.setLogoUrl(logoUrl);

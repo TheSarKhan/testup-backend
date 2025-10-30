@@ -1,5 +1,6 @@
 package com.exam.examapp.service.interfaces.subject;
 
+import com.exam.examapp.dto.request.SubjectUpdateRequest;
 import com.exam.examapp.dto.request.subject.SubjectRequest;
 import com.exam.examapp.model.subject.Subject;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +17,7 @@ public interface SubjectService {
 
     Subject getById(UUID id);
 
-    void update(UUID id, String name, boolean isSupportMath, MultipartFile logo);
+    void update(SubjectUpdateRequest request, MultipartFile logo);
 
     void delete(UUID id);
 }

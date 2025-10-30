@@ -1,5 +1,6 @@
 package com.exam.examapp.controller.subject;
 
+import com.exam.examapp.dto.request.SubjectUpdateRequest;
 import com.exam.examapp.dto.request.subject.SubjectRequest;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.model.subject.Subject;
@@ -12,7 +13,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -108,19 +108,10 @@ public class SubjectController {
             summary = "Update a subject",
             description = "Allows an **ADMIN** to update the name and logo of an existing subject by its ID."
     )
-    public ResponseEntity<ApiResponse<Void>> update(@RequestPart
-                                                    @NotNull
-                                                    UUID id,
-                                                    @RequestPart
-                                                    @NotBlank
-                                                    @Schema(defaultValue = "Subject name")
-                                                    String name,
-                                                    @RequestPart
-                                                    @Schema(defaultValue = "false")
-                                                    boolean isSupportMath,
+    public ResponseEntity<ApiResponse<Void>> update(@RequestPart @Valid SubjectUpdateRequest request,
                                                     @RequestPart
                                                     MultipartFile logo) {
-        subjectService.update(id, name, isSupportMath, logo);
+        subjectService.update(request, logo);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
