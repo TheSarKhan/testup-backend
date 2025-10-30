@@ -168,6 +168,25 @@ public class AdminController {
                 ApiResponse.build(HttpStatus.OK, "İmtahanlar uğurla əldə edildi", myExams));
     }
 
+    @GetMapping("/exam-by-teacher")
+    @Operation(summary = "Get Exam by teacher", description = "Retrieve a list of exams filtered by teacher.")
+    public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getExamByTeacher(
+            @RequestParam UUID teacherId,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Integer minCost,
+            @RequestParam(required = false) Integer maxCost,
+            @RequestParam(required = false) List<Integer> rating,
+            @RequestParam(required = false) List<UUID> tagIds,
+            @RequestParam(required = false) Integer pageNum,
+            @RequestParam ExamSort sort,
+            @RequestParam ExamType type) {
+        List<ExamBlockResponse> examsByTeacher =
+                adminService.getExamsByTeacher(teacherId, name, minCost, maxCost, rating, tagIds, sort, type, pageNum);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK,
+                        "İmtahanlar uğurla əldə edildi", examsByTeacher));
+    }
+
     @PatchMapping("/change-pack")
     @Operation(summary = "Change pack", description = "Allows an **ADMIN** to change the pack of teacher by id.")
     public ResponseEntity<ApiResponse<Void>> changePack(@RequestParam UUID id, @RequestParam UUID packId) {

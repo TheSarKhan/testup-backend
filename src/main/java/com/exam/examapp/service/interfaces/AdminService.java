@@ -4,7 +4,10 @@ import com.exam.examapp.dto.request.StudentFilter;
 import com.exam.examapp.dto.request.TeacherFilter;
 import com.exam.examapp.dto.response.AdminStatisticsResponse;
 import com.exam.examapp.dto.response.UsersForAdminResponse;
+import com.exam.examapp.dto.response.exam.ExamBlockResponse;
 import com.exam.examapp.model.enums.Role;
+import com.exam.examapp.service.impl.exam.helper.ExamSort;
+import com.exam.examapp.service.impl.exam.helper.ExamType;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +27,16 @@ public interface AdminService {
     Map<Integer, List<UsersForAdminResponse>> getTeachersByFiltered(TeacherFilter filter);
 
     Map<Integer, List<UsersForAdminResponse>> getStudentsByFiltered(StudentFilter filter);
+
+    List<ExamBlockResponse> getExamsByTeacher(UUID id,
+                                              String name,
+                                              Integer minCost,
+                                              Integer maxCost,
+                                              List<Integer> rating,
+                                              List<UUID> tagIds,
+                                              ExamSort sort,
+                                              ExamType type,
+                                              Integer pageNum);
 
     void deactivateUser(UUID id);
 

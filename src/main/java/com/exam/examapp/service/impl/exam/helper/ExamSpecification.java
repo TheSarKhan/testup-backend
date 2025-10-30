@@ -18,8 +18,15 @@ import java.util.UUID;
 
 public class ExamSpecification {
     public static Specification<Exam> hasTag(UUID tagId) {
+        if (tagId == null) return null;
         return (root, query, cb) ->
                 cb.equal(root.get("tags").get("id"), tagId);
+    }
+
+    public static Specification<Exam> hasTeacher(UUID teacherId) {
+        if (teacherId == null) return null;
+        return (root, query, cb) ->
+                cb.equal(root.get("teacher").get("id"), teacherId);
     }
 
     public static Specification<Exam> hasTags(List<UUID> tagIds) {

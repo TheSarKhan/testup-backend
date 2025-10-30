@@ -5,22 +5,28 @@ import com.exam.examapp.dto.request.TeacherFilter;
 import com.exam.examapp.dto.response.AdminStatisticsResponse;
 import com.exam.examapp.dto.response.LogResponse;
 import com.exam.examapp.dto.response.UsersForAdminResponse;
+import com.exam.examapp.dto.response.exam.ExamBlockResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.model.Pack;
 import com.exam.examapp.model.PaymentResult;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
+import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.repository.ExamRepository;
 import com.exam.examapp.repository.PaymentResultRepository;
 import com.exam.examapp.repository.UserRepository;
 import com.exam.examapp.service.GraphService;
+import com.exam.examapp.service.impl.exam.helper.ExamSort;
+import com.exam.examapp.service.impl.exam.helper.ExamType;
 import com.exam.examapp.service.impl.user.UserSpecification;
 import com.exam.examapp.service.interfaces.AdminService;
 import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.PackService;
 import com.exam.examapp.service.interfaces.UserService;
+import com.exam.examapp.service.interfaces.exam.ExamService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -50,6 +56,8 @@ public class AdminServiceImpl implements AdminService {
     private final GraphService graphService;
 
     private final UserSpecification userSpecification;
+
+    private final ExamService examService;
 
     @Override
     public void changeUserRoleViaEmail(String email, Role role) {
@@ -167,6 +175,16 @@ public class AdminServiceImpl implements AdminService {
         List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
                 .stream().map(this::mapUser).toList();
         return Map.of(totalStudentsCount, list);
+    }
+
+    @Override
+    public List<ExamBlockResponse> getExamsByTeacher(UUID id, String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, ExamSort sort, ExamType type, Integer pageNum) {
+        Page<Exam> examPage = examService.getExamPage(id, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
+
+        return examPage.getContent()
+                .stream()
+                .map(examService.examToResponse(userService.getCurrentUserOrNull()))
+                .toList();
     }
 
     @Override

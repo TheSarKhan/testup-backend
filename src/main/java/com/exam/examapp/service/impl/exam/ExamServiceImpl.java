@@ -114,7 +114,7 @@ public class ExamServiceImpl implements ExamService {
                                                ExamSort sort,
                                                ExamType type,
                                                Integer pageNum) {
-        Page<Exam> page = getExamPage(name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
+        Page<Exam> page = getExamPage(null, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
 
         return page.getContent()
                 .stream()
@@ -133,7 +133,7 @@ public class ExamServiceImpl implements ExamService {
                                                        ExamSort sort,
                                                        ExamType type,
                                                        Integer pageNum) {
-        Page<Exam> page = getExamPage(name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
+        Page<Exam> page = getExamPage(null, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
 
         return page.getContent()
                 .stream()
@@ -438,7 +438,8 @@ public class ExamServiceImpl implements ExamService {
                 new ResourceNotFoundException(String.format("%s id ilə tələbə imtahanı tapılmadı.", studentExamId)));
     }
 
-    private Function<Exam, ExamBlockResponse> examToResponse(User user) {
+    @Override
+    public Function<Exam, ExamBlockResponse> examToResponse(User user) {
         return exam -> {
             if (user != null) {
                 List<StudentExam> studentExams = studentExamRepository.getByStudent(user);
@@ -453,7 +454,9 @@ public class ExamServiceImpl implements ExamService {
         };
     }
 
-    private Page<Exam> getExamPage(String name,
+    @Override
+    public Page<Exam> getExamPage(UUID teacherId,
+                                   String name,
                                    Integer minCost,
                                    Integer maxCost,
                                    List<Integer> rating,
@@ -465,7 +468,8 @@ public class ExamServiceImpl implements ExamService {
         specification = specification.and(ExamSpecification.hasName(name))
                 .and(ExamSpecification.hasCostBetween(minCost, maxCost))
                 .and(ExamSpecification.hasRatingInRange(rating))
-                .and(ExamSpecification.hasTags(tagIds));
+                .and(ExamSpecification.hasTags(tagIds))
+                .and(ExamSpecification.hasTeacher(teacherId));
 
         User currentUser = userService.getCurrentUserOrNull();
         if ((type == ExamType.BOUGHT || type == ExamType.FINISHED) && currentUser == null) {

@@ -4,13 +4,16 @@ import com.exam.examapp.dto.request.exam.ExamRequest;
 import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
 import com.exam.examapp.dto.response.ResultStatisticResponse;
 import com.exam.examapp.dto.response.exam.*;
+import com.exam.examapp.model.User;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.service.impl.exam.helper.ExamSort;
 import com.exam.examapp.service.impl.exam.helper.ExamType;
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 public interface ExamService {
     void createExam(
@@ -80,4 +83,16 @@ public interface ExamService {
             List<MultipartFile> sounds);
 
     void deleteExam(UUID id);
+
+    Page<Exam> getExamPage(UUID teacherId,
+                           String name,
+                           Integer minCost,
+                           Integer maxCost,
+                           List<Integer> rating,
+                           List<UUID> tagIds,
+                           Integer pageNum,
+                           ExamSort sort,
+                           ExamType type);
+
+    Function<Exam, ExamBlockResponse> examToResponse(User user);
 }
