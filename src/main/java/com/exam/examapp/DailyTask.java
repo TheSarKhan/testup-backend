@@ -8,6 +8,7 @@ import com.exam.examapp.security.service.interfaces.EmailService;
 import com.exam.examapp.service.interfaces.NotificationService;
 import com.exam.examapp.service.interfaces.PackService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -29,8 +30,11 @@ public class DailyTask {
 
     private final EmailService emailService;
 
-    @Scheduled(cron = "0 0 2 * * ?")
-    public void runEveryEvening() {
+    @Value("${app.default-pack-name}")
+    private String defaultPackName;
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void resetTeacherInfo() {
         List<User> teachers = userRepository.getByRole(Role.TEACHER);
         teachers.stream()
                 .filter(
@@ -48,8 +52,8 @@ public class DailyTask {
     }
 
     @Scheduled(cron = "0 0 9 * * ?")
-    public void runEveryMorning() {
-        List<User> teachers = getActiveTeachers();
+    public void sendPaymentReminders() {
+        List<User> teachers = getTeachersByPackExceptDefault();
 
         for (User teacher : teachers) {
             handleExpiredPack(teacher);
@@ -57,9 +61,9 @@ public class DailyTask {
         }
     }
 
-    private List<User> getActiveTeachers() {
+    private List<User> getTeachersByPackExceptDefault() {
         return userRepository.getByRole(Role.TEACHER).stream()
-                .filter(teacher -> !"Free".equals(teacher.getPack().getPackName()))
+                .filter(teacher -> !defaultPackName.equals(teacher.getPack().getPackName()))
                 .filter(teacher -> isWithinRange(
                         teacher.getNextPaymentDate(),
                         Instant.now().minusSeconds(3 * 24 * 60 * 60 - 1),
@@ -69,7 +73,7 @@ public class DailyTask {
 
     private void handleExpiredPack(User teacher) {
         if (teacher.getNextPaymentDate().isAfter(Instant.now().plusSeconds(10 * 24 * 60 * 60))) {
-            teacher.setPack(packService.getPackByName("Free"));
+            teacher.setPack(packService.getPackByName(defaultPackName));
             teacher.setNextPaymentDate(null);
             userRepository.save(teacher);
         }

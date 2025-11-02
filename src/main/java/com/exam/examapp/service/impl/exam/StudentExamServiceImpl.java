@@ -124,6 +124,12 @@ public class StudentExamServiceImpl implements StudentExamService {
     @Override
     public void saveAnswer(UUID studentExamId, UUID questionId, String answer, MultipartFile file) {
         log.info("Cavab yadda saxlanılır");
+
+        if ((answer == null || answer.isEmpty()) && file == null) {
+            log.info("Cavab bosdur save olunmadi.");
+            return;
+        }
+
         StudentExam studentExam = getById(studentExamId);
         Map<UUID, String> questionIdToAnswerMap =
                 studentExam.getQuestionIdToAnswerMap() == null
