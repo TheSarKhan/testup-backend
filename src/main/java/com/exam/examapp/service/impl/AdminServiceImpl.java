@@ -216,6 +216,7 @@ public class AdminServiceImpl implements AdminService {
             String message = "Admin " + user.getEmail() + " e-poçt ünvanı sahibinin paketini dəyişdirdi. Paket adı: " + pack.getPackName();
             log.info(message);
             logService.save(message, userService.getCurrentUserOrNull());
+            return;
         }
         throw new BadRequestException("Yalnız müəllim və admin paketləri dəyişdirilə bilər.");
     }
