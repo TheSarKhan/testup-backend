@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -130,7 +131,7 @@ public class AuthController {
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Reset password",
             description = "Resets the current user's password using email, new password.")
-    public ResponseEntity<ApiResponse<TokenResponse>> resetPassword(@RequestParam String oldPassword, @RequestParam String newPassword) {
+    public ResponseEntity<ApiResponse<TokenResponse>> resetPassword(@RequestParam String oldPassword, @RequestParam @Size(min = 8) String newPassword) {
         TokenResponse tokenResponse = authService.resetCurrentUserPassword(oldPassword, newPassword);
         return ResponseEntity.ok(
                 ApiResponse.build(
