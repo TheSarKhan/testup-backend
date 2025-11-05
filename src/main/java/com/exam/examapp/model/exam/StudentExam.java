@@ -81,6 +81,11 @@ public class StudentExam {
         status = ExamStatus.ACTIVE;
         createdAt = updatedAt = Instant.now();
         questionIdToAnswerMap = Map.of();
+        questionIdToIsAnswerPictureMap = Map.of();
+        questionIdToAnswerStatusMap = Map.of();
+        listeningIdToPlayTimeMap = Map.of();
+        subjectToQuestionToAnswer = Map.of();
+        subjectToQuestionToAnswerStatus = Map.of();
     }
 
     @PreUpdate
