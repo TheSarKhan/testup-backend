@@ -181,10 +181,12 @@ public class AdminServiceImpl implements AdminService {
     public List<ExamBlockResponse> getExamsByTeacher(UUID id, String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, ExamSort sort, ExamType type, Integer pageNum) {
         Page<Exam> examPage = examService.getExamPage(id, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
 
-        return examPage.getContent()
+        List<ExamBlockResponse> list = examPage.getContent()
                 .stream()
                 .map(examService.examToResponse(userService.getCurrentUserOrNull()))
                 .toList();
+        log.info("Admin get Exam: {}", list.size());
+        return list;
     }
 
     @Override
