@@ -187,6 +187,18 @@ public class AdminController {
                         "İmtahanlar uğurla əldə edildi", examsByTeacher));
     }
 
+    @GetMapping("/simple-exam-by-teacher")
+    @Operation(summary = "Get Exam by teacher", description = "Retrieve a list of exams by teacher.")
+    public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getExamByTeacher(
+            @RequestParam UUID teacherId,
+            @RequestParam int pageNum) {
+        List<ExamBlockResponse> examsByTeacher =
+                adminService.getSimpleExamsByTeacher(teacherId, pageNum);
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK,
+                        "İmtahanlar uğurla əldə edildi", examsByTeacher));
+    }
+
     @PatchMapping("/change-pack")
     @Operation(summary = "Change pack", description = "Allows an **ADMIN** to change the pack of teacher by id.")
     public ResponseEntity<ApiResponse<Void>> changePack(@RequestParam UUID id, @RequestParam UUID packId) {

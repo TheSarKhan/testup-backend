@@ -185,6 +185,18 @@ public class AdminServiceImpl implements AdminService {
                 .stream()
                 .map(examService.examToResponse(userService.getCurrentUserOrNull()))
                 .toList();
+        log.info("Admin get Exam: " + list.size());
+        return list;
+    }
+
+    @Override
+    public List<ExamBlockResponse> getSimpleExamsByTeacher(UUID id, Integer pageNum) {
+        Page<Exam> examPage = examService.getSimpleExamPage(id,  pageNum);
+
+        List<ExamBlockResponse> list = examPage.getContent()
+                .stream()
+                .map(examService.examToResponse(userService.getCurrentUserOrNull()))
+                .toList();
         log.info("Admin get Exam: {}", list.size());
         return list;
     }

@@ -500,6 +500,20 @@ public class ExamServiceImpl implements ExamService {
         return examRepository.findAll(specification, pageable);
     }
 
+    @Override
+    public Page<Exam> getSimpleExamPage(UUID teacherId,
+                                  Integer pageNum) {
+        Specification<Exam> specification = Specification.unrestricted();
+        specification = specification.and(ExamSpecification.hasTeacher(teacherId));
+
+        pageNum = (pageNum != null && pageNum > 0) ? pageNum - 1 : 0;
+        int pageSize = 10;
+
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+
+        return examRepository.findAll(specification, pageable);
+    }
+
     private StartExamResponse getResponse(StartExamResponse response) {
         return new StartExamResponse(
                 response.studentExamId(),
