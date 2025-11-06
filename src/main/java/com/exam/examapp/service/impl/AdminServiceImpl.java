@@ -190,15 +190,10 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<ExamBlockResponse> getSimpleExamsByTeacher(UUID id, Integer pageNum) {
-        Page<Exam> examPage = examService.getSimpleExamPage(id,  pageNum);
-
-        List<ExamBlockResponse> list = examPage.getContent()
-                .stream()
-                .map(examService.examToResponse(userService.getCurrentUserOrNull()))
-                .toList();
-        log.info("Admin get Exam: {}", list.size());
-        return list;
+    public List<ExamBlockResponse> getSimpleExamsByTeacher(UUID id) {
+        List<Exam> byTeacher = examRepository.getByTeacher(userService.getUserById(id));
+        log.info("Admin get Exam: {}", byTeacher.size());
+        return byTeacher.stream().map(examService.examToResponse(userService.getCurrentUserOrNull())).toList();
     }
 
     @Override

@@ -190,10 +190,9 @@ public class AdminController {
     @GetMapping("/simple-exam-by-teacher")
     @Operation(summary = "Get Exam by teacher", description = "Retrieve a list of exams by teacher.")
     public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getExamByTeacher(
-            @RequestParam UUID teacherId,
-            @RequestParam int pageNum) {
+            @RequestParam UUID teacherId) {
         List<ExamBlockResponse> examsByTeacher =
-                adminService.getSimpleExamsByTeacher(teacherId, pageNum);
+                adminService.getSimpleExamsByTeacher(teacherId);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK,
                         "İmtahanlar uğurla əldə edildi", examsByTeacher));

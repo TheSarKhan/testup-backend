@@ -38,7 +38,7 @@ public interface AdminService {
                                               ExamType type,
                                               Integer pageNum);
 
-    List<ExamBlockResponse> getSimpleExamsByTeacher(UUID id, Integer pageNum);
+    List<ExamBlockResponse> getSimpleExamsByTeacher(UUID id);
 
     void deactivateUser(UUID id);
 
