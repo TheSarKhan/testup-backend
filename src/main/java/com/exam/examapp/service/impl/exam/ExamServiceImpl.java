@@ -441,7 +441,7 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public Function<Exam, ExamBlockResponse> examToResponse(User user) {
         return exam -> {
-            if (user != null) {
+            if (user != null && (Role.ADMIN.equals(user.getRole()) || Role.TEACHER.equals(user.getRole()))) {
                 List<StudentExam> studentExams = studentExamRepository.getByStudent(user);
                 List<StudentExam> filteredExams = studentExams
                         .stream()
