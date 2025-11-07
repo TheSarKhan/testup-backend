@@ -1,7 +1,6 @@
 package com.exam.examapp.service.impl;
 
 import com.exam.examapp.service.interfaces.CacheService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -9,9 +8,9 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class RedisServiceImpl implements CacheService {
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
-    public RedisServiceImpl(@Qualifier("redisTemplate") RedisTemplate redisTemplate) {
+    public RedisServiceImpl(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -24,7 +23,7 @@ public class RedisServiceImpl implements CacheService {
     @Override
     public String getContent(String header, String email) {
         String key = header + email;
-        return (String) redisTemplate.opsForValue().get(key);
+        return redisTemplate.opsForValue().get(key);
     }
 
     @Override

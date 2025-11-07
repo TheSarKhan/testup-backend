@@ -13,7 +13,7 @@ public interface NotificationService {
 
     void sendNotificationToAll(MultiNotificationRequest request);
 
-    List<NotificationResponse> getAllNotifications();
+    List<NotificationResponse> getAllNotifications(int size, int pageNum);
 
     List<NotificationResponse> getAllNotificationsSortedByCreatedAt();
 

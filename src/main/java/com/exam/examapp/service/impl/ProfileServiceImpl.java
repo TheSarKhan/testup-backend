@@ -44,28 +44,28 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public TeacherInfoResponse getTeacherInfo() {
+        User user = userService.getCurrentUser();
         return new TeacherInfoResponse(
-                userService.getTeacherInfo(),
-                userService.getCurrentUser().getPack());
+                user.getInfo(),
+                user.getPack());
     }
 
     @Override
     public TokenResponse updateProfileInfo(ProfileUpdateRequest request) {
         log.info("Profil yenilənir");
         User user = userService.getCurrentUser();
-        user.setFullName(request.fullName());
-        user.setPhoneNumber(request.phoneNumber());
-
         String email = request.email();
+
         if (userService.existsByEmail(email) &&
                 !userService.getByEmail(email).getId().equals(user.getId()))
             throw new BadRequestException("E-poçt artıq mövcuddur");
 
+        user.setFullName(request.fullName());
+        user.setPhoneNumber(request.phoneNumber());
+
         user.setEmail(email);
 
-        userService.save(user);
-
-        User newUser = userService.getByEmail(email);
+        User newUser = userService.save(user);
 
         TokenResponse tokenResponse = new TokenResponse(
                 jwtService.generateAccessToken(email),
@@ -73,7 +73,7 @@ public class ProfileServiceImpl implements ProfileService {
                 newUser.getRole(),
                 newUser.getPack());
         log.info("Profil yeniləndi");
-        logService.save("Profil yeniləndi", userService.getCurrentUserOrNull());
+        logService.save("Profil yeniləndi", newUser);
         return tokenResponse;
     }
 

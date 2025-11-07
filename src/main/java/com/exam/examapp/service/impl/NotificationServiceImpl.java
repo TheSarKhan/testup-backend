@@ -9,14 +9,18 @@ import com.exam.examapp.mapper.NotificationMapper;
 import com.exam.examapp.model.Notification;
 import com.exam.examapp.model.User;
 import com.exam.examapp.repository.NotificationRepository;
+import com.exam.examapp.repository.UserRepository;
 import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.NotificationService;
 import com.exam.examapp.service.interfaces.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +29,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
+
+    private final UserRepository userRepository;
 
     private final UserService userService;
 
@@ -43,15 +49,27 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void sendNotificationToAll(MultiNotificationRequest request) {
-        for (String email : request.emails()) {
-            sendNotification(new NotificationRequest(request.title(), request.message(), email));
+        log.info("Bildirişlər göndərilir");
+        List<Notification> list = new ArrayList<>();
+        List<User> getAllByEmail = userRepository.getAllByEmailIn(request.emails());
+        for (User user : getAllByEmail) {
+            list.add(Notification.builder()
+                    .title(request.title())
+                    .message(request.message())
+                    .user(user)
+                    .build());
         }
+        notificationRepository.saveAll(list);
+        String message = "Bildirişlər göndərildi. Message:" + request.message() + " mails: " + request.emails();
+        log.info(message);
+        logService.save(message, userService.getCurrentUserOrNull());
     }
 
     @Override
     @Transactional
-    public List<NotificationResponse> getAllNotifications() {
-        return notificationRepository.findAll()
+    public List<NotificationResponse> getAllNotifications(int size, int pageNum) {
+        PageRequest pageRequest = PageRequest.of(pageNum-1, size);
+        return notificationRepository.findAll(pageRequest)
                 .stream()
                 .map(NotificationMapper::toResponseForAdmin)
                 .toList();

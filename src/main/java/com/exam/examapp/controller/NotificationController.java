@@ -11,13 +11,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -65,8 +66,10 @@ public class NotificationController {
             summary = "Retrieve all notifications",
             description = "Fetches a list of all notifications. Only accessible by **ADMIN**."
     )
-    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getAll() {
-        List<NotificationResponse> allNotifications = notificationService.getAllNotifications();
+    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getAll(@RequestParam int pageNum,
+                                                                          @RequestParam int pageSize) {
+        List<NotificationResponse> allNotifications =
+                notificationService.getAllNotifications(pageSize, pageNum);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,

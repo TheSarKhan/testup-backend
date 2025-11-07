@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,4 +31,6 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     long countByCreatedAtBetween(Instant createdAtAfter, Instant createdAtBefore);
 
     long countByCreatedAtBetweenAndRole(Instant createdAtAfter, Instant createdAtBefore, Role role);
+
+    List<User> getAllByEmailIn(Collection<String> emails);
 }

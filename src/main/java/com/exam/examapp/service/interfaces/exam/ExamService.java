@@ -94,7 +94,5 @@ public interface ExamService {
                            ExamSort sort,
                            ExamType type);
 
-    Page<Exam> getSimpleExamPage(UUID teacherId, Integer pageNum);
-
     Function<Exam, ExamBlockResponse> examToResponse(User user);
 }

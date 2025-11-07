@@ -24,6 +24,7 @@ import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.PackService;
 import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.exam.ExamService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -80,6 +81,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     public AdminStatisticsResponse getAdminStatistics() {
         Instant now = Instant.now();
         Instant oneMonthAgo = now.minusSeconds(60L * 60 * 24 * 30);
@@ -125,6 +127,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     public Map<Integer, List<UsersForAdminResponse>> getTeachersByNameOrEmail(int page, int size, String search) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Specification<User> specification = Specification.unrestricted();
@@ -137,6 +140,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     public Map<Integer, List<UsersForAdminResponse>> getStudentsByNameOrEmail(int page, int size, String search) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Specification<User> specification = Specification.unrestricted();
@@ -149,6 +153,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     public Map<Integer, List<UsersForAdminResponse>> getTeachersByFiltered(TeacherFilter filter) {
         Pageable pageable = PageRequest.of(filter.page() - 1, filter.size());
         Specification<User> specification = Specification.unrestricted();
@@ -164,6 +169,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     public Map<Integer, List<UsersForAdminResponse>> getStudentsByFiltered(StudentFilter filter) {
         Pageable pageable = PageRequest.of(filter.page() - 1, filter.size());
         Specification<User> specification = Specification.unrestricted();
@@ -178,6 +184,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     public List<ExamBlockResponse> getExamsByTeacher(UUID id, String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, ExamSort sort, ExamType type, Integer pageNum) {
         Page<Exam> examPage = examService.getExamPage(id, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
 
@@ -190,10 +197,12 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     public List<ExamBlockResponse> getSimpleExamsByTeacher(UUID id) {
-        List<Exam> byTeacher = examRepository.getByTeacher(userService.getUserById(id));
-        log.info("Admin get Exam: {}", byTeacher.size());
-        return byTeacher.stream().map(examService.examToResponse(userService.getCurrentUserOrNull())).toList();
+        List<Exam> exams = examRepository.getByTeacher(userService.getUserById(id));
+        log.info("Admin get Simple Exam: " + exams.size());
+        return exams.stream()
+                .map(examService.examToResponse(userService.getCurrentUserOrNull())).toList();
     }
 
     @Override
