@@ -21,9 +21,6 @@ public class AnswerCheckerFactory {
                 checkerMap.put(QuestionType.MATCH, checker);
             } else if (checker instanceof OpenEndedChecker) {
                 checkerMap.put(QuestionType.OPEN_ENDED, checker);
-            } else if (checker instanceof TextBasedAndListeningChecker) {
-                checkerMap.put(QuestionType.LISTENING, checker);
-                checkerMap.put(QuestionType.TEXT_BASED, checker);
             }
         }
     }

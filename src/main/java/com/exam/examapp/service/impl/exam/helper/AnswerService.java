@@ -1,8 +1,10 @@
 package com.exam.examapp.service.impl.exam.helper;
 
+import com.exam.examapp.dto.QuestionDetails;
 import com.exam.examapp.dto.request.NotificationRequest;
 import com.exam.examapp.model.enums.AnswerStatus;
 import com.exam.examapp.model.enums.ExamStatus;
+import com.exam.examapp.model.enums.QuestionType;
 import com.exam.examapp.model.exam.StudentExam;
 import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.subject.SubjectStructureQuestion;
@@ -48,6 +50,12 @@ public class AnswerService {
         for (SubjectStructureQuestion subjectStructureQuestion : subjectStructureQuestions) {
             for (Question question : subjectStructureQuestion.getQuestion()) {
                 if (questionIdToAnswerMap.containsKey(question.getId())) {
+                    if (QuestionType.TEXT_BASED.equals(question.getType()) || QuestionType.LISTENING.equals(question.getType())) {
+                        checkListeningOrText(question,
+                                questionIdToAnswerMap.get(question.getId()),
+                                answerStatusMap,
+                                correctAndWrongCounts);
+                    }
                     AnswerChecker checker = factory.getChecker(question.getType());
                     checker.check(
                             question,
@@ -120,5 +128,16 @@ public class AnswerService {
         }
         log.info("Tələbənin məlumatları mövzuya çevrildi");
         return subjectToQuestionToValue;
+    }
+
+    public void checkListeningOrText(Question question, String answer, Map<UUID, AnswerStatus> answerStatusMap, List<Integer> counts) {
+        if (question.getQuestions() == null) {
+            return;
+        }
+        for (Question questionQuestion : question.getQuestions()) {
+            QuestionDetails questionDetails = questionQuestion.getQuestionDetails();
+            AnswerChecker answerChecker = factory.getChecker(questionQuestion.getType());
+            answerChecker.check(questionQuestion, questionDetails, answer, answerStatusMap, counts);
+        }
     }
 }
