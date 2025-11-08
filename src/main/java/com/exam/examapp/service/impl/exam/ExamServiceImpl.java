@@ -106,6 +106,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public List<ExamBlockResponse> getAllExams(String name,
                                                Integer minCost,
                                                Integer maxCost,
@@ -125,6 +126,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public List<ExamBlockResponse> getAllExamsForAdmin(String name,
                                                        Integer minCost,
                                                        Integer maxCost,
@@ -149,6 +151,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public List<ExamBlockResponse> getExamsByUserId(UUID id) {
         User user = userService.getUserById(id);
         return getExamBlockResponses(user);
@@ -171,6 +174,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public List<ExamBlockResponse> getAdminCooperationExams() {
         User user = userService.getCurrentUser();
         return examTeacherRepository.getByTeacher(user)
@@ -181,6 +185,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public List<ExamBlockResponse> getExamByTag(List<UUID> tagIds) {
         Specification<Exam> specification = Specification.unrestricted();
         for (UUID tagId : tagIds) {
@@ -195,6 +200,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public List<ExamBlockResponse> getLastCreatedExams() {
         User user = userService.getCurrentUserOrNull();
         return examRepository.getLastCreated()
@@ -205,6 +211,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public ExamDetailedResponse getExamDetailedById(UUID id) {
         Exam exam = getById(id);
         User user = userService.getCurrentUserOrNull();
@@ -302,6 +309,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public ResultStatisticResponse getResultStatistic(UUID studentExamId) {
         log.info("İmtahan üçün id ilə nəticə statistikasının alınması: {}", studentExamId);
         StudentExam studentExam = findStudentExamById(studentExamId);
@@ -310,6 +318,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public void publishExam(UUID id) {
         log.info("İmtahan id ilə nəşr olunur. Id: {}", id);
         User user = userService.getCurrentUser();
@@ -322,6 +331,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public void unpublishExam(UUID id) {
         log.info("İmtahan id ilə nəşrdən toplanır. Id: {}", id);
         User user = userService.getCurrentUser();
@@ -425,6 +435,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public Exam getById(UUID id) {
         log.info("İd ilə imtahan verilir: {}", id);
         return examRepository
@@ -439,6 +450,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public Function<Exam, ExamBlockResponse> examToResponse(User user) {
         return exam -> {
             if (user != null && !(Role.ADMIN.equals(user.getRole()) || Role.TEACHER.equals(user.getRole()))) {
@@ -455,6 +467,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    @Transactional
     public Page<Exam> getExamPage(UUID teacherId,
                                    String name,
                                    Integer minCost,
