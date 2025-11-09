@@ -2,7 +2,6 @@ package com.exam.examapp.model;
 
 import com.exam.examapp.dto.CurrentExam;
 import com.exam.examapp.model.enums.Role;
-import com.exam.examapp.security.model.CustomUserDetails;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,6 +9,7 @@ import org.hibernate.annotations.Type;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Getter
@@ -81,6 +81,11 @@ public class User {
                 isAccountNonExpired = isAccountNonLocked = isCredentialsNonExpired = isEnabled = true;
         updatedAt = createdAt = Instant.now();
         currentExams = List.of();
+        if (info == null) {
+            info = TeacherInfo.builder()
+                    .ExamToStudentCountMap(Map.of())
+                    .build();
+        }
     }
 
     @PreUpdate

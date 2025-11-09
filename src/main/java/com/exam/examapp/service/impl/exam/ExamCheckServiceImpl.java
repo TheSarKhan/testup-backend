@@ -224,11 +224,13 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
         Exam exam = examService.getById(id);
 
+        Integer participatedStudentCount = exam.getTeacher().getInfo().getExamToStudentCountMap().get(exam.getId());
+        if (participatedStudentCount == null) participatedStudentCount = 0;
         ExamStatistics examStatistics = new ExamStatistics(
                 getExamStatisticsRating(exam),
                 getBestStudents(studentExams),
                 getExamStudents(studentExams),
-                exam.getTeacher().getInfo().getExamToStudentCountMap().get(exam.getId()),
+                participatedStudentCount,
                 exam.getTeacher().getPack().getStudentPerExam());
         log.info("İmtahan statistikası: {}", examStatistics);
         return examStatistics;
