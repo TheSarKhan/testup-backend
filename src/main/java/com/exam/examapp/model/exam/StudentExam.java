@@ -16,6 +16,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Builder
+@ToString
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Table(name = "students_exams")

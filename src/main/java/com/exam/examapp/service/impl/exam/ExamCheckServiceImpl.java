@@ -23,6 +23,7 @@ import com.exam.examapp.service.impl.user.UserServiceImpl;
 import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.NotificationService;
 import com.exam.examapp.service.interfaces.exam.ExamCheckService;
+import com.exam.examapp.service.interfaces.exam.ExamService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,8 @@ public class ExamCheckServiceImpl implements ExamCheckService {
     private final UserServiceImpl userService;
 
     private final ExamMapper examMapper;
+
+    private final ExamService examService;
 
     private static void getAnswerList(List<Question> questions, Map<UUID, AnswerStatus> questionIdToAnswerStatusMap, List<Integer> list) {
         log.info("Cavab listi götürülür");
@@ -219,7 +222,7 @@ public class ExamCheckServiceImpl implements ExamCheckService {
         log.info("İmtahan statistikası hazırlanır: {}", id);
         List<StudentExam> studentExams = studentExamRepository.getByExam_Id(id);
 
-        Exam exam = studentExams.getFirst().getExam();
+        Exam exam = examService.getById(id);
 
         ExamStatistics examStatistics = new ExamStatistics(
                 getExamStatisticsRating(exam),
