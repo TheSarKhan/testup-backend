@@ -134,7 +134,8 @@ public class ExamCheckServiceImpl implements ExamCheckService {
         log.info("Tələbələr hazırlanır");
         List<ExamStatisticsStudent> list = studentExams.stream()
                 .filter(studentExam -> ExamStatus.COMPLETED.equals(studentExam.getStatus()) ||
-                        ExamStatus.EXPIRED.equals(studentExam.getStatus()))
+                        ExamStatus.EXPIRED.equals(studentExam.getStatus()) ||
+                        ExamStatus.WAITING_OPEN_ENDED_QUESTION.equals(studentExam.getStatus()))
                 .sorted(Comparator.comparing(StudentExam::getEndTime).reversed())
                 .map(examStudent -> {
                     Instant endTime = examStudent.getEndTime();
@@ -192,7 +193,8 @@ public class ExamCheckServiceImpl implements ExamCheckService {
         log.info("Ən yaxşı tələbələr hazırlanır");
         List<ExamStatisticsBestStudent> list = studentExams.stream()
                 .filter(studentExam -> ExamStatus.COMPLETED.equals(studentExam.getStatus()) ||
-                        ExamStatus.EXPIRED.equals(studentExam.getStatus()))
+                        ExamStatus.EXPIRED.equals(studentExam.getStatus()) ||
+                        ExamStatus.WAITING_OPEN_ENDED_QUESTION.equals(studentExam.getStatus()))
                 .sorted(Comparator.comparing(StudentExam::getScore))
                 .limit(5)
                 .map(examStudent -> {
