@@ -11,6 +11,7 @@ import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.mapper.ExamMapper;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.AnswerStatus;
+import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.enums.QuestionType;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.exam.StudentExam;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 
 @Slf4j
@@ -128,9 +130,12 @@ public class ExamCheckServiceImpl implements ExamCheckService {
     private List<ExamStatisticsStudent> getExamStudents(List<StudentExam> studentExams) {
         log.info("Tələbələr hazırlanır");
         List<ExamStatisticsStudent> list = studentExams.stream()
+                .filter(studentExam -> ExamStatus.COMPLETED.equals(studentExam.getStatus()) ||
+                        ExamStatus.EXPIRED.equals(studentExam.getStatus()))
                 .sorted(Comparator.comparing(StudentExam::getEndTime).reversed())
                 .map(examStudent -> {
-                    long durationInSecond = examStudent.getEndTime().getEpochSecond() -
+                    Instant endTime = examStudent.getEndTime();
+                    long durationInSecond = endTime.getEpochSecond() -
                             examStudent.getStartTime().getEpochSecond();
                     durationInSecond = examStudent.getExam().getDurationInSeconds() >
                             durationInSecond ?
@@ -183,6 +188,8 @@ public class ExamCheckServiceImpl implements ExamCheckService {
     private List<ExamStatisticsBestStudent> getBestStudents(List<StudentExam> studentExams) {
         log.info("Ən yaxşı tələbələr hazırlanır");
         List<ExamStatisticsBestStudent> list = studentExams.stream()
+                .filter(studentExam -> ExamStatus.COMPLETED.equals(studentExam.getStatus()) ||
+                        ExamStatus.EXPIRED.equals(studentExam.getStatus()))
                 .sorted(Comparator.comparing(StudentExam::getScore))
                 .limit(5)
                 .map(examStudent -> {
