@@ -29,6 +29,9 @@ public class ExamResultService {
     @Value("${app.base-url}")
     private String baseUrl;
 
+    @Value("${app.front-base-url}")
+    private String frontBaseUrl;
+
     public void calculateResult(StudentExam studentExam) {
         log.info("İmtahan nəticələri hesablanır");
         List<Integer> correctAndWrongCounts = new ArrayList<>(List.of(0, 0, 0, 0, 0, 0, 0, 0));
@@ -76,7 +79,7 @@ public class ExamResultService {
 
         ExamResponse examResponse = examMapper.toResponse(studentExam.getExam());
 
-        String shareLink = baseUrl + "/api/v1/exam/result?studentExamId=" + studentExamId;
+        String shareLink = frontBaseUrl + "/student-exam-result?studentExamId=" + studentExamId;
 
         ResultStatisticResponse resultStatisticResponse = new ResultStatisticResponse(
                 studentExam.getNumberOfCorrectAnswers(),

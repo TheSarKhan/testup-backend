@@ -32,7 +32,7 @@ public class Exam {
     @ManyToOne(fetch = FetchType.LAZY)
     private User teacher;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<SubjectStructureQuestion> subjectStructureQuestions;
 
     @ManyToMany(fetch = FetchType.EAGER)
