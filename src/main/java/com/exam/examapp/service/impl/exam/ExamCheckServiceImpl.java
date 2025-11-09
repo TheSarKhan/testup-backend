@@ -141,10 +141,12 @@ public class ExamCheckServiceImpl implements ExamCheckService {
                     Instant endTime = examStudent.getEndTime();
                     long durationInSecond = endTime.getEpochSecond() -
                             examStudent.getStartTime().getEpochSecond();
-                    durationInSecond = examStudent.getExam().getDurationInSeconds() >
-                            durationInSecond ?
-                            examStudent.getExam().getDurationInSeconds() :
-                            durationInSecond;
+                    Integer examDurationLimit = examStudent.getExam().getDurationInSeconds();
+                    if (examDurationLimit != null)
+                        durationInSecond = examDurationLimit <
+                                durationInSecond ?
+                                examDurationLimit :
+                                durationInSecond;
                     return new ExamStatisticsStudent(
                             examStudent.getExam().getId(),
                             examStudent.getId(),
@@ -200,10 +202,12 @@ public class ExamCheckServiceImpl implements ExamCheckService {
                 .map(examStudent -> {
                     long durationInSecond = examStudent.getEndTime().getEpochSecond() -
                             examStudent.getStartTime().getEpochSecond();
-                    durationInSecond = examStudent.getExam().getDurationInSeconds() >
-                            durationInSecond ?
-                            examStudent.getExam().getDurationInSeconds() :
-                            durationInSecond;
+                    Integer examDurationLimit = examStudent.getExam().getDurationInSeconds();
+                    if (examDurationLimit != null)
+                        durationInSecond = examDurationLimit <
+                                durationInSecond ?
+                                examDurationLimit :
+                                durationInSecond;
                     return new ExamStatisticsBestStudent(
                             examStudent.getExam().getId(),
                             examStudent.getId(),
