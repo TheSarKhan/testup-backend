@@ -64,6 +64,10 @@ public class StudentExamController {
     }
 
     @GetMapping("/id")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+            summary = "Get Student Exam by id"
+    )
     public ResponseEntity<ApiResponse<StudentExam>> getStudentExamId(@RequestParam UUID studentExamId) {
         StudentExam studentExam = studentExamService.getStudentExam(studentExamId);
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Student exam alindi.", studentExam));
