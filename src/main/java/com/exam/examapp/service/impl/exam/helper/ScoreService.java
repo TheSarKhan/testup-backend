@@ -33,14 +33,14 @@ public class ScoreService {
     }
 
     private static double calculatePointBasedScore(SubjectStructureQuestion subjectStructureQuestion,
-                                                  Map<UUID, AnswerStatus> answerStatusMap) {
+                                                   Map<UUID, AnswerStatus> answerStatusMap) {
         log.info("Bal əsasında hesablanır");
         Map<Integer, Integer> questionToPointMap = subjectStructureQuestion.getSubjectStructure().getQuestionToPointMap();
         List<Question> questions = subjectStructureQuestion.getQuestion();
 
         double score = 0;
         for (Map.Entry<Integer, Integer> entry : questionToPointMap.entrySet()) {
-            Question currentQuestion = questions.get(entry.getKey());
+            Question currentQuestion = questions.get(entry.getKey() - 1);
             if (AnswerStatus.CORRECT.equals(answerStatusMap.get(currentQuestion.getId()))) {
                 score += entry.getValue();
             }
