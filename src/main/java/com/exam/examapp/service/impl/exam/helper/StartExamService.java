@@ -34,6 +34,8 @@ public class StartExamService {
 
     private final ExamResultService examResultService;
 
+    private final ExamMapper examMapper;
+
     @Transactional
     public StartExamResponse startExam(String studentName, Exam exam) {
         log.info("İmtahan id ilə başlayır: {}", exam.getId());
@@ -68,7 +70,7 @@ public class StartExamService {
                         first.getQuestionIdToAnswerMap(),
                         first.getListeningIdToPlayTimeMap(),
                         first.getStartTime(),
-                        ExamMapper.toResponse(exam));
+                        examMapper.toResponse(exam));
             } else {
                 if (first.getStartTime().plusSeconds(first.getExam().getDurationInSeconds()).isBefore(Instant.now())) {
                     log.info("Hazırki imtahan başladılır");
@@ -78,7 +80,7 @@ public class StartExamService {
                             first.getQuestionIdToAnswerMap(),
                             first.getListeningIdToPlayTimeMap(),
                             first.getStartTime(),
-                            ExamMapper.toResponse(exam));
+                            examMapper.toResponse(exam));
                 } else {
                     log.info("Imtahanın vaxtı bitib");
                     first.setStatus(ExamStatus.EXPIRED);
@@ -107,7 +109,7 @@ public class StartExamService {
                     Map.of(),
                     Map.of(),
                     Instant.now(),
-                    ExamMapper.toResponse(exam));
+                    examMapper.toResponse(exam));
         } else {
             return createStudentExamEntry(exam, user);
         }
@@ -137,7 +139,7 @@ public class StartExamService {
                 Map.of(),
                 Map.of(),
                 Instant.now(),
-                ExamMapper.toResponse(exam));
+                examMapper.toResponse(exam));
     }
 
     private void updateExamStudentCount(UUID id, User examCreator) {
@@ -186,6 +188,6 @@ public class StartExamService {
                 Map.of(),
                 Map.of(),
                 Instant.now(),
-                ExamMapper.toResponse(exam));
+                examMapper.toResponse(exam));
     }
 }

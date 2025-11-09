@@ -11,11 +11,14 @@ import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.subject.Subject;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Component
 public class ExamMapper {
     public static ExamBlockResponse toBlockResponse(Exam exam, ExamStatus examStatus) {
         Result result = getResult(exam);
@@ -94,7 +97,8 @@ public class ExamMapper {
         return new Result(first, tags);
     }
 
-    public static ExamResponse toResponse(Exam exam) {
+    @Transactional
+    public ExamResponse toResponse(Exam exam) {
         Result result = getResult(exam);
         User user = exam.getTeacher();
         UserResponseForExam teacher =

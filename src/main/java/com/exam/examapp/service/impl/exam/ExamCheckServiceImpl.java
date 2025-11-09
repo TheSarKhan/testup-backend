@@ -48,6 +48,8 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
     private final UserServiceImpl userService;
 
+    private final ExamMapper examMapper;
+
     private static void getAnswerList(List<Question> questions, Map<UUID, AnswerStatus> questionIdToAnswerStatusMap, List<Integer> list) {
         log.info("Cavab listi götürülür");
         for (Question question : questions) {
@@ -233,7 +235,7 @@ public class ExamCheckServiceImpl implements ExamCheckService {
                 studentExam.getQuestionIdToAnswerMap(),
                 studentExam.getListeningIdToPlayTimeMap(),
                 studentExam.getStartTime(),
-                ExamMapper.toResponse(studentExam.getExam())
+                examMapper.toResponse(studentExam.getExam())
         );
     }
 

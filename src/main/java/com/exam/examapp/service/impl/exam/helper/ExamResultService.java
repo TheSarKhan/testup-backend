@@ -24,6 +24,8 @@ public class ExamResultService {
 
     private final StudentExamRepository studentExamRepository;
 
+    private final ExamMapper examMapper;
+
     @Value("${app.base-url}")
     private String baseUrl;
 
@@ -72,7 +74,7 @@ public class ExamResultService {
         log.info("Imtahan statistikası hazırlanır");
         long secondsPassed = studentExam.getEndTime().getEpochSecond() - studentExam.getStartTime().getEpochSecond();
 
-        ExamResponse examResponse = ExamMapper.toResponse(studentExam.getExam());
+        ExamResponse examResponse = examMapper.toResponse(studentExam.getExam());
 
         String shareLink = baseUrl + "/api/v1/exam/result?studentExamId=" + studentExamId;
 

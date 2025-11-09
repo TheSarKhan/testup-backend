@@ -80,6 +80,8 @@ public class ExamServiceImpl implements ExamService {
 
     private final LogService logService;
 
+    private final ExamMapper examMapper;
+
     @Value("${app.front-base-url}")
     private String frontBaseUrl;
 
@@ -256,7 +258,7 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public ExamResponse getExamById(UUID id) {
-        return ExamMapper.toResponse(getById(id));
+        return examMapper.toResponse(getById(id));
     }
 
     @Override
@@ -541,6 +543,6 @@ public class ExamServiceImpl implements ExamService {
                 response.questionIdToAnswerMap(),
                 response.listeningIdToPlayTimeMap(),
                 response.startTime(),
-                ExamMapper.toResponse(getById(response.exam().id())));
+                examMapper.toResponse(getById(response.exam().id())));
     }
 }
