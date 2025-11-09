@@ -276,4 +276,13 @@ public class ExamController {
         examService.deleteExam(id);
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.NO_CONTENT, "İmtahan uğurla silindi", null));
     }
+
+    @PatchMapping("/give-rating")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('STUDENT')")
+    @Operation(summary = "İmtahana qiymət verin", description = "Tələbələrə imtahana qiymət verməyə imkan verir.")
+    public ResponseEntity<ApiResponse<Void>> giveRating(@RequestParam UUID examId, @RequestParam Integer rating) {
+        examService.giveRatingToExam(examId, rating);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Rating verildi.", null));
+    }
 }

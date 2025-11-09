@@ -45,6 +45,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -544,5 +545,42 @@ public class ExamServiceImpl implements ExamService {
                 response.listeningIdToPlayTimeMap(),
                 response.startTime(),
                 examMapper.toResponse(getById(response.exam().id())));
+    }
+
+
+    @Override
+    @Transactional
+    public void giveRatingToExam(UUID examId, Integer rating) {
+        log.info("Rating verilir.");
+        if (rating == null || rating < 0 || rating > 5)
+            throw new BadRequestException("Rating 0 ile 5 arasinda olmalidir.");
+        User user = userService.getCurrentUser();
+        Exam exam = getById(examId);
+
+        if (exam.isDeleted())
+            throw new BadRequestException("Imtahan silinib.");
+
+        Map<UUID, Integer> userRatings = exam.getUserIdToRatingMap();
+        if (userRatings.containsKey(user.getId()))
+            throw new BadRequestException("Siz artiq rating vermisiniz.");
+
+        List<StudentExam> studentExams = studentExamRepository.getByExamAndStudent(exam, user);
+        long count = studentExams.stream()
+                .filter(studentExam ->
+                        studentExam.getStatus() == ExamStatus.COMPLETED ||
+                                studentExam.getStatus() == ExamStatus.EXPIRED)
+                .count();
+
+        if (!(count > 0))
+            throw new BadRequestException("Evvelce imtahani islemeli ve ya bitirmeliniz");
+
+        double currentRating = exam.getRating();
+        int size = userRatings.size();
+        double v = (currentRating * size + rating) / (size + 1);
+        exam.setRating(v);
+        userRatings.put(user.getId(), rating);
+        examRepository.save(exam);
+        log.info("Rating verildi. ratings:{}", userRatings);
+        logService.save("Rating verildi", user);
     }
 }

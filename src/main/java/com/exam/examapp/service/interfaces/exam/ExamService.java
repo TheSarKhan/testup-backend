@@ -95,4 +95,6 @@ public interface ExamService {
                            ExamType type);
 
     Function<Exam, ExamBlockResponse> examToResponse(User user);
+
+    void giveRatingToExam(UUID examId, Integer rating);
 }
