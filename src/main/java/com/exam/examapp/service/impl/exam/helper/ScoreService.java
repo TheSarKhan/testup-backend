@@ -21,7 +21,7 @@ public class ScoreService {
         for (SubjectStructureQuestion subjectStructureQuestion : studentExam.getExam().getSubjectStructureQuestions()) {
             String formula = subjectStructureQuestion.getSubjectStructure().getFormula();
 
-            if (formula != null) {
+            if (formula != null && !formula.trim().isEmpty()) {
                 String formattedFormula = formatFormulaWithCounts(formula, correctAndWrongCounts);
                 score += new ExpressionBuilder(formattedFormula).build().evaluate();
             } else {

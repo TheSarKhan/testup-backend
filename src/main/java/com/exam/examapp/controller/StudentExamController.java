@@ -2,6 +2,7 @@ package com.exam.examapp.controller;
 
 import com.exam.examapp.dto.request.StudentExamSaveRequest;
 import com.exam.examapp.dto.response.ApiResponse;
+import com.exam.examapp.model.exam.StudentExam;
 import com.exam.examapp.service.interfaces.exam.StudentExamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -60,5 +61,11 @@ public class StudentExamController {
             @RequestPart(required = false) MultipartFile file) {
         studentExamService.saveAnswer(request.studentExamId(), request.questionId(), request.answer(), file);
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Cavab uğurla yadda saxlanıldı", null));
+    }
+
+    @GetMapping("/id")
+    public ResponseEntity<ApiResponse<StudentExam>> getStudentExamId(@RequestParam UUID studentExamId) {
+        StudentExam studentExam = studentExamService.getStudentExam(studentExamId);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "Student exam alindi.", studentExam));
     }
 }

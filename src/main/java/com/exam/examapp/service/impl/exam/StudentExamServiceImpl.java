@@ -88,7 +88,7 @@ public class StudentExamServiceImpl implements StudentExamService {
                 "Hesabınıza imtahan hesabınıza əlavə edildi. İmtahan adı: " + exam.getExamTitle()
         );
 
-        String message = "İmtahan sagirdə əlavə olundu. Email: " + student.getEmail() +" imtahan adı: "+ exam.getExamTitle();
+        String message = "İmtahan sagirdə əlavə olundu. Email: " + student.getEmail() + " imtahan adı: " + exam.getExamTitle();
 
         log.info(message);
         logService.save(message, userService.getCurrentUserOrNull());
@@ -148,5 +148,11 @@ public class StudentExamServiceImpl implements StudentExamService {
 
         studentExamRepository.save(studentExam);
         log.info("Cavab uğurla yadda saxlanıldı");
+    }
+
+    @Override
+    public StudentExam getStudentExam(UUID studentExamId) {
+        return studentExamRepository.findById(studentExamId).orElseThrow(
+                () -> new ResourceNotFoundException("Student exam tapilmadi."));
     }
 }
