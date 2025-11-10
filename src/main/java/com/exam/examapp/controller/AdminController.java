@@ -126,7 +126,7 @@ public class AdminController {
     @Operation(summary = "Get Logs", description = "Retrieve list of logs.")
     public ResponseEntity<ApiResponse<List<LogResponse>>> getLogs(@RequestParam int page,
                                                                   @RequestParam int size) {
-        List<LogResponse> logs = logService.getAllOrderByCreatedAt(page, size);
+        List<LogResponse> logs = logService.getAllOrderByCreatedAtDesc(page, size);
         return ResponseEntity.ok(
                 ApiResponse.build(
                         HttpStatus.OK,
