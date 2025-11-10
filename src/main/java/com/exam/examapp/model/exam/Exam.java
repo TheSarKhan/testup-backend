@@ -76,6 +76,7 @@ public class Exam {
         startId = UUID.randomUUID();
         userIdToRatingMap = new HashMap<>();
         createdAt = updatedAt = Instant.now();
+        hasUncheckedQuestionStudentExamId = List.of();
     }
 
     @PreUpdate
