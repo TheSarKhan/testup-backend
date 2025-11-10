@@ -68,7 +68,7 @@ public class QuestionServiceImpl implements QuestionService {
                 titles.removeFirst();
                 question.setTitle(titleUrl);
             }
-        }catch (NoSuchElementException e){
+        } catch (NoSuchElementException e) {
             throw new ResourceNotFoundException("Başlıq yüklənməyib");
         }
         log.info("Başlıq uğurla yükləndi");
@@ -79,7 +79,7 @@ public class QuestionServiceImpl implements QuestionService {
                 sounds.removeFirst();
                 question.setSoundUrl(soundUrl);
             }
-        }catch (NoSuchElementException e){
+        } catch (NoSuchElementException e) {
             throw new ResourceNotFoundException("Səs yüklənməyib");
         }
 
@@ -109,7 +109,7 @@ public class QuestionServiceImpl implements QuestionService {
                                 questionDetails.variantToIsPictureMap(),
                                 IMAGE_VARIANT_PATH,
                                 variantPictures);
-        }catch (NoSuchElementException e){
+        } catch (NoSuchElementException e) {
             throw new ResourceNotFoundException("Kifayət qədər variant şəkilləri yüklənməyib");
         }
         log.info("Variant şəkillər uğurla yükləndi");
@@ -123,7 +123,7 @@ public class QuestionServiceImpl implements QuestionService {
                                 questionDetails.numberToIsPictureMap(),
                                 IMAGE_NUMBER_PATH,
                                 numberPictures);
-        }catch (NoSuchElementException e){
+        } catch (NoSuchElementException e) {
             throw new ResourceNotFoundException("Yüklənmiş şəkillərin sayı kifayət deyil");
         }
         log.info("Nömrə şəkillər uğurla yükləndi");
@@ -199,10 +199,21 @@ public class QuestionServiceImpl implements QuestionService {
             List<MultipartFile> sounds) {
         log.info("Sual yenilənir");
         Question byId = getQuestionById(updateRequest.id());
-        QuestionRequest request = updateRequest.question();
+        QuestionRequest request = new QuestionRequest(
+                updateRequest.title(),
+                updateRequest.titleDescription(),
+                updateRequest.isTitlePicture(),
+                updateRequest.isTitleContainMath(),
+                updateRequest.type(),
+                updateRequest.difficulty(),
+                updateRequest.topicId(),
+                updateRequest.questionCount(),
+                updateRequest.questions(),
+                updateRequest.questionDetails()
+        );
         Question question = QuestionMapper.updateRequestTo(byId, request);
 
-        if (request.isTitlePicture()) {
+        if (updateRequest.isTitlePicture()) {
             fileService.deleteFile(IMAGE_TITLE_PATH, byId.getTitle());
             String titleUrl = fileService.uploadFile(IMAGE_TITLE_PATH, titles.getFirst());
             titles.removeFirst();
@@ -210,7 +221,7 @@ public class QuestionServiceImpl implements QuestionService {
         }
         log.info("Sualın başlığı hazırdır");
 
-        if (QuestionType.LISTENING.equals(request.type())) {
+        if (QuestionType.LISTENING.equals(updateRequest.type())) {
             if (question.getSoundUrl() != null)
                 fileService.deleteFile(IMAGE_NUMBER_PATH, question.getSoundUrl());
             String soundUrl = fileService.uploadFile(SOUND_PATH, sounds.getFirst());
