@@ -39,8 +39,6 @@ public class CreateExamService {
 
     private final ExamRepository examRepository;
 
-    private final LogService logService;
-
     private static Exam buildExam(ExamRequest request, List<SubjectStructureQuestion> subjectStructureQuestions, List<Tag> tags, BigDecimal cost, User user) {
         return Exam.builder()
                 .examTitle(request.examTitle())
