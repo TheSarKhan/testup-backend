@@ -30,9 +30,9 @@ public class LogServiceImpl implements LogService {
     }
 
     @Override
-    public List<LogResponse> getAllOrderByCreatedAt(int page, int size) {
+    public List<LogResponse> getAllOrderByCreatedAtDesc(int page, int size) {
         int skip = (page - 1) * size;
-        return logRepository.getAllOrderByCreatedAt(skip, size).
+        return logRepository.getAllOrderByCreatedAtDesc(skip, size).
                 stream()
                 .map(this::logToResponse)
                 .toList();

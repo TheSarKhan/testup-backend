@@ -1,5 +1,6 @@
 package com.exam.examapp.init;
 
+import com.exam.examapp.model.TeacherInfo;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.service.interfaces.PackService;
@@ -10,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.util.HashMap;
 
 @Slf4j
 @Component
@@ -43,6 +47,7 @@ public class UserInitializer {
                     .phoneNumber(adminPhoneNumber)
                     .role(Role.ADMIN)
                     .pack(packService.getPackByName("Admin"))
+                    .info(new TeacherInfo(Instant.now(), 0, 0, new HashMap<>()))
                     .isAcceptedTerms(true)
                     .build();
 

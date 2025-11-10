@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface LogService {
     void save(String message, User user);
 
-    List<LogResponse> getAllOrderByCreatedAt(int page, int size);
+    List<LogResponse> getAllOrderByCreatedAtDesc(int page, int size);
 
     List<LogResponse> getAllByFilter(Role role, List<String> filters, int page, int size);
 

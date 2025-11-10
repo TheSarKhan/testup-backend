@@ -110,7 +110,7 @@ public class AdminServiceImpl implements AdminService {
         long totalExams = examRepository.count();
         long thisMonthCreatedExam = examRepository.countByCreatedAtAfter(oneMonthAgo);
 
-        List<LogResponse> logs = logService.getAllOrderByCreatedAt(1, 5);
+        List<LogResponse> logs = logService.getAllOrderByCreatedAtDesc(1, 5);
 
         return new AdminStatisticsResponse(
                 (int) totalUsers,

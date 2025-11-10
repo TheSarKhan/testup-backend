@@ -11,6 +11,6 @@ import java.util.UUID;
 
 @Repository
 public interface LogRepository extends JpaRepository<Log, UUID>, JpaSpecificationExecutor<Log> {
-    @Query("from Log where deletedAt is null order by createdAt limit :size offset :skip")
-    List<Log> getAllOrderByCreatedAt(int skip, int size);
+    @Query("from Log where deletedAt is null order by createdAt desc limit :size offset :skip")
+    List<Log> getAllOrderByCreatedAtDesc(int skip, int size);
 }

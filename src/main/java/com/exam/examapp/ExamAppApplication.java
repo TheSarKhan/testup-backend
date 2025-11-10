@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @Data
 public class ExamAppApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(ExamAppApplication.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(ExamAppApplication.class, args);
+    }
 }
