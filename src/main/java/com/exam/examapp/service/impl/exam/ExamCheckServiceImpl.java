@@ -243,6 +243,7 @@ public class ExamCheckServiceImpl implements ExamCheckService {
     }
 
     @Override
+    @Transactional
     public StartExamResponse getUserExam(UUID studentExamId) {
         log.info("İmtahan götürülür tələbə imtahan id-si: {}", studentExamId);
         StudentExam studentExam = getStudentExam(studentExamId);
@@ -258,6 +259,7 @@ public class ExamCheckServiceImpl implements ExamCheckService {
     }
 
     @Override
+    @Transactional
     public void checkAnswer(UUID studentExamId, UUID questionId, AnswerStatus status) {
         log.info("Sual yoxlanılır: {}, Sual id-si: {}, Status: {}", studentExamId, questionId, status);
         StudentExam studentExam = getStudentExam(studentExamId);
