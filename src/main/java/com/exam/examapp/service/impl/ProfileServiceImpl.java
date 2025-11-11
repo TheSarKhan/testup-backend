@@ -60,6 +60,10 @@ public class ProfileServiceImpl implements ProfileService {
                 !userService.getByEmail(email).getId().equals(user.getId()))
             throw new BadRequestException("E-poçt artıq mövcuddur");
 
+        if (userService.existsByPhoneNumber(request.phoneNumber()) &&
+                !userService.getByPhoneNumber(request.phoneNumber()).getId().equals(user.getId()))
+            throw new BadRequestException("Telefon nomresi artiq movcuddur.");
+
         user.setFullName(request.fullName());
         user.setPhoneNumber(request.phoneNumber());
 

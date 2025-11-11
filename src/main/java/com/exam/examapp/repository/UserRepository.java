@@ -33,4 +33,6 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     long countByCreatedAtBetweenAndRole(Instant createdAtAfter, Instant createdAtBefore, Role role);
 
     List<User> getAllByEmailIn(Collection<String> emails);
+
+    Optional<User> findByPhoneNumber(String phoneNumber);
 }

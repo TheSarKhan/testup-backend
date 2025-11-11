@@ -13,6 +13,8 @@ public interface UserService {
 
   User getByEmail(String email);
 
+  User getByPhoneNumber(String phoneNumber);
+
   User getCurrentUser();
 
   User getUserById(UUID userId);
