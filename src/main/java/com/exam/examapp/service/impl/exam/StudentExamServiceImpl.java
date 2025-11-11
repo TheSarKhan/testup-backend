@@ -151,10 +151,11 @@ public class StudentExamServiceImpl implements StudentExamService {
     }
 
     @Override
+    @Transactional
     public StudentExam getStudentExam(UUID studentExamId) {
         StudentExam studentExam = studentExamRepository.findById(studentExamId).orElseThrow(
                 () -> new ResourceNotFoundException("Student exam tapilmadi."));
-        log.info("Student exam getirildi:" + studentExam.toString());
+        log.info("Student exam getirildi:{}", studentExam.toString());
         return studentExam;
     }
 }

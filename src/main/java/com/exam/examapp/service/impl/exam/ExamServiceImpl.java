@@ -92,12 +92,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional
-    public void createExam(
-            ExamRequest request,
-            List<MultipartFile> titles,
-            List<MultipartFile> variantPictures,
-            List<MultipartFile> numberPictures,
-            List<MultipartFile> sounds) {
+    public void createExam(ExamRequest request, List<MultipartFile> titles, List<MultipartFile> variantPictures, List<MultipartFile> numberPictures, List<MultipartFile> sounds) {
         log.info("İmtahan yaradılır");
         createExamService.createExam(request, titles, variantPictures, numberPictures, sounds);
         log.info("İmtahanın yaradılması tamamlandı");
@@ -106,42 +101,18 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional
-    public List<ExamBlockResponse> getAllExams(String name,
-                                               Integer minCost,
-                                               Integer maxCost,
-                                               List<Integer> rating,
-                                               List<UUID> tagIds,
-                                               ExamSort sort,
-                                               ExamType type,
-                                               Integer pageNum) {
+    public List<ExamBlockResponse> getAllExams(String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, ExamSort sort, ExamType type, Integer pageNum) {
         Page<Exam> page = getExamPage(null, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
 
-        return page.getContent()
-                .stream()
-                .filter(Exam::isDeleted)
-                .filter(exam -> Role.ADMIN.equals(exam.getTeacher().getRole()))
-                .filter(Exam::isReadyForSale)
-                .map(examToResponse(userService.getCurrentUserOrNull()))
-                .toList();
+        return page.getContent().stream().filter(Exam::isDeleted).filter(exam -> Role.ADMIN.equals(exam.getTeacher().getRole())).filter(Exam::isReadyForSale).map(examToResponse(userService.getCurrentUserOrNull())).toList();
     }
 
     @Override
     @Transactional
-    public List<ExamBlockResponse> getAllExamsForAdmin(String name,
-                                                       Integer minCost,
-                                                       Integer maxCost,
-                                                       List<Integer> rating,
-                                                       List<UUID> tagIds,
-                                                       ExamSort sort,
-                                                       ExamType type,
-                                                       Integer pageNum) {
+    public List<ExamBlockResponse> getAllExamsForAdmin(String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, ExamSort sort, ExamType type, Integer pageNum) {
         Page<Exam> page = getExamPage(null, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
 
-        return page.getContent()
-                .stream()
-                .filter(exam -> !exam.isDeleted())
-                .map(examToResponse(userService.getCurrentUserOrNull()))
-                .toList();
+        return page.getContent().stream().filter(exam -> !exam.isDeleted()).map(examToResponse(userService.getCurrentUserOrNull())).toList();
     }
 
     @Override
@@ -160,19 +131,12 @@ public class ExamServiceImpl implements ExamService {
 
     private List<ExamBlockResponse> getExamBlockResponses(User user) {
         if (Role.TEACHER.equals(user.getRole()) || Role.ADMIN.equals(user.getRole())) {
-            return examRepository.getByTeacher(user).stream()
-                    .filter(exam -> !exam.isDeleted())
-                    .map(exam -> ExamMapper.toBlockResponse(exam, null))
-                    .toList();
+            return examRepository.getByTeacher(user).stream().filter(exam -> !exam.isDeleted()).map(exam -> ExamMapper.toBlockResponse(exam, null)).toList();
         } else {
-            return studentExamRepository.getByStudent(user)
-                    .stream()
-                    .filter(studentExam -> !studentExam.getExam().isDeleted())
-                    .map(studentExam -> {
-                        ExamStatus status = studentExam.getStatus();
-                        return ExamMapper.toBlockResponse(studentExam.getExam(), status);
-                    })
-                    .toList();
+            return studentExamRepository.getByStudent(user).stream().filter(studentExam -> !studentExam.getExam().isDeleted()).map(studentExam -> {
+                ExamStatus status = studentExam.getStatus();
+                return ExamMapper.toBlockResponse(studentExam.getExam(), status);
+            }).toList();
         }
     }
 
@@ -180,12 +144,7 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public List<ExamBlockResponse> getAdminCooperationExams() {
         User user = userService.getCurrentUser();
-        return examTeacherRepository.getByTeacher(user)
-                .stream()
-                .filter(examTeacher -> !examTeacher.getExam().isDeleted())
-                .map(examTeacher -> ExamMapper.toBlockResponse(
-                        examTeacher.getExam(), null))
-                .toList();
+        return examTeacherRepository.getByTeacher(user).stream().filter(examTeacher -> !examTeacher.getExam().isDeleted()).map(examTeacher -> ExamMapper.toBlockResponse(examTeacher.getExam(), null)).toList();
     }
 
     @Override
@@ -196,44 +155,30 @@ public class ExamServiceImpl implements ExamService {
             specification.or(ExamSpecification.hasTag(tagId));
         }
         User user = userService.getCurrentUserOrNull();
-        return examRepository.findAll(specification)
-                .stream()
-                .filter(exam -> !exam.isDeleted())
-                .filter(Exam::isReadyForSale)
-                .map(examToResponse(user))
-                .toList();
+        return examRepository.findAll(specification).stream().filter(exam -> !exam.isDeleted()).filter(Exam::isReadyForSale).map(examToResponse(user)).toList();
     }
 
     @Override
     @Transactional
     public List<ExamBlockResponse> getLastCreatedExams() {
         User user = userService.getCurrentUserOrNull();
-        return examRepository.getLastCreated()
-                .stream()
-                .filter(exam -> !exam.isDeleted())
-                .filter(Exam::isReadyForSale)
-                .map(examToResponse(user))
-                .toList();
+        return examRepository.getLastCreated().stream().filter(exam -> !exam.isDeleted()).filter(Exam::isReadyForSale).map(examToResponse(user)).toList();
     }
 
     @Override
     @Transactional
     public ExamDetailedResponse getExamDetailedById(UUID id) {
         Exam exam = getById(id);
-        if (exam.isDeleted())
-            throw new BadRequestException("Imtahan silinib.");
+        if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
 
         User user = userService.getCurrentUserOrNull();
         log.info("point 1");
-        if (user != null) {
+        if (user != null && Role.STUDENT.equals(user.getRole())) {
             List<StudentExam> studentExams = studentExamRepository.getByStudent(user);
             log.info("point 2");
-            List<StudentExam> filteredExams = studentExams
-                    .stream()
-                    .filter(studentExam -> studentExam.getExam().equals(exam))
-                    .toList();
+            List<StudentExam> filteredExams = studentExams.stream().filter(studentExam -> studentExam.getExam().equals(exam)).toList();
             log.info("point 3");
-            StudentExam last = filteredExams.getLast();
+            StudentExam last = filteredExams.isEmpty() ? null : filteredExams.getLast();
             log.info("point 4");
             return ExamMapper.toDetailedResponse(exam, last == null ? null : last.getStatus());
         }
@@ -243,16 +188,10 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public ExamStartLinkResponse getExamStartInformationById(UUID id) {
-        Exam exam = examRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("İmtahan tapılmadı"));
-        if (exam.isDeleted())
-            throw new BadRequestException("Imtahan silinib.");
+        Exam exam = examRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("İmtahan tapılmadı"));
+        if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
 
-        List<String> subjectNames = exam.getSubjectStructureQuestions()
-                .stream()
-                .map(subjectStructureQuestion ->
-                        subjectStructureQuestion.getSubjectStructure().getSubject().getName())
-                .toList();
+        List<String> subjectNames = exam.getSubjectStructureQuestions().stream().map(subjectStructureQuestion -> subjectStructureQuestion.getSubjectStructure().getSubject().getName()).toList();
         return ExamMapper.toStartLinkResponse(exam, subjectNames);
     }
 
@@ -266,10 +205,8 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public Integer getExamCode(UUID id) {
         Exam exam = getById(id);
-        if (exam.isDeleted())
-            throw new BadRequestException("Imtahan silinib.");
-        if (!exam.isHidden())
-            throw new BadRequestException("İmtahan gizli deyil. İmtahan kodunu əldə edə bilməzsiniz");
+        if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
+        if (!exam.isHidden()) throw new BadRequestException("İmtahan gizli deyil. İmtahan kodunu əldə edə bilməzsiniz");
         int code = (int) (Math.random() * (9_999_999 - 1_000_000 + 1)) + 1_000_000;
         cacheService.saveContent(EXAM_CODE_PREFIX, String.valueOf(code), id.toString(), (long) 86_400_000);
         return code;
@@ -279,8 +216,7 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public String getExamLink(UUID id) {
         Exam exam = getById(id);
-        if (exam.isDeleted())
-            throw new BadRequestException("Imtahan silinib.");
+        if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
         return frontBaseUrl + EXAM_START_LINK_PREFIX + exam.getId();
     }
 
@@ -293,8 +229,7 @@ public class ExamServiceImpl implements ExamService {
 
         String examId = cacheService.getContent(EXAM_CODE_PREFIX, examCode.substring(1));
         Exam exam = getById(UUID.fromString(examId));
-        if (exam.isDeleted())
-            throw new BadRequestException("Imtahan silinib.");
+        if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
         StartExamResponse result = startExamService.startExam(studentName, exam);
         printStartExam(exam);
         logService.save("İmtahan başladı. İmtahan: " + exam.getExamTitle(), userService.getCurrentUserOrNull());
@@ -305,10 +240,8 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public StartExamResponse startExamViaId(String studentName, UUID id) {
         log.info("Id vasitəsilə imtahan başlayır : {}", id);
-        Exam exam = examRepository.getExamByStartId(id).orElseThrow(() ->
-                new ResourceNotFoundException("İmtahan tapılmadı"));
-        if (exam.isDeleted())
-            throw new BadRequestException("Imtahan silinib.");
+        Exam exam = examRepository.getExamByStartId(id).orElseThrow(() -> new ResourceNotFoundException("İmtahan tapılmadı"));
+        if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
         StartExamResponse result = startExamService.startExam(studentName, exam);
         printStartExam(exam);
         logService.save("İmtahan başladı. İmtahan: " + exam.getExamTitle(), userService.getCurrentUserOrNull());
@@ -323,8 +256,7 @@ public class ExamServiceImpl implements ExamService {
 
         StudentExam studentExam = findStudentExamById(studentExamId);
 
-        studentExam.setStatus(studentExam.getNumberOfNotCheckedYetQuestions() > 0 ?
-                ExamStatus.WAITING_OPEN_ENDED_QUESTION : ExamStatus.COMPLETED);
+        studentExam.setStatus(studentExam.getNumberOfNotCheckedYetQuestions() > 0 ? ExamStatus.WAITING_OPEN_ENDED_QUESTION : ExamStatus.COMPLETED);
 
         studentExam.setEndTime(Instant.now());
         studentExamRepository.save(studentExam);
@@ -348,8 +280,7 @@ public class ExamServiceImpl implements ExamService {
         log.info("İmtahan id ilə nəşr olunur. Id: {}", id);
         User user = userService.getCurrentUser();
         Exam exam = getById(id);
-        if (exam.isDeleted())
-            throw new BadRequestException("Imtahan silinib.");
+        if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
         if (!Role.ADMIN.equals(user.getRole()) || exam.getTeacher().getId() != user.getId())
             throw new BadRequestException("Əgər admin deyilsinizsə, başqasının imtahanını dərc edə bilməzsiniz.");
         exam.setReadyForSale(true);
@@ -363,8 +294,7 @@ public class ExamServiceImpl implements ExamService {
         log.info("İmtahan id ilə nəşrdən toplanır. Id: {}", id);
         User user = userService.getCurrentUser();
         Exam exam = getById(id);
-        if (exam.isDeleted())
-            throw new BadRequestException("Imtahan silinib.");
+        if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
         if (!Role.ADMIN.equals(user.getRole()) || exam.getTeacher().getId() != user.getId())
             throw new BadRequestException("Əgər admin deyilsinizsə, başqasının imtahanını dərcinə mane ola bilməzsiniz.");
         exam.setReadyForSale(false);
@@ -374,17 +304,11 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional
-    public void updateExam(
-            ExamUpdateRequest request,
-            List<MultipartFile> titles,
-            List<MultipartFile> variantPictures,
-            List<MultipartFile> numberPictures,
-            List<MultipartFile> sounds) {
+    public void updateExam(ExamUpdateRequest request, List<MultipartFile> titles, List<MultipartFile> variantPictures, List<MultipartFile> numberPictures, List<MultipartFile> sounds) {
         log.info("İmtahan id ilə yenilənir: {}", request.id());
         Exam exam = getById(request.id());
 
-        if (exam.isDeleted())
-            throw new BadRequestException("Imtahan silinib.");
+        if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
 
         ExamValidationService.validationForUpdate(request, exam.getTeacher());
 
@@ -406,16 +330,13 @@ public class ExamServiceImpl implements ExamService {
         List<SubjectStructureQuestion> subjectStructureQuestions = new ArrayList<>();
         for (var subjectStructureQuestionsUpdateRequest : subjectStructureQuestionsUpdateRequests) {
             SubjectStructureQuestion subjectStructureQuestion = new SubjectStructureQuestion();
-            var subjectStructureUpdateRequest = subjectStructureQuestionsUpdateRequest
-                    .subjectStructureUpdateRequest();
+            var subjectStructureUpdateRequest = subjectStructureQuestionsUpdateRequest.subjectStructureUpdateRequest();
             SubjectStructure subjectStructure;
             if (subjectStructureUpdateRequest.request().submoduleId() != null) {
-                subjectStructure = subjectStructureService
-                        .getById(subjectStructureUpdateRequest.id());
+                subjectStructure = subjectStructureService.getById(subjectStructureUpdateRequest.id());
             } else {
                 subjectStructureService.delete(subjectStructureUpdateRequest.id());
-                subjectStructure = subjectStructureService
-                        .create(subjectStructureUpdateRequest.request());
+                subjectStructure = subjectStructureService.create(subjectStructureUpdateRequest.request());
             }
             subjectStructureQuestion.setSubjectStructure(subjectStructure);
 
@@ -425,9 +346,7 @@ public class ExamServiceImpl implements ExamService {
                 Question question;
                 if (questionUpdateRequestForExam.hasChange()) {
                     questionService.delete(questionUpdateRequestForExam.id());
-                    question = questionService.save(
-                            QuestionMapper.requestToRequest(questionUpdateRequestForExam),
-                            titles, variantPictures, numberPictures, sounds);
+                    question = questionService.save(QuestionMapper.requestToRequest(questionUpdateRequestForExam), titles, variantPictures, numberPictures, sounds);
 
                 } else {
                     question = questionService.getQuestionById(questionUpdateRequestForExam.id());
@@ -461,15 +380,11 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public Exam getById(UUID id) {
         log.info("İd ilə imtahan verilir: {}", id);
-        return examRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("İmtahan tapılmadı"));
+        return examRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("İmtahan tapılmadı"));
     }
 
     private StudentExam findStudentExamById(UUID studentExamId) {
-        return studentExamRepository.findById(studentExamId).orElseThrow(() ->
-                new ResourceNotFoundException(String.format("%s id ilə tələbə imtahanı tapılmadı.", studentExamId)));
+        return studentExamRepository.findById(studentExamId).orElseThrow(() -> new ResourceNotFoundException(String.format("%s id ilə tələbə imtahanı tapılmadı.", studentExamId)));
     }
 
     @Override
@@ -478,10 +393,7 @@ public class ExamServiceImpl implements ExamService {
         return exam -> {
             if (user != null && !(Role.ADMIN.equals(user.getRole()) || Role.TEACHER.equals(user.getRole()))) {
                 List<StudentExam> studentExams = studentExamRepository.getByStudent(user);
-                List<StudentExam> filteredExams = studentExams
-                        .stream()
-                        .filter(studentExam -> studentExam.getExam().equals(exam))
-                        .toList();
+                List<StudentExam> filteredExams = studentExams.stream().filter(studentExam -> studentExam.getExam().equals(exam)).toList();
                 StudentExam last = filteredExams.getLast();
                 return ExamMapper.toBlockResponse(exam, last == null ? null : last.getStatus());
             }
@@ -491,30 +403,16 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional
-    public Page<Exam> getExamPage(UUID teacherId,
-                                  String name,
-                                  Integer minCost,
-                                  Integer maxCost,
-                                  List<Integer> rating,
-                                  List<UUID> tagIds,
-                                  Integer pageNum,
-                                  ExamSort sort,
-                                  ExamType type) {
+    public Page<Exam> getExamPage(UUID teacherId, String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, Integer pageNum, ExamSort sort, ExamType type) {
         Specification<Exam> specification = Specification.unrestricted();
-        specification = specification.and(ExamSpecification.hasName(name))
-                .and(ExamSpecification.hasCostBetween(minCost, maxCost))
-                .and(ExamSpecification.hasRatingInRange(rating))
-                .and(ExamSpecification.hasTags(tagIds))
-                .and(ExamSpecification.hasTeacher(teacherId));
+        specification = specification.and(ExamSpecification.hasName(name)).and(ExamSpecification.hasCostBetween(minCost, maxCost)).and(ExamSpecification.hasRatingInRange(rating)).and(ExamSpecification.hasTags(tagIds)).and(ExamSpecification.hasTeacher(teacherId));
 
         User currentUser = userService.getCurrentUserOrNull();
         if ((type == ExamType.BOUGHT || type == ExamType.FINISHED) && currentUser == null) {
             throw new UserNotLoginException("User must be logged in to see bought or finished exams");
         }
 
-        specification = specification.and(
-                ExamSpecification.hasType(type, currentUser, studentExamRepository)
-        );
+        specification = specification.and(ExamSpecification.hasType(type, currentUser, studentExamRepository));
 
         Sort sortBy = switch (sort) {
             case COST_ASC -> Sort.by("cost").ascending();
@@ -538,13 +436,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Transactional
     public StartExamResponse getResponse(StartExamResponse response) {
-        return new StartExamResponse(
-                response.studentExamId(),
-                response.status(),
-                response.questionIdToAnswerMap(),
-                response.listeningIdToPlayTimeMap(),
-                response.startTime(),
-                examMapper.toResponse(getById(response.exam().id())));
+        return new StartExamResponse(response.studentExamId(), response.status(), response.questionIdToAnswerMap(), response.listeningIdToPlayTimeMap(), response.startTime(), examMapper.toResponse(getById(response.exam().id())));
     }
 
 
@@ -557,22 +449,15 @@ public class ExamServiceImpl implements ExamService {
         User user = userService.getCurrentUser();
         Exam exam = getById(examId);
 
-        if (exam.isDeleted())
-            throw new BadRequestException("Imtahan silinib.");
+        if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
 
         Map<UUID, Integer> userRatings = exam.getUserIdToRatingMap();
-        if (userRatings.containsKey(user.getId()))
-            throw new BadRequestException("Siz artiq rating vermisiniz.");
+        if (userRatings.containsKey(user.getId())) throw new BadRequestException("Siz artiq rating vermisiniz.");
 
         List<StudentExam> studentExams = studentExamRepository.getByExamAndStudent(exam, user);
-        long count = studentExams.stream()
-                .filter(studentExam ->
-                        studentExam.getStatus() == ExamStatus.COMPLETED ||
-                                studentExam.getStatus() == ExamStatus.EXPIRED)
-                .count();
+        long count = studentExams.stream().filter(studentExam -> studentExam.getStatus() == ExamStatus.COMPLETED || studentExam.getStatus() == ExamStatus.EXPIRED).count();
 
-        if (!(count > 0))
-            throw new BadRequestException("Evvelce imtahani islemeli ve ya bitirmeliniz");
+        if (!(count > 0)) throw new BadRequestException("Evvelce imtahani islemeli ve ya bitirmeliniz");
 
         double currentRating = exam.getRating();
         int size = userRatings.size();

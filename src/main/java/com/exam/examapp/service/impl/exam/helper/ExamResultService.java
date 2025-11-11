@@ -70,6 +70,8 @@ public class ExamResultService {
         Map<String, Map<Integer, AnswerStatus>> subjectToQuestionAnswerStatusMap =
                 answerService.mapStudentDataToSubjects(studentExam, answerStatusMap);
         studentExam.setSubjectToQuestionToAnswerStatus(subjectToQuestionAnswerStatusMap);
+
+        studentExam.setQuestionIdToAnswerStatusMap(answerStatusMap);
         log.info("Statistika yeniləndi");
     }
 
