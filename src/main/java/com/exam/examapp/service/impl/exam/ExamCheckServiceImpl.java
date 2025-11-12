@@ -285,9 +285,15 @@ public class ExamCheckServiceImpl implements ExamCheckService {
         log.info("Email və Bildiriş göndərilir");
         String examTitle = studentExam.getExam().getExamTitle();
         User student = studentExam.getStudent();
+        if (student == null) {
+            log.info("Telebe giris etmeden imtahan isleyib");
+            log.info("Email və Bildiriş göndərilmek olmadi");
+            return;
+        }
         String emailContent = String.format(MAIL_BODY, examTitle);
         emailService.sendEmail(student.getEmail(), MAIL_SUBJECT, emailContent);
         notificationService.sendNotification(new NotificationRequest(MAIL_SUBJECT, emailContent, student.getEmail()));
+        log.info("Email və Bildiriş göndərildi");
     }
 
     private double calculateScore(StudentExam studentExam) {
