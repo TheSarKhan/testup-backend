@@ -299,7 +299,7 @@ public class ExamCheckServiceImpl implements ExamCheckService {
         for (SubjectStructureQuestion subjectStructureQuestion : subjectStructureQuestions) {
             String formula = subjectStructureQuestion.getSubjectStructure().getFormula();
             List<Question> questions = subjectStructureQuestion.getQuestion();
-            if (formula == null) {
+            if (formula == null || formula.trim().isEmpty()) {
                 Map<Integer, Integer> questionToPointMap = subjectStructureQuestion
                         .getSubjectStructure().getQuestionToPointMap();
 
