@@ -122,6 +122,7 @@ public class ExamCheckServiceImpl implements ExamCheckService {
         formattedFormula = formattedFormula.replace("h", String.valueOf(correctAndWrongCounts.get(7)));
         formattedFormula = formattedFormula.replace("i", String.valueOf(correctAndWrongCounts.get(8)));
         formattedFormula = formattedFormula.replace("j", String.valueOf(correctAndWrongCounts.get(9)));
+        log.info("Formula hazirlandi: " + formattedFormula);
         return formattedFormula;
     }
 
