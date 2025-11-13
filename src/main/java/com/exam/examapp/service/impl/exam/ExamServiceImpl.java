@@ -318,9 +318,9 @@ public class ExamServiceImpl implements ExamService {
         log.info("Imtahan update üçün xəritələndi edildi");
         List<Tag> tags = new ArrayList<>();
         tags.add(tagService.getTagById(request.headerTagId()));
-        if (request.otherTagIds() != null) {
-            tags.addAll(request.otherTagIds().stream().map(tagService::getTagById).toList());
-        }
+        if (request.otherTagIds() != null)
+            tags.addAll(request.otherTagIds().stream()
+                    .map(tagService::getTagById).toList());
 
         exam.setTags(tags);
 
@@ -345,9 +345,7 @@ public class ExamServiceImpl implements ExamService {
             for (QuestionUpdateRequestForExam questionUpdateRequestForExam : questionUpdateRequestForExams) {
                 Question question;
                 if (questionUpdateRequestForExam.hasChange()) {
-                    questionService.delete(questionUpdateRequestForExam.id());
-                    question = questionService.save(QuestionMapper.requestToRequest(questionUpdateRequestForExam), titles, variantPictures, numberPictures, sounds);
-
+                    question = questionService.update(QuestionMapper.requestToRequest(questionUpdateRequestForExam), titles, variantPictures, numberPictures, sounds);
                 } else {
                     question = questionService.getQuestionById(questionUpdateRequestForExam.id());
                 }

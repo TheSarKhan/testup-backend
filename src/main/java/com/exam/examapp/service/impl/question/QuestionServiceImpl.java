@@ -46,6 +46,8 @@ public class QuestionServiceImpl implements QuestionService {
 
     private final UserService userService;
 
+    private final QuestionUpdateHelper questionUpdateHelper;
+
     @Override
     @Transactional
     public Question save(
@@ -197,48 +199,8 @@ public class QuestionServiceImpl implements QuestionService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
-        log.info("Sual yenilənir");
-        Question byId = getQuestionById(updateRequest.id());
-        QuestionRequest request = new QuestionRequest(
-                updateRequest.title(),
-                updateRequest.titleDescription(),
-                updateRequest.isTitlePicture(),
-                updateRequest.isTitleContainMath(),
-                updateRequest.type(),
-                updateRequest.difficulty(),
-                updateRequest.topicId(),
-                updateRequest.questionCount(),
-                updateRequest.questions(),
-                updateRequest.questionDetails()
-        );
-        Question question = QuestionMapper.updateRequestTo(byId, request);
-
-        if (updateRequest.isTitlePicture()) {
-            fileService.deleteFile(IMAGE_TITLE_PATH, byId.getTitle());
-            String titleUrl = fileService.uploadFile(IMAGE_TITLE_PATH, titles.getFirst());
-            titles.removeFirst();
-            question.setTitle(titleUrl);
-        }
-        log.info("Sualın başlığı hazırdır");
-
-        if (QuestionType.LISTENING.equals(updateRequest.type())) {
-            if (question.getSoundUrl() != null)
-                fileService.deleteFile(IMAGE_NUMBER_PATH, question.getSoundUrl());
-            String soundUrl = fileService.uploadFile(SOUND_PATH, sounds.getFirst());
-            sounds.removeFirst();
-            question.setSoundUrl(soundUrl);
-        }
-        log.info("Sualın səsi hazırdır");
-
-        for (Question byIdQuestion : byId.getQuestions()) {
-            delete(byIdQuestion.getId());
-        }
-
-        deleteQuestionPictures(byId);
-
-        return finishEdit(titles, variantPictures, numberPictures, request, question, sounds);
+        return questionUpdateHelper.update(updateRequest, titles,variantPictures, numberPictures, sounds);
     }
-
 
     private Question finishEdit(
             List<MultipartFile> titles,
