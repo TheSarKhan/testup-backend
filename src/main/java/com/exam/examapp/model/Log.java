@@ -21,6 +21,7 @@ public class Log {
     @ManyToOne
     private User user;
 
+    @Column(columnDefinition = "TEXT")
     private String message;
 
     private Instant deletedAt;
