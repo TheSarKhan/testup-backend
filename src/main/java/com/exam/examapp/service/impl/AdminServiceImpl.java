@@ -7,13 +7,16 @@ import com.exam.examapp.dto.response.LogResponse;
 import com.exam.examapp.dto.response.UsersForAdminResponse;
 import com.exam.examapp.dto.response.exam.ExamBlockResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
+import com.exam.examapp.mapper.ExamMapper;
 import com.exam.examapp.model.Pack;
 import com.exam.examapp.model.PaymentResult;
 import com.exam.examapp.model.User;
+import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.repository.ExamRepository;
 import com.exam.examapp.repository.PaymentResultRepository;
+import com.exam.examapp.repository.StudentExamRepository;
 import com.exam.examapp.repository.UserRepository;
 import com.exam.examapp.service.GraphService;
 import com.exam.examapp.service.impl.exam.helper.ExamSort;
@@ -47,6 +50,8 @@ public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
 
     private final PaymentResultRepository paymentResultRepository;
+
+    private final StudentExamRepository studentExamRepository;
 
     private final ExamRepository examRepository;
 
@@ -192,7 +197,7 @@ public class AdminServiceImpl implements AdminService {
                 .stream()
                 .map(examService.examToResponse(userService.getCurrentUserOrNull()))
                 .toList();
-        log.info("Admin get Exam: " + list.size());
+        log.info("Admin get Exam: {}", list.size());
         return list;
     }
 
@@ -200,9 +205,27 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public List<ExamBlockResponse> getSimpleExamsByTeacher(UUID id) {
         List<Exam> exams = examRepository.getByTeacher(userService.getUserById(id));
-        log.info("Admin get Simple Exam: " + exams.size());
+        log.info("Admin get Simple Exam by Teacher: {}", exams.size());
         return exams.stream()
                 .map(examService.examToResponse(userService.getCurrentUserOrNull())).toList();
+    }
+
+    @Override
+    @Transactional
+    public List<ExamBlockResponse> getSimpleExamsByStudent(UUID id) {
+        User user = userService.getUserById(id);
+        if (!Role.STUDENT.equals(user.getRole()))
+            throw new BadRequestException("Bu istifadeci telebe deyil");
+
+        List<ExamBlockResponse> exams = studentExamRepository.getByStudent(user)
+                .stream()
+                .filter(studentExam -> !studentExam.getExam().isDeleted())
+                .map(studentExam -> {
+                    ExamStatus status = studentExam.getStatus();
+                    return ExamMapper.toBlockResponse(studentExam.getExam(), status, studentExam.getId());
+                }).toList();
+        log.info("Admin get Simple Exam by Student: {}", exams.size());
+        return exams;
     }
 
     @Override

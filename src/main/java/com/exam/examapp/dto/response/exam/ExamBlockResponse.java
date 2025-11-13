@@ -10,6 +10,7 @@ import java.util.UUID;
 
 public record ExamBlockResponse(
         UUID id,
+        UUID studentExamId,
         String examTitle,
         Tag headerTag,
         List<Tag> otherTags,

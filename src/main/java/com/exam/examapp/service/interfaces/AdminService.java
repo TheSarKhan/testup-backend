@@ -40,6 +40,8 @@ public interface AdminService {
 
     List<ExamBlockResponse> getSimpleExamsByTeacher(UUID id);
 
+    List<ExamBlockResponse> getSimpleExamsByStudent(UUID id);
+
     void deactivateUser(UUID id);
 
     void activateUser(UUID id);

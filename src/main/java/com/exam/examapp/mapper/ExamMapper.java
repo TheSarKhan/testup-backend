@@ -20,12 +20,13 @@ import java.util.UUID;
 
 @Component
 public class ExamMapper {
-    public static ExamBlockResponse toBlockResponse(Exam exam, ExamStatus examStatus) {
+    public static ExamBlockResponse toBlockResponse(Exam exam, ExamStatus examStatus, UUID studentExamId) {
         Result result = getResult(exam);
         List<UUID> studentExamIds = exam.getHasUncheckedQuestionStudentExamId();
         Boolean hasUnchecked = studentExamIds == null ? null : !studentExamIds.isEmpty();
         return new ExamBlockResponse(
                 exam.getId(),
+                studentExamId,
                 exam.getExamTitle(),
                 result.first(),
                 result.otherTags(),

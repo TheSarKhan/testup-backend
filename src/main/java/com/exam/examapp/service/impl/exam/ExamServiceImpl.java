@@ -131,11 +131,14 @@ public class ExamServiceImpl implements ExamService {
 
     private List<ExamBlockResponse> getExamBlockResponses(User user) {
         if (Role.TEACHER.equals(user.getRole()) || Role.ADMIN.equals(user.getRole())) {
-            return examRepository.getByTeacher(user).stream().filter(exam -> !exam.isDeleted()).map(exam -> ExamMapper.toBlockResponse(exam, null)).toList();
+            return examRepository.getByTeacher(user)
+                    .stream().filter(exam -> !exam.isDeleted())
+                    .map(exam -> ExamMapper.toBlockResponse(exam, null, null))
+                    .toList();
         } else {
             return studentExamRepository.getByStudent(user).stream().filter(studentExam -> !studentExam.getExam().isDeleted()).map(studentExam -> {
                 ExamStatus status = studentExam.getStatus();
-                return ExamMapper.toBlockResponse(studentExam.getExam(), status);
+                return ExamMapper.toBlockResponse(studentExam.getExam(), status, studentExam.getId());
             }).toList();
         }
     }
@@ -144,7 +147,10 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public List<ExamBlockResponse> getAdminCooperationExams() {
         User user = userService.getCurrentUser();
-        return examTeacherRepository.getByTeacher(user).stream().filter(examTeacher -> !examTeacher.getExam().isDeleted()).map(examTeacher -> ExamMapper.toBlockResponse(examTeacher.getExam(), null)).toList();
+        return examTeacherRepository.getByTeacher(user)
+                .stream().filter(examTeacher -> !examTeacher.getExam().isDeleted())
+                .map(examTeacher -> ExamMapper.toBlockResponse(examTeacher.getExam(), null, null))
+                .toList();
     }
 
     @Override
@@ -395,9 +401,9 @@ public class ExamServiceImpl implements ExamService {
                 List<StudentExam> studentExams = studentExamRepository.getByStudent(user);
                 List<StudentExam> filteredExams = studentExams.stream().filter(studentExam -> studentExam.getExam().equals(exam)).toList();
                 StudentExam last = filteredExams.getLast();
-                return ExamMapper.toBlockResponse(exam, last == null ? null : last.getStatus());
+                return ExamMapper.toBlockResponse(exam, last == null ? null : last.getStatus(), last == null ? null : last.getId());
             }
-            return ExamMapper.toBlockResponse(exam, null);
+            return ExamMapper.toBlockResponse(exam, null, null);
         };
     }
 
@@ -405,7 +411,11 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public Page<Exam> getExamPage(UUID teacherId, String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, Integer pageNum, ExamSort sort, ExamType type) {
         Specification<Exam> specification = Specification.unrestricted();
-        specification = specification.and(ExamSpecification.hasName(name)).and(ExamSpecification.hasCostBetween(minCost, maxCost)).and(ExamSpecification.hasRatingInRange(rating)).and(ExamSpecification.hasTags(tagIds)).and(ExamSpecification.hasTeacher(teacherId));
+        specification = specification.and(ExamSpecification.hasName(name))
+                .and(ExamSpecification.hasCostBetween(minCost, maxCost))
+                .and(ExamSpecification.hasRatingInRange(rating))
+                .and(ExamSpecification.hasTags(tagIds))
+                .and(ExamSpecification.hasTeacher(teacherId));
 
         User currentUser = userService.getCurrentUserOrNull();
         if ((type == ExamType.BOUGHT || type == ExamType.FINISHED) && currentUser == null) {
