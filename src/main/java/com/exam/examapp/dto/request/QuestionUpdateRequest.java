@@ -19,7 +19,8 @@ public record QuestionUpdateRequest(
         Difficulty difficulty,
         UUID topicId,
         int questionCount,
-        List<QuestionRequest> questions,
+        List<QuestionUpdateRequest> questions,
+        String soundUrl,
         @NotNull QuestionDetails questionDetails
 ) {
 }
