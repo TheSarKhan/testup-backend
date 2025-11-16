@@ -1,7 +1,6 @@
 package com.exam.examapp.service.impl.question;
 
 import com.exam.examapp.dto.QuestionDetails;
-import com.exam.examapp.dto.request.QuestionRequest;
 import com.exam.examapp.dto.request.QuestionUpdateRequest;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.mapper.QuestionMapper;
@@ -173,7 +172,9 @@ public class QuestionUpdateHelper {
                     Character key = characterBooleanEntry.getKey();
                     log.info("content : {}, {}, {}", key, intCharToContentMap.containsKey(key), intCharToContentMap.get(key));
                     if (!(charToContentMap.containsKey(key) &&
-                            charToContentMap.get(key) != null)) {
+                            charToContentMap.get(key) != null &&
+                            charToContentMap.get(key).isEmpty())) {
+                        log.info("New image");
                         String imageUrl = fileService.uploadFile(imagePath, variantPictures.getFirst());
                         charToContentMap.put(key, imageUrl);
                         if (oldCharacterIsPictureMap != null && oldCharacterIsPictureMap.containsKey(key) &&
