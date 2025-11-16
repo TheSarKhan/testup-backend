@@ -100,6 +100,7 @@ public class StartExamService {
                     Instant.now(),
                     exam.getDurationInSeconds(),
                     studentExam.getId(),
+                    exam.getStartId(),
                     exam.getId()));
             userService.save(user);
 
@@ -178,6 +179,7 @@ public class StartExamService {
                 Instant.now(),
                 exam.getDurationInSeconds(),
                 save.getId(),
+                exam.getStartId(),
                 exam.getId()));
         userService.save(user);
 

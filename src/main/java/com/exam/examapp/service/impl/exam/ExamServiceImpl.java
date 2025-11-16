@@ -234,6 +234,7 @@ public class ExamServiceImpl implements ExamService {
             throw new BadRequestException("İmtahan Kodunun uzunluğu 8 olmalıdır. İmtahan Kodu: " + examCode);
 
         String examId = cacheService.getContent(EXAM_CODE_PREFIX, examCode.substring(1));
+        cacheService.deleteContent(EXAM_CODE_PREFIX, examCode.substring(1));
         Exam exam = getById(UUID.fromString(examId));
         if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
         StartExamResponse result = startExamService.startExam(studentName, exam);

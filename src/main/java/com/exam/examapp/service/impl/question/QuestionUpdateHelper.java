@@ -10,6 +10,9 @@ import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.subject.Topic;
 import com.exam.examapp.repository.question.QuestionRepository;
 import com.exam.examapp.service.interfaces.FileService;
+import com.exam.examapp.service.interfaces.LogService;
+import com.exam.examapp.service.interfaces.UserService;
+import com.exam.examapp.service.interfaces.subject.TopicService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,6 +36,12 @@ public class QuestionUpdateHelper {
 
     private final FileService fileService;
 
+    private final TopicService topicService;
+
+    private final LogService logService;
+
+    private final UserService userService;
+
     public Question update(
             QuestionUpdateRequest updateRequest,
             List<MultipartFile> titles,
@@ -53,9 +62,10 @@ public class QuestionUpdateHelper {
         }
         log.info("Sualın başlığı hazırdır");
 
-        if (QuestionType.LISTENING.equals(updateRequest.type()) && (updateRequest.soundUrl() == null || updateRequest.soundUrl().isEmpty())) {
+        if (QuestionType.LISTENING.equals(updateRequest.type()) &&
+                (updateRequest.soundUrl() == null || updateRequest.soundUrl().isEmpty())) {
             if (question.getSoundUrl() != null)
-                fileService.deleteFile(IMAGE_NUMBER_PATH, byId.getSoundUrl());
+                fileService.deleteFile(SOUND_PATH, byId.getSoundUrl());
             String soundUrl = fileService.uploadFile(SOUND_PATH, sounds.getFirst());
             sounds.removeFirst();
             question.setSoundUrl(soundUrl);
@@ -63,30 +73,23 @@ public class QuestionUpdateHelper {
         log.info("Sualın səsi hazırdır");
 
         List<Question> questions = new ArrayList<>();
-        for (QuestionUpdateRequest request : updateRequest.questions())
-            questions.add(update(request, titles, variantPictures, numberPictures, sounds));
+        if (updateRequest.questions() != null)
+            for (QuestionUpdateRequest request : updateRequest.questions())
+                questions.add(update(request, titles, variantPictures, numberPictures, sounds));
 
         question.setQuestions(questions);
 
-        log.info("Son mərhələyə keçirildi");
+        log.info("Suallar uğurla əlavə edildi");
 
         createQuestionDetails(updateRequest, variantPictures, numberPictures, question);
 
         log.info("Sual təfərrüatları uğurla yaradıldı");
-        if (request.topicId() != null) {
-            Topic topic = topicService.getById(request.topicId());
+        if (updateRequest.topicId() != null) {
+            Topic topic = topicService.getById(updateRequest.topicId());
             question.setTopic(topic);
         }
         log.info("Mövzu uğurla quruldu");
 
-        List<Question> questions = new ArrayList<>();
-        if (request.questions() != null)
-            for (QuestionRequest questionRequest : request.questions()) {
-                questions.add(getQuestion(questionRequest, titles, variantPictures, numberPictures, sounds));
-            }
-        question.setQuestions(questions);
-
-        log.info("Suallar uğurla əlavə edildi");
         Question savedQuestion = questionRepository.save(question);
         logService.save("Suallar uğurla əlavə edildi", userService.getCurrentUserOrNull());
         return savedQuestion;
@@ -126,6 +129,8 @@ public class QuestionUpdateHelper {
             if (request.type().equals(QuestionType.MATCH))
                 numberToContentMap =
                         getCharacterStringMap(
+                                oldQuestionDetails.numberToContentMap(),
+                                oldQuestionDetails.numberToIsPictureMap(),
                                 questionDetails.numberToContentMap(),
                                 questionDetails.numberToIsPictureMap(),
                                 IMAGE_NUMBER_PATH,
@@ -155,7 +160,7 @@ public class QuestionUpdateHelper {
             Map<Character, Boolean> oldCharacterIsPictureMap,
             Map<Character, String> intCharToContentMap,
             Map<Character, Boolean> characterIsPictureMap,
-            String imageNumberPath,
+            String imagePath,
             List<MultipartFile> variantPictures) {
         Map<Character, String> charToContentMap =
                 intCharToContentMap == null ? new HashMap<>() : new HashMap<>(intCharToContentMap);
@@ -163,20 +168,15 @@ public class QuestionUpdateHelper {
         if (characterIsPictureMap != null && !charToContentMap.isEmpty()) {
             for (Map.Entry<Character, Boolean> characterBooleanEntry : characterIsPictureMap.entrySet()) {
                 if (characterBooleanEntry.getValue()) {
-                    if (oldCharacterIsPictureMap != null &&
-                            oldCharacterIsPictureMap.containsKey(characterBooleanEntry.getKey()) &&
-                                oldCharacterIsPictureMap.get(characterBooleanEntry.getKey())) {
-                        if (oldIntCharToContentMap != null &&
-                                oldIntCharToContentMap.containsKey(characterBooleanEntry.getKey()) &&
-                                    oldIntCharToContentMap.get(characterBooleanEntry.getKey()) != null) {
-
-                        }
-
+                    Character key = characterBooleanEntry.getKey();
+                    if (!(charToContentMap.containsKey(key) &&
+                            charToContentMap.get(key) != null)) {
+                        fileService.uploadFile(imagePath, variantPictures.getFirst());
+                        if (oldCharacterIsPictureMap != null && oldCharacterIsPictureMap.containsKey(key) &&
+                                oldCharacterIsPictureMap.get(key) && oldIntCharToContentMap != null &&
+                                oldIntCharToContentMap.containsKey(key) && oldIntCharToContentMap.get(key) != null)
+                            fileService.deleteFile(imagePath, oldIntCharToContentMap.get(key));
                     }
-                    String numberPictureUrl =
-                            fileService.uploadFile(imageNumberPath, variantPictures.getFirst());
-                    variantPictures.removeFirst();
-                    charToContentMap.put(characterBooleanEntry.getKey(), numberPictureUrl);
                 }
             }
         }
