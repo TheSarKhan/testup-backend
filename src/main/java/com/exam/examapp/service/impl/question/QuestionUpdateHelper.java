@@ -165,6 +165,7 @@ public class QuestionUpdateHelper {
         Map<Character, String> charToContentMap =
                 intCharToContentMap == null ? new HashMap<>() : new HashMap<>(intCharToContentMap);
         log.info("Simvol sətir xəritəsi uğurla yaradıldı");
+        log.info("Log : {}, {}, {}", characterIsPictureMap, oldCharacterIsPictureMap, charToContentMap);
         if (characterIsPictureMap != null && !charToContentMap.isEmpty()) {
             for (Map.Entry<Character, Boolean> characterBooleanEntry : characterIsPictureMap.entrySet()) {
                 log.info("characterBooleanEntry : {}, {}, {}", characterBooleanEntry.getKey(), characterBooleanEntry.getValue(), charToContentMap.containsKey(characterBooleanEntry.getKey()));
