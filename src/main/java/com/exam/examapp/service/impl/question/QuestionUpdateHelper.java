@@ -171,7 +171,8 @@ public class QuestionUpdateHelper {
                     Character key = characterBooleanEntry.getKey();
                     if (!(charToContentMap.containsKey(key) &&
                             charToContentMap.get(key) != null)) {
-                        fileService.uploadFile(imagePath, variantPictures.getFirst());
+                        String imageUrl = fileService.uploadFile(imagePath, variantPictures.getFirst());
+                        charToContentMap.put(key, imageUrl);
                         if (oldCharacterIsPictureMap != null && oldCharacterIsPictureMap.containsKey(key) &&
                                 oldCharacterIsPictureMap.get(key) && oldIntCharToContentMap != null &&
                                 oldIntCharToContentMap.containsKey(key) && oldIntCharToContentMap.get(key) != null)

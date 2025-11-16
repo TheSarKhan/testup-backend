@@ -154,7 +154,7 @@ public class QuestionStorageController {
                 ApiResponse.build(HttpStatus.OK, "Suallar uğurla əldə edildi", response));
     }
 
-    @PatchMapping
+    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
     @Operation(

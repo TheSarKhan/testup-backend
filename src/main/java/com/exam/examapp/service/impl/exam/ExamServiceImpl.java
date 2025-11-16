@@ -168,7 +168,12 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public List<ExamBlockResponse> getLastCreatedExams() {
         User user = userService.getCurrentUserOrNull();
-        return examRepository.getLastCreated().stream().filter(exam -> !exam.isDeleted()).filter(Exam::isReadyForSale).map(examToResponse(user)).toList();
+        return examRepository.getLastCreated().stream()
+                .filter(exam -> Role.ADMIN.equals(exam.getTeacher().getRole()))
+                .filter(exam -> !exam.isDeleted())
+                .filter(Exam::isReadyForSale)
+                .map(examToResponse(user))
+                .toList();
     }
 
     @Override
@@ -178,14 +183,11 @@ public class ExamServiceImpl implements ExamService {
         if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
 
         User user = userService.getCurrentUserOrNull();
-        log.info("point 1");
         if (user != null && Role.STUDENT.equals(user.getRole())) {
             List<StudentExam> studentExams = studentExamRepository.getByStudent(user);
-            log.info("point 2");
             List<StudentExam> filteredExams = studentExams.stream().filter(studentExam -> studentExam.getExam().equals(exam)).toList();
-            log.info("point 3");
+
             StudentExam last = filteredExams.isEmpty() ? null : filteredExams.getLast();
-            log.info("point 4");
             return ExamMapper.toDetailedResponse(exam, last == null ? null : last.getStatus());
         }
         return ExamMapper.toDetailedResponse(exam, null);

@@ -124,7 +124,6 @@ public class ExamController {
 
     @GetMapping("/detailed/id")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
     @Operation(
             summary = "Get Exam detailed by id",
             description = "Retrieve exam details by exam UUID.")
