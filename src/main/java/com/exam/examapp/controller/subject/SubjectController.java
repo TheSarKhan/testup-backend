@@ -109,7 +109,7 @@ public class SubjectController {
             description = "Allows an **ADMIN** to update the name and logo of an existing subject by its ID."
     )
     public ResponseEntity<ApiResponse<Void>> update(@RequestPart @Valid SubjectUpdateRequest request,
-                                                    @RequestPart
+                                                    @RequestPart(required = false)
                                                     MultipartFile logo) {
         subjectService.update(request, logo);
         return ResponseEntity.ok(

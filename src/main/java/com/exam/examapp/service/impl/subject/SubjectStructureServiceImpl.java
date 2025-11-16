@@ -13,6 +13,7 @@ import com.exam.examapp.service.interfaces.subject.SubjectService;
 import com.exam.examapp.service.interfaces.subject.SubjectStructureService;
 import com.exam.examapp.service.interfaces.subject.SubmoduleService;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -103,7 +104,7 @@ public class SubjectStructureServiceImpl implements SubjectStructureService {
 
     @Override
     @Transactional
-    public SubjectStructure update(SubjectStructureUpdateRequest request) {
+    public SubjectStructure update(@Valid SubjectStructureUpdateRequest request) {
         log.info("Mövzu strukturu yenilənir");
         deactivate(request.id());
 

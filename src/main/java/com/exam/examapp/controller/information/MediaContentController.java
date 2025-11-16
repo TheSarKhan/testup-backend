@@ -106,7 +106,7 @@ public class MediaContentController {
     public ResponseEntity<ApiResponse<Void>> update(@RequestPart
                                                     @Valid
                                                     MediaContentUpdateRequest request,
-                                                    @RequestPart
+                                                    @RequestPart(required = false)
                                                     MultipartFile image) {
         mediaContentService.updateMediaContent(request, image);
         return ResponseEntity.ok(

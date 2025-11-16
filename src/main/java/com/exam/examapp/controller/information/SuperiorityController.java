@@ -104,7 +104,7 @@ public class SuperiorityController {
     public ResponseEntity<ApiResponse<Void>> update(@RequestPart
                                                     @Valid
                                                     SuperiorityUpdateRequest request,
-                                                    @RequestPart
+                                                    @RequestPart(required = false)
                                                     MultipartFile icon) {
         superiorityService.updateSuperiority(request, icon);
         return ResponseEntity.ok(

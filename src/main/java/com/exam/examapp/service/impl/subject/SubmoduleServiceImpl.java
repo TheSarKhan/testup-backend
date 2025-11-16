@@ -2,7 +2,6 @@ package com.exam.examapp.service.impl.subject;
 
 import com.exam.examapp.dto.request.subject.SubmoduleRequest;
 import com.exam.examapp.dto.request.subject.SubmoduleUpdateRequest;
-import com.exam.examapp.dto.response.ModuleResponse;
 import com.exam.examapp.dto.response.SubmoduleResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
@@ -27,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -115,9 +113,11 @@ public class SubmoduleServiceImpl implements SubmoduleService {
         Module module = moduleService.getModuleById(request.moduleId());
         submodule.setModule(module);
 
-        fileService.deleteFile(IMAGE_PATH, submodule.getLogoUrl());
-        String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);
-        submodule.setLogoUrl(logoUrl);
+        if (logo != null) {
+            fileService.deleteFile(IMAGE_PATH, submodule.getLogoUrl());
+            String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);
+            submodule.setLogoUrl(logoUrl);
+        }
 
         submoduleRepository.save(submodule);
         log.info("Alt modul yeniləndi");

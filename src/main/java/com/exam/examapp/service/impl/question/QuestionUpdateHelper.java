@@ -164,14 +164,18 @@ public class QuestionUpdateHelper {
             List<MultipartFile> variantPictures) {
         Map<Character, String> charToContentMap =
                 intCharToContentMap == null ? new HashMap<>() : new HashMap<>(intCharToContentMap);
-        log.info("Simvol sətir xəritəsi uğurla yaradıldı");
+        log.info("Simvol sətir xəritəsi uğurla yaradıldı deyesen");
+        log.info("Log : {}, {}, {}", characterIsPictureMap, oldCharacterIsPictureMap, charToContentMap);
         if (characterIsPictureMap != null && !charToContentMap.isEmpty()) {
             for (Map.Entry<Character, Boolean> characterBooleanEntry : characterIsPictureMap.entrySet()) {
+                log.info("characterBooleanEntry : {}, {}, {}", characterBooleanEntry.getKey(), characterBooleanEntry.getValue(), charToContentMap.containsKey(characterBooleanEntry.getKey()));
                 if (characterBooleanEntry.getValue()) {
                     Character key = characterBooleanEntry.getKey();
+                    log.info("content : {}, {}, {}", key, intCharToContentMap.containsKey(key), intCharToContentMap.get(key));
                     if (!(charToContentMap.containsKey(key) &&
                             charToContentMap.get(key) != null)) {
-                        fileService.uploadFile(imagePath, variantPictures.getFirst());
+                        String imageUrl = fileService.uploadFile(imagePath, variantPictures.getFirst());
+                        charToContentMap.put(key, imageUrl);
                         if (oldCharacterIsPictureMap != null && oldCharacterIsPictureMap.containsKey(key) &&
                                 oldCharacterIsPictureMap.get(key) && oldIntCharToContentMap != null &&
                                 oldIntCharToContentMap.containsKey(key) && oldIntCharToContentMap.get(key) != null)

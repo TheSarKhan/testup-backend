@@ -78,9 +78,11 @@ public class SubjectServiceImpl implements SubjectService {
 
         subject.setName(request.name());
         subject.setSupportMath(request.isSupportMath());
-        fileService.deleteFile(IMAGE_PATH, subject.getLogoUrl());
-        String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);
-        subject.setLogoUrl(logoUrl);
+        if (logo != null) {
+            fileService.deleteFile(IMAGE_PATH, subject.getLogoUrl());
+            String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);
+            subject.setLogoUrl(logoUrl);
+        }
         subjectRepository.save(subject);
         log.info("Mövzu yeniləndi");
         logService.save("Mövzu yeniləndi", userService.getCurrentUserOrNull());

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -107,8 +108,8 @@ public class ModuleController {
             summary = "Update an existing module",
             description = "Allows an **ADMIN** to update a module's name and logo by providing its ID."
     )
-    public ResponseEntity<ApiResponse<Void>> update(@RequestPart ModuleUpdateRequest request,
-                                                    @RequestPart MultipartFile logo) {
+    public ResponseEntity<ApiResponse<Void>> update(@RequestPart @Valid ModuleUpdateRequest request,
+                                                    @RequestPart(required = false) MultipartFile logo) {
         moduleService.updateModule(request, logo);
         return ResponseEntity.ok(
                 ApiResponse.build(
