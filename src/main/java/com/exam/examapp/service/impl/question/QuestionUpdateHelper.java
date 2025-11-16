@@ -168,9 +168,9 @@ public class QuestionUpdateHelper {
             for (Map.Entry<Character, Boolean> characterBooleanEntry : characterIsPictureMap.entrySet()) {
                 if (characterBooleanEntry.getValue()) {
                     Character key = characterBooleanEntry.getKey();
-                    if (!(charToContentMap.containsKey(key) &&
-                            charToContentMap.get(key) != null &&
-                            charToContentMap.get(key).isEmpty())) {
+                    if (!charToContentMap.containsKey(key) ||
+                            charToContentMap.get(key) == null ||
+                            charToContentMap.get(key).isEmpty()) {
                         String imageUrl = fileService.uploadFile(imagePath, variantPictures.getFirst());
                         charToContentMap.put(key, imageUrl);
                         log.info("New image: {} , key : {}", imageUrl, key);
