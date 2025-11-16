@@ -138,7 +138,7 @@ public class QuestionUpdateHelper {
             throw new ResourceNotFoundException("Yüklənmiş şəkillərin sayı kifayət deyil");
         }
         log.info("Nömrə şəkillər uğurla yükləndi");
-
+        log.info("variantToContentMap: {}", variantToContentMap);
         question.setQuestionDetails(
                 new QuestionDetails(
                         variantToContentMap,
@@ -164,19 +164,16 @@ public class QuestionUpdateHelper {
         Map<Character, String> charToContentMap =
                 intCharToContentMap == null ? new HashMap<>() : new HashMap<>(intCharToContentMap);
         log.info("Simvol sətir xəritəsi uğurla yaradıldı deyesen");
-        log.info("Log : {}, {}, {}", characterIsPictureMap, oldCharacterIsPictureMap, charToContentMap);
         if (characterIsPictureMap != null && !charToContentMap.isEmpty()) {
             for (Map.Entry<Character, Boolean> characterBooleanEntry : characterIsPictureMap.entrySet()) {
-                log.info("characterBooleanEntry : {}, {}, {}", characterBooleanEntry.getKey(), characterBooleanEntry.getValue(), charToContentMap.containsKey(characterBooleanEntry.getKey()));
                 if (characterBooleanEntry.getValue()) {
                     Character key = characterBooleanEntry.getKey();
-                    log.info("content : {}, {}, {}", key, intCharToContentMap.containsKey(key), intCharToContentMap.get(key));
                     if (!(charToContentMap.containsKey(key) &&
                             charToContentMap.get(key) != null &&
                             charToContentMap.get(key).isEmpty())) {
-                        log.info("New image");
                         String imageUrl = fileService.uploadFile(imagePath, variantPictures.getFirst());
                         charToContentMap.put(key, imageUrl);
+                        log.info("New image: {}", imageUrl);
                         if (oldCharacterIsPictureMap != null && oldCharacterIsPictureMap.containsKey(key) &&
                                 oldCharacterIsPictureMap.get(key) && oldIntCharToContentMap != null &&
                                 oldIntCharToContentMap.containsKey(key) && oldIntCharToContentMap.get(key) != null)
@@ -185,7 +182,7 @@ public class QuestionUpdateHelper {
                 }
             }
         }
-        log.info("Xarakter şəkilləri uğurla yükləndi");
+        log.info("Xarakter şəkilləri uğurla yükləndi: {}", charToContentMap);
         return charToContentMap;
     }
 }
