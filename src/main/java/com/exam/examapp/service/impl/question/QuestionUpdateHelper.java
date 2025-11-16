@@ -174,9 +174,13 @@ public class QuestionUpdateHelper {
                         String imageUrl = fileService.uploadFile(imagePath, variantPictures.getFirst());
                         charToContentMap.put(key, imageUrl);
                         log.info("New image: {} , key : {}", imageUrl, key);
-                        if (oldCharacterIsPictureMap != null && oldCharacterIsPictureMap.containsKey(key) &&
-                                oldCharacterIsPictureMap.get(key) && oldIntCharToContentMap != null &&
-                                oldIntCharToContentMap.containsKey(key) && oldIntCharToContentMap.get(key) != null)
+                        if (oldCharacterIsPictureMap != null &&
+                                oldCharacterIsPictureMap.containsKey(key) &&
+                                oldCharacterIsPictureMap.get(key) &&
+                                oldIntCharToContentMap != null &&
+                                oldIntCharToContentMap.containsKey(key) &&
+                                oldIntCharToContentMap.get(key) != null &&
+                                !oldIntCharToContentMap.get(key).isEmpty())
                             fileService.deleteFile(imagePath, oldIntCharToContentMap.get(key));
                     }
                 }
