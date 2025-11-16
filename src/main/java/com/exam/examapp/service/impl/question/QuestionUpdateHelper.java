@@ -164,7 +164,7 @@ public class QuestionUpdateHelper {
             List<MultipartFile> variantPictures) {
         Map<Character, String> charToContentMap =
                 intCharToContentMap == null ? new HashMap<>() : new HashMap<>(intCharToContentMap);
-        log.info("Simvol sətir xəritəsi uğurla yaradıldı");
+        log.info("Simvol sətir xəritəsi uğurla yaradıldı deyesen");
         log.info("Log : {}, {}, {}", characterIsPictureMap, oldCharacterIsPictureMap, charToContentMap);
         if (characterIsPictureMap != null && !charToContentMap.isEmpty()) {
             for (Map.Entry<Character, Boolean> characterBooleanEntry : characterIsPictureMap.entrySet()) {
