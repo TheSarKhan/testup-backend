@@ -180,8 +180,10 @@ public class QuestionUpdateHelper {
                                 oldIntCharToContentMap != null &&
                                 oldIntCharToContentMap.containsKey(key) &&
                                 oldIntCharToContentMap.get(key) != null &&
-                                !oldIntCharToContentMap.get(key).isEmpty())
+                                !oldIntCharToContentMap.get(key).isEmpty()) {
+                            log.info("Old image: {} , key : {}", oldIntCharToContentMap.get(key), key);
                             fileService.deleteFile(imagePath, oldIntCharToContentMap.get(key));
+                        }
                     }
                 }
             }
