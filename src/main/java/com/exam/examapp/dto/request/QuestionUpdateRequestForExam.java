@@ -19,7 +19,8 @@ public record QuestionUpdateRequestForExam(
         Difficulty difficulty,
         UUID topicId,
         int questionCount,
-        List<QuestionRequest> questions,
+        String soundUrl,
+        List<QuestionUpdateRequest> questions,
         @NotNull QuestionDetails questionDetails,
         boolean hasChange
 ) {

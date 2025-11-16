@@ -7,6 +7,7 @@ public record CurrentExam(
         Instant startTime,
         long durationInSeconds,
         UUID studentExamId,
+        UUID startId,
         UUID examId
 ) {
 }
