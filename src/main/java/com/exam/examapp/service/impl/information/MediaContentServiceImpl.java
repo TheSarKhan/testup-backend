@@ -80,8 +80,10 @@ public class MediaContentServiceImpl implements MediaContentService {
             throw new BadRequestException(request.text() + " mətnli media məzmunu artıq mövcuddur.");
 
         MediaContent updatedMediaContent = MediaContentMapper.updateRequestTo(mediaContent, request);
-        fileService.deleteFile(IMAGE_PATH, mediaContent.getPictureUrl());
-        updatedMediaContent.setPictureUrl(fileService.uploadFile(IMAGE_PATH, image));
+        if (image != null) {
+            fileService.deleteFile(IMAGE_PATH, mediaContent.getPictureUrl());
+            updatedMediaContent.setPictureUrl(fileService.uploadFile(IMAGE_PATH, image));
+        }
         mediaContentRepository.save(updatedMediaContent);
         log.info("Media məzmunu yeniləndi");
         logService.save("Media məzmunu yeniləndi", userService.getCurrentUserOrNull());

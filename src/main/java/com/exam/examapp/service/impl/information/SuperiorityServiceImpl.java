@@ -56,7 +56,7 @@ public class SuperiorityServiceImpl implements SuperiorityService {
 
     @Override
     public Superiority getSuperiorityById(UUID id) {
-        return superiorityRepository.findById(id).orElseThrow(()->
+        return superiorityRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException("Üstünlük tapılmadı"));
     }
 
@@ -65,9 +65,11 @@ public class SuperiorityServiceImpl implements SuperiorityService {
         log.info("Üstünlük yenilənir");
         Superiority superiority = getSuperiorityById(request.id());
         Superiority updatedSuperiority = SuperiorityMapper.updateRequestTo(superiority, request);
-        fileService.deleteFile(IMAGE_PATH, superiority.getIconUrl());
-        String uploadedIconUrl = fileService.uploadFile(IMAGE_PATH, icon);
-        updatedSuperiority.setIconUrl(uploadedIconUrl);
+        if (icon != null) {
+            fileService.deleteFile(IMAGE_PATH, superiority.getIconUrl());
+            String uploadedIconUrl = fileService.uploadFile(IMAGE_PATH, icon);
+            updatedSuperiority.setIconUrl(uploadedIconUrl);
+        }
         superiorityRepository.save(updatedSuperiority);
         log.info("Üstünlük yeniləndi");
         logService.save("Üstünlük yeniləndi", userService.getCurrentUserOrNull());

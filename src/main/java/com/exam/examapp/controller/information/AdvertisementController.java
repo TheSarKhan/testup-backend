@@ -106,7 +106,7 @@ public class AdvertisementController {
     public ResponseEntity<ApiResponse<Void>> update(@RequestPart
                                                     @Valid
                                                     AdvertisementUpdateRequest request,
-                                                    @RequestPart
+                                                    @RequestPart(required = false)
                                                     MultipartFile image) {
         advertisementService.updateAdvertisement(request, image);
         return ResponseEntity.ok(

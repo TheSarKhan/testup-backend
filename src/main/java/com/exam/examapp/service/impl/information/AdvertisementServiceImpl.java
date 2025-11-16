@@ -78,8 +78,10 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
         Advertisement updatedAdvertisement = AdvertisementMapper.
                 updateRequestTo(advertisement, request);
-        fileService.deleteFile(IMAGE_PATH, advertisement.getImageUrl());
-        advertisement.setImageUrl(fileService.uploadFile(IMAGE_PATH, image));
+        if (image != null) {
+            fileService.deleteFile(IMAGE_PATH, advertisement.getImageUrl());
+            advertisement.setImageUrl(fileService.uploadFile(IMAGE_PATH, image));
+        }
         advertisementRepository.save(updatedAdvertisement);
         log.info("Reklam yeniləndi");
         logService.save("Reklam yeniləndi. Reklam adı: " + request.title(), userService.getCurrentUserOrNull());

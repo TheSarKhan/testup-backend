@@ -143,7 +143,7 @@ public class SubmoduleController {
     public ResponseEntity<ApiResponse<Void>> update(@RequestPart
                                                     @Valid
                                                     SubmoduleUpdateRequest request,
-                                                    @RequestPart
+                                                    @RequestPart(required = false)
                                                     MultipartFile logo) {
         submoduleService.update(request, logo);
         return ResponseEntity.ok(

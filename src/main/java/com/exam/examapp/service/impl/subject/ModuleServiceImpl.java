@@ -99,8 +99,10 @@ public class ModuleServiceImpl implements ModuleService {
             throw new BadRequestException(request.moduleName() + " adlı modul artıq mövcuddur.");
 
         module.setName(request.moduleName());
-        fileService.deleteFile(IMAGE_PATH, module.getLogoUrl());
-        module.setLogoUrl(fileService.uploadFile(IMAGE_PATH, logo));
+        if (logo != null) {
+            fileService.deleteFile(IMAGE_PATH, module.getLogoUrl());
+            module.setLogoUrl(fileService.uploadFile(IMAGE_PATH, logo));
+        }
         moduleRepository.save(module);
         log.info("Modul yeniləndi");
         logService.save("Modul yeniləndi", userService.getCurrentUserOrNull());
