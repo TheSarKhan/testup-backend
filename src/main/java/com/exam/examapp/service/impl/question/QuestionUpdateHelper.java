@@ -169,6 +169,7 @@ public class QuestionUpdateHelper {
             for (Map.Entry<Character, Boolean> characterBooleanEntry : characterIsPictureMap.entrySet()) {
                 if (characterBooleanEntry.getValue()) {
                     Character key = characterBooleanEntry.getKey();
+                    log.info("content : {}, {}, {}", key, intCharToContentMap.containsKey(key), intCharToContentMap.get(key));
                     if (!(charToContentMap.containsKey(key) &&
                             charToContentMap.get(key) != null)) {
                         String imageUrl = fileService.uploadFile(imagePath, variantPictures.getFirst());
