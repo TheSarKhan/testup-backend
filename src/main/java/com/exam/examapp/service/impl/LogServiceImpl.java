@@ -11,6 +11,7 @@ import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +41,7 @@ public class LogServiceImpl implements LogService {
 
     @Override
     public List<LogResponse> getAllByFilter(Role role, List<String> filters, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("crateAt").descending());
         Specification<Log> specification = Specification.unrestricted();
         specification.and(hasRole(role));
         specification.and(hasFilter(filters));
@@ -64,19 +65,28 @@ public class LogServiceImpl implements LogService {
 
             for (String filter : filters) {
                 switch (filter) {
-                    case "Qeydiyyatdan keçən şagirdlər" -> orPredicates.add(cb.like(root.get("message"), "%Tələbə qeydiyyatdan keçdi%"));
-                    case "Qeydiyyatdan keçən müəllimlər" -> orPredicates.add(cb.like(root.get("message"), "%Müəllim qeydiyyatdan keçdi%"));
+                    case "Qeydiyyatdan keçən şagirdlər" ->
+                            orPredicates.add(cb.like(root.get("message"), "%Tələbə qeydiyyatdan keçdi%"));
+                    case "Qeydiyyatdan keçən müəllimlər" ->
+                            orPredicates.add(cb.like(root.get("message"), "%Müəllim qeydiyyatdan keçdi%"));
                     case "Aktiv edilən hesablar" -> orPredicates.add(cb.like(root.get("message"), "%aktiv edildi%"));
-                    case "Deaktiv edilən hesablar" -> orPredicates.add(cb.like(root.get("message"), "%deaktiv edildi%"));
-                    case "Planı dəyişdirilən müəllimlər" -> orPredicates.add(cb.like(root.get("message"), "%paketini dəyişdirdi%"));
+                    case "Deaktiv edilən hesablar" ->
+                            orPredicates.add(cb.like(root.get("message"), "%deaktiv edildi%"));
+                    case "Planı dəyişdirilən müəllimlər" ->
+                            orPredicates.add(cb.like(root.get("message"), "%paketini dəyişdirdi%"));
                     case "Alınan planlar" -> orPredicates.add(cb.like(root.get("message"), "%paket aldı%"));
-                    case "Yaradılan imtahanlar" -> orPredicates.add(cb.like(root.get("message"), "%İmtahanın yaradılması tamamlandı%"));
-                    case "Düzəliş edilən imtahanlar" -> orPredicates.add(cb.like(root.get("message"), "%İmtahan yeniləndi%"));
+                    case "Yaradılan imtahanlar" ->
+                            orPredicates.add(cb.like(root.get("message"), "%İmtahanın yaradılması tamamlandı%"));
+                    case "Düzəliş edilən imtahanlar" ->
+                            orPredicates.add(cb.like(root.get("message"), "%İmtahan yeniləndi%"));
                     case "Silinən imtahanlar" -> orPredicates.add(cb.like(root.get("message"), "%İmtahan silindi%"));
                     case "Alınan imtahanlar" -> orPredicates.add(cb.like(root.get("message"), "%Tələbə imtahan aldı%"));
-                    case "Birləşmiş imtahana əlavə edilən müəllimlər" -> orPredicates.add(cb.like(root.get("message"), "%Müəllim(lər) uğurla əlavə edildi%"));
-                    case "Şagirdlərə əlavə olunan imtahanlar" -> orPredicates.add(cb.like(root.get("message"), "%İmtahan sagirdə əlavə olundu%"));
-                    default -> {}
+                    case "Birləşmiş imtahana əlavə edilən müəllimlər" ->
+                            orPredicates.add(cb.like(root.get("message"), "%Müəllim(lər) uğurla əlavə edildi%"));
+                    case "Şagirdlərə əlavə olunan imtahanlar" ->
+                            orPredicates.add(cb.like(root.get("message"), "%İmtahan sagirdə əlavə olundu%"));
+                    default -> {
+                    }
                 }
             }
 

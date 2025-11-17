@@ -30,7 +30,6 @@ import com.exam.examapp.service.interfaces.exam.ExamService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -191,10 +190,9 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public List<ExamBlockResponse> getExamsByTeacher(UUID id, String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, ExamSort sort, ExamType type, Integer pageNum) {
-        Page<Exam> examPage = examService.getExamPage(id, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
+        List<Exam> exams = examService.getExamsFiltered(id, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
 
-        List<ExamBlockResponse> list = examPage.getContent()
-                .stream()
+        List<ExamBlockResponse> list = exams.stream()
                 .map(examService.examToResponse(userService.getCurrentUserOrNull()))
                 .toList();
         log.info("Admin get Exam: {}", list.size());

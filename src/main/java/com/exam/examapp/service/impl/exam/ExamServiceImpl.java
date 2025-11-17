@@ -34,7 +34,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -102,17 +101,21 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public List<ExamBlockResponse> getAllExams(String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, ExamSort sort, ExamType type, Integer pageNum) {
-        Page<Exam> page = getExamPage(null, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
+        List<Exam> page = getExamsFiltered(null, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
 
-        return page.getContent().stream().filter(Exam::isDeleted).filter(exam -> Role.ADMIN.equals(exam.getTeacher().getRole())).filter(Exam::isReadyForSale).map(examToResponse(userService.getCurrentUserOrNull())).toList();
+        return page.stream()
+                .map(examToResponse(userService.getCurrentUserOrNull()))
+                .toList();
     }
 
     @Override
     @Transactional
     public List<ExamBlockResponse> getAllExamsForAdmin(String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, ExamSort sort, ExamType type, Integer pageNum) {
-        Page<Exam> page = getExamPage(null, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
+        List<Exam> page = getExamsFiltered(null, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
 
-        return page.getContent().stream().filter(exam -> !exam.isDeleted()).map(examToResponse(userService.getCurrentUserOrNull())).toList();
+        return page.stream()
+                .map(examToResponse(userService.getCurrentUserOrNull()))
+                .toList();
     }
 
     @Override
@@ -410,13 +413,14 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional
-    public Page<Exam> getExamPage(UUID teacherId, String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, Integer pageNum, ExamSort sort, ExamType type) {
+    public List<Exam> getExamsFiltered(UUID teacherId, String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, Integer pageNum, ExamSort sort, ExamType type) {
         Specification<Exam> specification = Specification.unrestricted();
         specification = specification.and(ExamSpecification.hasName(name))
                 .and(ExamSpecification.hasCostBetween(minCost, maxCost))
                 .and(ExamSpecification.hasRatingInRange(rating))
                 .and(ExamSpecification.hasTags(tagIds))
-                .and(ExamSpecification.hasTeacher(teacherId));
+                .and(ExamSpecification.hasTeacher(teacherId))
+                .and(ExamSpecification.isDeletedFalse());
 
         User currentUser = userService.getCurrentUserOrNull();
         if ((type == ExamType.BOUGHT || type == ExamType.FINISHED) && currentUser == null) {
@@ -442,7 +446,7 @@ public class ExamServiceImpl implements ExamService {
 
         Pageable pageable = PageRequest.of(pageNum, pageSize, sortBy);
 
-        return examRepository.findAll(specification, pageable);
+        return examRepository.findAll(specification, pageable).toList();
     }
 
     @Transactional

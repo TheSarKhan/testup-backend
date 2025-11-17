@@ -29,6 +29,11 @@ public class ExamSpecification {
                 cb.equal(root.get("teacher").get("id"), teacherId);
     }
 
+    public static Specification<Exam> isDeletedFalse() {
+        return (root, query, cb) ->
+                cb.equal(root.get("isDeleted"), false);
+    }
+
     public static Specification<Exam> hasTags(List<UUID> tagIds) {
         return (root, query, criteriaBuilder) -> {
             if (tagIds == null || tagIds.isEmpty()) {
@@ -96,6 +101,7 @@ public class ExamSpecification {
     }
 
     public static Specification<Exam> hasName(String name) {
+        if (name == null) return null;
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.like(criteriaBuilder.lower(root.get("examTitle")), "%" + name + "%");
     }
