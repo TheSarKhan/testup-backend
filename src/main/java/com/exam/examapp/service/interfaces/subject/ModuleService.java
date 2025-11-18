@@ -1,7 +1,7 @@
 package com.exam.examapp.service.interfaces.subject;
 
 import com.exam.examapp.dto.request.ModuleUpdateRequest;
-import com.exam.examapp.dto.response.ModuleResponse;
+import com.exam.examapp.dto.response.subject.ModuleResponse;
 import com.exam.examapp.model.exam.Module;
 import org.springframework.web.multipart.MultipartFile;
 

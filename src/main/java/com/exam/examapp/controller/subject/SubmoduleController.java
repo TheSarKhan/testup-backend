@@ -3,7 +3,7 @@ package com.exam.examapp.controller.subject;
 import com.exam.examapp.dto.request.subject.SubmoduleRequest;
 import com.exam.examapp.dto.request.subject.SubmoduleUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
-import com.exam.examapp.dto.response.SubmoduleResponse;
+import com.exam.examapp.dto.response.subject.SubmoduleResponse;
 import com.exam.examapp.model.exam.Submodule;
 import com.exam.examapp.service.interfaces.subject.SubmoduleService;
 import io.swagger.v3.oas.annotations.Operation;

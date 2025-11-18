@@ -2,15 +2,12 @@ package com.exam.examapp.service.impl.subject;
 
 import com.exam.examapp.dto.request.subject.SubmoduleRequest;
 import com.exam.examapp.dto.request.subject.SubmoduleUpdateRequest;
-import com.exam.examapp.dto.response.SubmoduleResponse;
+import com.exam.examapp.dto.response.subject.SubmoduleProjection;
+import com.exam.examapp.dto.response.subject.SubmoduleResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.model.exam.Module;
 import com.exam.examapp.model.exam.Submodule;
-import com.exam.examapp.model.subject.SubjectStructure;
-import com.exam.examapp.repository.ExamRepository;
-import com.exam.examapp.repository.subject.SubjectStructureQuestionRepository;
-import com.exam.examapp.repository.subject.SubjectStructureRepository;
 import com.exam.examapp.repository.subject.SubmoduleRepository;
 import com.exam.examapp.service.interfaces.FileService;
 import com.exam.examapp.service.interfaces.LogService;
@@ -43,11 +40,12 @@ public class SubmoduleServiceImpl implements SubmoduleService {
 
     private final LogService logService;
 
-    private final SubjectStructureRepository subjectStructureRepository;
-
-    private final SubjectStructureQuestionRepository subjectStructureQuestionRepository;
-
-    private final ExamRepository examRepository;
+    private static Submodule buildSubmodule(SubmoduleRequest request, Module module) {
+        return Submodule.builder()
+                .name(request.name())
+                .module(module)
+                .build();
+    }
 
     @Override
     public void create(SubmoduleRequest request, MultipartFile logo) {
@@ -55,7 +53,9 @@ public class SubmoduleServiceImpl implements SubmoduleService {
         Module module = moduleService.getModuleById(request.moduleId());
         if (submoduleRepository.existsByNameAndModule(request.name(), module))
             throw new BadRequestException("Alt modul artıq mövcuddur.");
-        Submodule build = Submodule.builder().name(request.name()).module(module).build();
+
+        Submodule build = buildSubmodule(request, module);
+
         String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);
         build.setLogoUrl(logoUrl);
         submoduleRepository.save(build);
@@ -76,17 +76,8 @@ public class SubmoduleServiceImpl implements SubmoduleService {
     @Override
     @Transactional
     public List<SubmoduleResponse> getAllSubmoduleResponse() {
-        return getAll().stream().map(
-                submodule -> {
-                    List<SubjectStructure> subjectStructures = subjectStructureRepository.getBySubmodule(submodule);
-                    List<String> subjectNames = subjectStructures.stream()
-                            .map(subjectStructure -> subjectStructure.getSubject().getName()).toList();
-                    List<UUID> subjectStructureQuestionIds = subjectStructureQuestionRepository
-                            .getIdsBySubjectStructureIn(subjectStructures);
-                    long examCount = examRepository.countBySubjectStructureQuestions_IdIn(subjectStructureQuestionIds);
-                    return new SubmoduleResponse(submodule, subjectNames, examCount);
-                }
-        ).toList();
+        return submoduleRepository.getAllNative().stream()
+                .map(SubmoduleProjection::toSubmoduleResponse).toList();
     }
 
     @Override

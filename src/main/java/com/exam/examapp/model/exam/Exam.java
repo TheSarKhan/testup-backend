@@ -19,6 +19,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Builder
+@ToString
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Table(name = "exams")
@@ -82,31 +83,5 @@ public class Exam {
     @PreUpdate
     void preUpdate() {
         updatedAt = Instant.now();
-    }
-
-    @Override
-    public String toString() {
-        return "Exam{" +
-                "id=" + id +
-                ", examTitle='" + examTitle + '\'' +
-                ", teacher=" + teacher +
-                ", subjectStructureQuestions=" + subjectStructureQuestions +
-                ", tags=" + tags +
-                ", explanationVideoUrl='" + explanationVideoUrl + '\'' +
-                ", examDescription='" + examDescription + '\'' +
-                ", durationInSeconds=" + durationInSeconds +
-                ", numberOfQuestions=" + numberOfQuestions +
-                ", cost=" + cost +
-                ", isReadyForSale=" + isReadyForSale +
-                ", isHidden=" + isHidden +
-                ", startId=" + startId +
-                ", rating=" + rating +
-                ", userIdToRatingMap=" + userIdToRatingMap +
-                ", hasUncheckedQuestionStudentExamId=" + hasUncheckedQuestionStudentExamId +
-                ", isDeleted=" + isDeleted +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", deletedAt=" + deletedAt +
-                '}';
     }
 }

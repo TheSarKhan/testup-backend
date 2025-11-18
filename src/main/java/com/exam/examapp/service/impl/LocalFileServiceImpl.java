@@ -25,8 +25,8 @@ public class LocalFileServiceImpl implements FileService {
     @Override
     public String uploadFile(String directory, MultipartFile file) {
         log.info("Şəkil endirilir");
-        if (file.isEmpty() || Objects.isNull(file.getOriginalFilename()))
-            return null;
+        if (file.isEmpty() || Objects.isNull(file.getOriginalFilename()) || file.getSize() < 100)
+            throw new FileException("Fayl boşdur və ya sıfırdır və ya ölçüsü 100-dən azdır");
 
         String originalFilename = file.getOriginalFilename();
 

@@ -1,12 +1,10 @@
 package com.exam.examapp.service.impl.subject;
 
 import com.exam.examapp.dto.request.ModuleUpdateRequest;
-import com.exam.examapp.dto.response.ModuleResponse;
+import com.exam.examapp.dto.response.subject.ModuleResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.model.exam.Module;
-import com.exam.examapp.model.exam.Submodule;
-import com.exam.examapp.model.subject.SubjectStructure;
 import com.exam.examapp.repository.ExamRepository;
 import com.exam.examapp.repository.subject.ModuleRepository;
 import com.exam.examapp.repository.subject.SubjectStructureQuestionRepository;
@@ -54,13 +52,17 @@ public class ModuleServiceImpl implements ModuleService {
         if (moduleRepository.existsModuleByName(moduleName))
             throw new BadRequestException(moduleName + " adlı modul artıq mövcuddur.");
 
-        Module build = Module.builder()
-                .name(moduleName)
-                .build();
+        Module build = buildModule(moduleName);
         build.setLogoUrl(fileService.uploadFile(IMAGE_PATH, logo));
         moduleRepository.save(build);
         log.info("Modul yaradıldı");
         logService.save("Modul yaradıldı", userService.getCurrentUserOrNull());
+    }
+
+    private static Module buildModule(String moduleName) {
+        return Module.builder()
+                .name(moduleName)
+                .build();
     }
 
     @Override
@@ -71,16 +73,7 @@ public class ModuleServiceImpl implements ModuleService {
     @Override
     @Transactional
     public List<ModuleResponse> getAllModulesResponse() {
-        return getAllModules().stream().map(
-                module -> {
-                    List<Submodule> submodules = submoduleRepository.getAllByModule_Id(module.getId());
-                    List<SubjectStructure> subjectStructures = subjectStructureRepository.getBySubmoduleIn(submodules);
-                    List<UUID> subjectStructureQuestionIds = subjectStructureQuestionRepository
-                            .getIdsBySubjectStructureIn(subjectStructures);
-                    long examCount = examRepository.countBySubjectStructureQuestions_IdIn(subjectStructureQuestionIds);
-                    return new ModuleResponse(module, submodules.size(), examCount);
-                }
-        ).toList();
+        return moduleRepository.getAllModuleResponses();
     }
 
     @Override

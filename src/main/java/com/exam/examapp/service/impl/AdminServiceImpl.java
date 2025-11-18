@@ -96,20 +96,13 @@ public class AdminServiceImpl implements AdminService {
         long lastMonthUserCount = userRepository.countByCreatedAtBetween(twoMonthsAgo, oneMonthAgo);
 
         int percentageUserIncrease = 0;
-        if (lastMonthUserCount > 0) {
+        if (lastMonthUserCount > 0)
             percentageUserIncrease = (int) ((newUserCount * 100.0 / lastMonthUserCount) - 100);
-        }
 
-        double totalAmount = paymentResultRepository.getByStatus("APPROVED")
-                .stream()
-                .mapToDouble(PaymentResult::getAmount)
-                .sum();
+        double totalAmount = paymentResultRepository.sumAmountsByStatus("APPROVE");
 
         double lastMonthAmount = paymentResultRepository
-                .getByStatusAndCreatedAtAfter("APPROVED", oneMonthAgo)
-                .stream()
-                .mapToDouble(PaymentResult::getAmount)
-                .sum();
+                .sumApprovedPaymentsAfter("APPROVED", oneMonthAgo);
 
         long totalExams = examRepository.count();
         long thisMonthCreatedExam = examRepository.countByCreatedAtAfter(oneMonthAgo);

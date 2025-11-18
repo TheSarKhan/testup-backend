@@ -2,12 +2,13 @@ package com.exam.examapp;
 
 import com.exam.examapp.dto.request.NotificationRequest;
 import com.exam.examapp.model.User;
-import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.repository.UserRepository;
 import com.exam.examapp.security.service.interfaces.EmailService;
+import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.NotificationService;
 import com.exam.examapp.service.interfaces.PackService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DailyTask {
@@ -30,30 +32,29 @@ public class DailyTask {
 
     private final EmailService emailService;
 
+    private final LogService logService;
+
     @Value("${app.default-pack-name}")
     private String defaultPackName;
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void resetTeacherInfo() {
-        List<User> teachers = userRepository.getByRole(Role.TEACHER);
-        teachers.stream()
-                .filter(
-                        teacher ->
-                                teacher
-                                        .getInfo()
-                                        .getThisMonthStartTime()
-                                        .isBefore(Instant.now().minusSeconds(2592000)))
-                .forEach(
-                        teacher -> {
-                            teacher.getInfo().setThisMonthStartTime(Instant.now());
-                            teacher.getInfo().setThisMonthCreatedExamCount(0);
-                            userRepository.save(teacher);
-                        });
+        log.info("Müəllim məlumatlarını sıfırlayır");
+        List<User> teachers = userRepository.getTeachersByLastMonth();
+        teachers.forEach(
+                teacher -> {
+                    teacher.getInfo().setThisMonthStartTime(Instant.now());
+                    teacher.getInfo().setThisMonthCreatedExamCount(0);
+                    userRepository.save(teacher);
+                });
+        String message = "Müəllim məlumatlarını sıfırlandı. Müəllim sayı: " + teachers.size();
+        log.info(message);
+        logService.save(message, null);
     }
 
     @Scheduled(cron = "0 0 9 * * ?")
     public void sendPaymentReminders() {
-        List<User> teachers = getTeachersByPackExceptDefault();
+        List<User> teachers = userRepository.getTeachersByPackExceptDefault(defaultPackName);
 
         for (User teacher : teachers) {
             handleExpiredPack(teacher);
@@ -61,21 +62,15 @@ public class DailyTask {
         }
     }
 
-    private List<User> getTeachersByPackExceptDefault() {
-        return userRepository.getByRole(Role.TEACHER).stream()
-                .filter(teacher -> !defaultPackName.equals(teacher.getPack().getPackName()))
-                .filter(teacher -> isWithinRange(
-                        teacher.getNextPaymentDate(),
-                        Instant.now().minusSeconds(3 * 24 * 60 * 60 - 1),
-                        Instant.now().plusSeconds(11 * 24 * 60 * 60 + 1)))
-                .toList();
-    }
-
     private void handleExpiredPack(User teacher) {
         if (teacher.getNextPaymentDate().isAfter(Instant.now().plusSeconds(10 * 24 * 60 * 60))) {
+            log.info("{} paketi bitib.", teacher.getEmail());
+            logService.save(teacher.getEmail() + " paketi bitib.", null);
             teacher.setPack(packService.getPackByName(defaultPackName));
             teacher.setNextPaymentDate(null);
             userRepository.save(teacher);
+            log.info("{} paketi silindi", teacher.getEmail());
+            logService.save(teacher.getEmail() + " paketi silindi", null);
         }
     }
 
@@ -105,10 +100,13 @@ public class DailyTask {
     }
 
     private void sendReminder(User teacher) {
+        log.info("{} paketninin vaxtı xatırladılır.", teacher.getEmail());
         String message = EMAIL_BODY.formatted(teacher.getNextPaymentDate().toString());
         emailService.sendEmail(teacher.getEmail(), EMAIL_SUBJECT, message);
         notificationService.sendNotification(
                 new NotificationRequest(EMAIL_SUBJECT, message, teacher.getEmail())
         );
+        log.info("{} paketninin vaxtı xatırladıldı.", teacher.getEmail());
+        logService.save(teacher.getEmail() + " paketninin vaxtı xatırladıldı.", null);
     }
 }

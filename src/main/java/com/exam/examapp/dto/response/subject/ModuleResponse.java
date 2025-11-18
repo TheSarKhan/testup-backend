@@ -1,4 +1,4 @@
-package com.exam.examapp.dto.response;
+package com.exam.examapp.dto.response.subject;
 
 import com.exam.examapp.model.exam.Module;
 

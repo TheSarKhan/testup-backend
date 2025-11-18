@@ -15,19 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/about")
-@Tag(
-    name = "About Information",
-    description = "Endpoints for retrieving about information of the application")
+@Tag(name = "About Information")
 public class AboutController {
-  private final AboutService aboutService;
+    private final AboutService aboutService;
 
-  @GetMapping
-  @Operation(
-      summary = "Get about information",
-      description = "Retrieve the application's about information.")
-  public ResponseEntity<ApiResponse<AboutResponse>> get() {
-    AboutResponse about = aboutService.getAbout();
-    return ResponseEntity.ok(
-        ApiResponse.build(HttpStatus.OK, "Haqqında uğurla əldə edildi", about));
-  }
+    @GetMapping
+    @Operation(summary = "Get about information",
+            description = "Retrieve the application's about information.")
+    public ResponseEntity<ApiResponse<AboutResponse>> get() {
+        AboutResponse about = aboutService.getAbout();
+        return ResponseEntity.ok(
+                ApiResponse.build(HttpStatus.OK, "Haqqında uğurla əldə edildi", about));
+    }
 }

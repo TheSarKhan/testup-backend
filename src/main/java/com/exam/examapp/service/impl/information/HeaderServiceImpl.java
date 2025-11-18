@@ -1,4 +1,4 @@
-package com.exam.examapp.service.impl;
+package com.exam.examapp.service.impl.information;
 
 import com.exam.examapp.dto.response.HeaderResponse;
 import com.exam.examapp.model.User;

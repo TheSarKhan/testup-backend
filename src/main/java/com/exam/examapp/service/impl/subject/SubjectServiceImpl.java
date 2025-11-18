@@ -39,16 +39,20 @@ public class SubjectServiceImpl implements SubjectService {
         if (subjectRepository.existsSubjectByName(request.name()))
             throw new BadRequestException("Mövzu artıq mövcuddur");
 
-        Subject build = Subject.builder()
-                .name(request.name())
-                .isSupportMath(request.isSupportMath())
-                .build();
+        Subject build = buildSubject(request);
 
         String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);
         build.setLogoUrl(logoUrl);
         subjectRepository.save(build);
         log.info("Mövzu yaradıldı");
         logService.save("Mövzu yaradıldı", userService.getCurrentUserOrNull());
+    }
+
+    private static Subject buildSubject(SubjectRequest request) {
+        return Subject.builder()
+                .name(request.name())
+                .isSupportMath(request.isSupportMath())
+                .build();
     }
 
     @Override
@@ -78,6 +82,7 @@ public class SubjectServiceImpl implements SubjectService {
 
         subject.setName(request.name());
         subject.setSupportMath(request.isSupportMath());
+
         if (logo != null) {
             fileService.deleteFile(IMAGE_PATH, subject.getLogoUrl());
             String logoUrl = fileService.uploadFile(IMAGE_PATH, logo);

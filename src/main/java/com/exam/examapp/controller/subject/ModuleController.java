@@ -2,7 +2,7 @@ package com.exam.examapp.controller.subject;
 
 import com.exam.examapp.dto.request.ModuleUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
-import com.exam.examapp.dto.response.ModuleResponse;
+import com.exam.examapp.dto.response.subject.ModuleResponse;
 import com.exam.examapp.model.exam.Module;
 import com.exam.examapp.service.interfaces.subject.ModuleService;
 import io.swagger.v3.oas.annotations.Operation;

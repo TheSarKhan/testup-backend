@@ -4,6 +4,8 @@ import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
@@ -35,4 +37,25 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     List<User> getAllByEmailIn(Collection<String> emails);
 
     Optional<User> findByPhoneNumber(String phoneNumber);
+
+    @Query(value = """
+        SELECT *
+        FROM users
+        WHERE role = 'TEACHER'
+          AND (info->>'thisMonthStartTime')::timestamptz
+                < (NOW() - INTERVAL '30 days')
+        """, nativeQuery = true)
+    List<User> getTeachersByLastMonth();
+
+    @Query(value = """
+            SELECT u.*
+            FROM users u
+            JOIN packs p ON p.id = u.pack_id
+            WHERE u.role = 'TEACHER'
+                AND p.pack_name <> :defaultPackName
+                AND u.next_payment_date > (NOW() - INTERVAL '3 days' + INTERVAL '1 second')
+                AND u.next_payment_date < (NOW() + INTERVAL '11 days' - INTERVAL '1 second')
+            """, nativeQuery = true)
+    List<User> getTeachersByPackExceptDefault(@Param("defaultPackName") String defaultPackName);
+
 }

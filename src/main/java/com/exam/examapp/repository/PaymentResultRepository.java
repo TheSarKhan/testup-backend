@@ -4,6 +4,7 @@ import com.exam.examapp.model.PaymentResult;
 import com.exam.examapp.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
@@ -20,10 +21,28 @@ public interface PaymentResultRepository extends JpaRepository<PaymentResult, UU
 
     Optional<PaymentResult> getByInvoiceUuid(String uuid);
 
-    List<PaymentResult> getByStatusAndCreatedAtAfter(String status, Instant createdAtAfter);
-
-    List<PaymentResult> getByStatus(String status);
-
-    @Query("select sum(amount) from PaymentResult where createdAt > :createdAtAfter and createdAt < :createdAtBefore")
+    @Query("""
+            select COALESCE(sum(amount))
+            from PaymentResult
+            where createdAt > :createdAtAfter
+                and createdAt < :createdAtBefore
+            """)
     Double getAmountPaidByRange(Instant createdAtAfter, Instant createdAtBefore);
+
+    @Query("""
+            select coalesce(sum(amount), 0)
+            from PaymentResult
+            where status = :status
+            """)
+    double sumAmountsByStatus(@Param("status") String status);
+
+    @Query(value = """
+            select coalesce(sum(amount), 0)
+            from PaymentResult
+            WHERE status = :status
+              AND createdAt > :afterDate
+            """)
+    double sumApprovedPaymentsAfter(
+            @Param("status") String status,
+            @Param("afterDate") Instant afterDate);
 }

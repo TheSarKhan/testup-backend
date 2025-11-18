@@ -56,13 +56,7 @@ public class ProfileServiceImpl implements ProfileService {
         User user = userService.getCurrentUser();
         String email = request.email();
 
-        if (userService.existsByEmail(email) &&
-                !userService.getByEmail(email).getId().equals(user.getId()))
-            throw new BadRequestException("E-poçt artıq mövcuddur");
-
-        if (userService.existsByPhoneNumber(request.phoneNumber()) &&
-                !userService.getByPhoneNumber(request.phoneNumber()).getId().equals(user.getId()))
-            throw new BadRequestException("Telefon nomresi artiq movcuddur.");
+        validateEmailAndPhoneNumber(request, email, user);
 
         user.setFullName(request.fullName());
         user.setPhoneNumber(request.phoneNumber());
@@ -71,14 +65,29 @@ public class ProfileServiceImpl implements ProfileService {
 
         User newUser = userService.save(user);
 
-        TokenResponse tokenResponse = new TokenResponse(
+        TokenResponse tokenResponse = generateToken(email, newUser);
+
+        log.info("Profil yeniləndi");
+        logService.save("Profil yeniləndi", newUser);
+        return tokenResponse;
+    }
+
+    private TokenResponse generateToken(String email, User newUser) {
+        return new TokenResponse(
                 jwtService.generateAccessToken(email),
                 jwtService.generateRefreshToken(email),
                 newUser.getRole(),
                 newUser.getPack());
-        log.info("Profil yeniləndi");
-        logService.save("Profil yeniləndi", newUser);
-        return tokenResponse;
+    }
+
+    private void validateEmailAndPhoneNumber(ProfileUpdateRequest request, String email, User user) {
+        if (userService.existsByEmail(email) &&
+                !userService.getByEmail(email).getId().equals(user.getId()))
+            throw new BadRequestException("E-poçt artıq mövcuddur");
+
+        if (userService.existsByPhoneNumber(request.phoneNumber()) &&
+                !userService.getByPhoneNumber(request.phoneNumber()).getId().equals(user.getId()))
+            throw new BadRequestException("Telefon nomresi artiq movcuddur.");
     }
 
     @Override

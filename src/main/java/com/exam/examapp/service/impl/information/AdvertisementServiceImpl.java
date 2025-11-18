@@ -78,6 +78,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
         Advertisement updatedAdvertisement = AdvertisementMapper.
                 updateRequestTo(advertisement, request);
+
         if (image != null) {
             fileService.deleteFile(IMAGE_PATH, advertisement.getImageUrl());
             advertisement.setImageUrl(fileService.uploadFile(IMAGE_PATH, image));
