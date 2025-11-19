@@ -101,7 +101,8 @@ public class ExamServiceImpl implements ExamService {
     @Override
     @Transactional
     public List<ExamBlockResponse> getAllExams(String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, ExamSort sort, ExamType type, Integer pageNum) {
-        List<Exam> page = getExamsFiltered(null, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
+        List<Exam> page = getExamsFiltered(
+                null, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
 
         return page.stream()
                 .map(examToResponse(userService.getCurrentUserOrNull()))
@@ -402,10 +403,16 @@ public class ExamServiceImpl implements ExamService {
     public Function<Exam, ExamBlockResponse> examToResponse(User user) {
         return exam -> {
             if (user != null && !(Role.ADMIN.equals(user.getRole()) || Role.TEACHER.equals(user.getRole()))) {
+                log.info("User: {}, Exam: {}", user.getId(), exam.getId());
                 List<StudentExam> studentExams = studentExamRepository.getByStudent(user);
+                log.info("StudentExams: {}", studentExams.size());
                 List<StudentExam> filteredExams = studentExams.stream().filter(studentExam -> studentExam.getExam().equals(exam)).toList();
-                StudentExam last = filteredExams.getLast();
-                return ExamMapper.toBlockResponse(exam, last == null ? null : last.getStatus(), last == null ? null : last.getId());
+                log.info("Filtered Exams: {}", filteredExams.size());
+                StudentExam last = filteredExams.isEmpty() ? null : filteredExams.getLast();
+                log.info("Last: {}", last);
+                ExamBlockResponse blockResponse = ExamMapper.toBlockResponse(exam, last == null ? null : last.getStatus(), last == null ? null : last.getId());
+                log.info("BlockResponse: {}", blockResponse);
+                return blockResponse;
             }
             return ExamMapper.toBlockResponse(exam, null, null);
         };
