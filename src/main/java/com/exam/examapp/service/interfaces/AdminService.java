@@ -38,6 +38,8 @@ public interface AdminService {
                                               ExamType type,
                                               Integer pageNum);
 
+    List<ExamBlockResponse> getTeacherCooperationExams();
+
     List<ExamBlockResponse> getSimpleExamsByTeacher(UUID id);
 
     List<ExamBlockResponse> getSimpleExamsByStudent(UUID id);

@@ -9,7 +9,6 @@ import com.exam.examapp.dto.response.exam.ExamBlockResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.mapper.ExamMapper;
 import com.exam.examapp.model.Pack;
-import com.exam.examapp.model.PaymentResult;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.enums.Role;
@@ -190,6 +189,14 @@ public class AdminServiceImpl implements AdminService {
                 .toList();
         log.info("Admin get Exam: {}", list.size());
         return list;
+    }
+
+    @Override
+    public List<ExamBlockResponse> getTeacherCooperationExams() {
+        return examRepository.getTeacherCooperationExams().stream()
+                .map(exam -> ExamMapper
+                        .toBlockResponse(exam, null, null))
+                .toList();
     }
 
     @Override

@@ -187,6 +187,17 @@ public class AdminController {
                         "İmtahanlar uğurla əldə edildi", examsByTeacher));
     }
 
+    @GetMapping("/teacher-cooperation-exams")
+    @Operation(summary = "Get Teacher cooperation exams", description = "Retrieve a list of teacher cooperation exams.")
+    public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getTeacherCooperationExams() {
+        List<ExamBlockResponse> cooperationExams = adminService.getTeacherCooperationExams();
+        return ResponseEntity.ok(
+                ApiResponse.
+                        build(HttpStatus.OK,
+                                "Birlesmis imtahanlar elde edildi",
+                                cooperationExams));
+    }
+
     @GetMapping("/simple-exam-by-teacher")
     @Operation(summary = "Get Exam by teacher", description = "Retrieve a list of exams by teacher.")
     public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getExamByTeacher(

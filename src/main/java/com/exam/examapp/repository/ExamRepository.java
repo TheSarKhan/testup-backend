@@ -24,4 +24,11 @@ public interface ExamRepository extends JpaRepository<Exam, UUID>, JpaSpecificat
     Optional<Exam> getExamByStartId(UUID startId);
 
     long countByCreatedAtAfter(Instant createdAtAfter);
+
+    @Query("""
+            select distinct ex
+            from Exam ex join ExamTeacher ext
+            on ex = ext.exam
+            """)
+    List<Exam> getTeacherCooperationExams();
 }

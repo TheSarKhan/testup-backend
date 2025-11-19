@@ -454,7 +454,6 @@ public class ExamServiceImpl implements ExamService {
         return new StartExamResponse(response.studentExamId(), response.status(), response.questionIdToAnswerMap(), response.listeningIdToPlayTimeMap(), response.startTime(), examMapper.toResponse(getById(response.exam().id())));
     }
 
-
     @Override
     @Transactional
     public void giveRatingToExam(UUID examId, Integer rating) {
