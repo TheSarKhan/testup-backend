@@ -82,7 +82,7 @@ public class ExamController {
             summary = "Get exams",
             description =
                     "Retrieve list of exam blocks . Returns summary info used in dashboard.")
-    public ResponseEntity<ApiResponse<List<ExamBlockResponse>>> getAllExams(
+    public ResponseEntity<ApiResponse<ExamAllResponses>> getAllExams(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Integer minCost,
             @RequestParam(required = false) Integer maxCost,
@@ -93,9 +93,9 @@ public class ExamController {
             @RequestParam ExamSort sort,
             @RequestParam ExamType type
     ) {
-        List<ExamBlockResponse> myExams = examService.getAllExams(name, minCost, maxCost, rating, tagIds, sort, type, pageNum, pageSize);
+        ExamAllResponses allExams = examService.getAllExams(name, minCost, maxCost, rating, tagIds, sort, type, pageNum, pageSize);
         return ResponseEntity.ok(
-                ApiResponse.build(HttpStatus.OK, "İmtahanlar uğurla əldə edildi", myExams));
+                ApiResponse.build(HttpStatus.OK, "İmtahanlar uğurla əldə edildi", allExams));
     }
 
     @GetMapping("/tags")
