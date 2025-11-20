@@ -1,33 +1,37 @@
 package com.exam.examapp.service.interfaces;
 
-import com.exam.examapp.dto.request.UserFilterRequest;
 import com.exam.examapp.model.TeacherInfo;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
-  User save(User user);
+    User save(User user);
 
-  User getByEmail(String email);
+    User getByEmail(String email);
 
-  User getByPhoneNumber(String phoneNumber);
+    User getByPhoneNumber(String phoneNumber);
 
-  User getCurrentUser();
+    User getCurrentUser();
 
-  User getUserById(UUID userId);
+    User getUserById(UUID userId);
 
-  User getCurrentUserOrNull();
+    User getCurrentUserOrNull();
 
-  TeacherInfo getTeacherInfo();
+    TeacherInfo getTeacherInfo();
 
-  List<User> getUsersByRole(Role role);
+    List<User> getUsersByRole(Role role);
 
-  List<String> getEmailList(UserFilterRequest request);
+    List<String> getEmailList(List<String> packNames,
+                              List<Role> roles,
+                              Boolean isActive,
+                              Instant createAtAfter,
+                              Instant createAtBefore);
 
-  boolean existsByEmail(String email);
+    boolean existsByEmail(String email);
 
-  boolean existsByPhoneNumber(String phoneNumber);
+    boolean existsByPhoneNumber(String phoneNumber);
 }

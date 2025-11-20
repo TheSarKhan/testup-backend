@@ -2,7 +2,6 @@ package com.exam.examapp.controller;
 
 import com.exam.examapp.dto.request.StudentFilter;
 import com.exam.examapp.dto.request.TeacherFilter;
-import com.exam.examapp.dto.request.UserFilterRequest;
 import com.exam.examapp.dto.response.AdminStatisticsResponse;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.dto.response.LogResponse;
@@ -149,6 +148,7 @@ public class AdminController {
     }
 
     @GetMapping("/all-exams")
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(
             summary = "Get exams",
             description =
@@ -249,8 +249,7 @@ public class AdminController {
             @RequestParam(required = false) Boolean isActive,
             @RequestParam(required = false) Instant createAtAfter,
             @RequestParam(required = false) Instant createAtBefore) {
-        UserFilterRequest request = new UserFilterRequest(packNames, roles, isActive, createAtAfter, createAtBefore);
-        List<String> emailList = userService.getEmailList(request);
+        List<String> emailList = userService.getEmailList(packNames, roles, isActive, createAtAfter, createAtBefore);
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "E-poçtlar uğurla filtrləndi", emailList));
     }
 }

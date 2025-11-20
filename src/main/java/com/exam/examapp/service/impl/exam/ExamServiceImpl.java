@@ -100,13 +100,13 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional
-    public List<ExamBlockResponse> getAllExams(String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, ExamSort sort, ExamType type, Integer pageNum) {
-        List<Exam> page = getExamsFiltered(
-                null, name, minCost, maxCost, rating, tagIds, pageNum, sort, type);
-
-        return page.stream()
-                .map(examToResponse(userService.getCurrentUserOrNull()))
-                .toList();
+    public ExamAllResponses getAllExams(String name, Integer minCost,
+                                        Integer maxCost, List<Integer> rating,
+                                        List<UUID> tagIds, ExamSort sort,
+                                        ExamType type, int pageNum,
+                                        int pageSize) {
+        return getExamsFilteredForAll(name, minCost,
+                maxCost, rating, tagIds, pageNum, pageSize, sort, type);
     }
 
     @Override
@@ -429,14 +429,55 @@ public class ExamServiceImpl implements ExamService {
                 .and(ExamSpecification.hasTeacher(teacherId))
                 .and(ExamSpecification.isDeletedFalse());
 
+        specification = validateForType(type, specification);
+
+        Sort sortBy = sort(sort);
+
+        pageNum = (pageNum != null && pageNum > 0) ? pageNum - 1 : 0;
+        int pageSize = 10;
+
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sortBy);
+
+        return examRepository.findAll(specification, pageable).toList();
+    }
+
+    @Transactional
+    public ExamAllResponses getExamsFilteredForAll(String name, Integer minCost, Integer maxCost, List<Integer> rating, List<UUID> tagIds, int pageNum, int pageSize, ExamSort sort, ExamType type) {
+        Specification<Exam> specification = Specification.unrestricted();
+        specification = specification.and(ExamSpecification.hasName(name))
+                .and(ExamSpecification.hasCostBetween(minCost, maxCost))
+                .and(ExamSpecification.hasRatingInRange(rating))
+                .and(ExamSpecification.hasTags(tagIds))
+                .and(ExamSpecification.hasTeacher(userService.getUsersByRole(Role.ADMIN).getFirst().getId()))
+                .and(ExamSpecification.isDeletedFalse());
+
+        specification = validateForType(type, specification);
+
+        Sort sortBy = sort(sort);
+
+        pageNum = (pageNum > 0) ? pageNum - 1 : 0;
+
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sortBy);
+        int totalExams = examRepository.findAll(specification).size();
+
+        List<Exam> exams = examRepository.findAll(specification, pageable).toList();
+        List<ExamBlockResponse> examBlockResponses = exams.stream()
+                .map(examToResponse(userService.getCurrentUserOrNull()))
+                .toList();
+        return new ExamAllResponses(examBlockResponses, totalExams);
+    }
+
+    private Specification<Exam> validateForType(ExamType type, Specification<Exam> specification) {
         User currentUser = userService.getCurrentUserOrNull();
         if ((type == ExamType.BOUGHT || type == ExamType.FINISHED) && currentUser == null) {
             throw new UserNotLoginException("User must be logged in to see bought or finished exams");
         }
 
-        specification = specification.and(ExamSpecification.hasType(type, currentUser, studentExamRepository));
+        return specification.and(ExamSpecification.hasType(type, currentUser, studentExamRepository));
+    }
 
-        Sort sortBy = switch (sort) {
+    private Sort sort(ExamSort sort) {
+        return switch (sort) {
             case COST_ASC -> Sort.by("cost").ascending();
             case COST_DESC -> Sort.by("cost").descending();
             case RATING_ASC -> Sort.by("rating").ascending();
@@ -447,13 +488,6 @@ public class ExamServiceImpl implements ExamService {
             case CREATED_DATE_DESC -> Sort.by("createdAt").descending();
             default -> Sort.unsorted();
         };
-
-        pageNum = (pageNum != null && pageNum > 0) ? pageNum - 1 : 0;
-        int pageSize = 10;
-
-        Pageable pageable = PageRequest.of(pageNum, pageSize, sortBy);
-
-        return examRepository.findAll(specification, pageable).toList();
     }
 
     @Transactional

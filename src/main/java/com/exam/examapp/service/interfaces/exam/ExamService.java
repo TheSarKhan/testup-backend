@@ -22,14 +22,15 @@ public interface ExamService {
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds);
 
-    List<ExamBlockResponse> getAllExams(String name,
+    ExamAllResponses getAllExams(String name,
                                         Integer minCost,
                                         Integer maxCost,
                                         List<Integer> rating,
                                         List<UUID> tagIds,
                                         ExamSort sort,
                                         ExamType type,
-                                        Integer pageNum);
+                                        int pageNum,
+                                        int pageSize);
 
     List<ExamBlockResponse> getAllExamsForAdmin(String name,
                                                 Integer minCost,

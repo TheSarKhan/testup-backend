@@ -88,11 +88,12 @@ public class ExamController {
             @RequestParam(required = false) Integer maxCost,
             @RequestParam(required = false) List<Integer> rating,
             @RequestParam(required = false) List<UUID> tagIds,
-            @RequestParam(required = false) Integer pageNum,
+            @RequestParam int pageNum,
+            @RequestParam int pageSize,
             @RequestParam ExamSort sort,
             @RequestParam ExamType type
     ) {
-        List<ExamBlockResponse> myExams = examService.getAllExams(name, minCost, maxCost, rating, tagIds, sort, type, pageNum);
+        List<ExamBlockResponse> myExams = examService.getAllExams(name, minCost, maxCost, rating, tagIds, sort, type, pageNum, pageSize);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "İmtahanlar uğurla əldə edildi", myExams));
     }

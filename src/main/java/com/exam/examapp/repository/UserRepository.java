@@ -2,6 +2,7 @@ package com.exam.examapp.repository;
 
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -18,15 +19,11 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
     Optional<User> findByEmail(String email);
 
-    Optional<User> getUserById(UUID userId);
-
     boolean existsByEmail(String email);
 
     boolean existsByPhoneNumber(String phoneNumber);
 
     List<User> getAllByRole(Role role);
-
-    List<User> getByRole(Role role);
 
     long countByCreatedAtAfter(Instant createdAtAfter);
 
@@ -39,12 +36,12 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     Optional<User> findByPhoneNumber(String phoneNumber);
 
     @Query(value = """
-        SELECT *
-        FROM users
-        WHERE role = 'TEACHER'
-          AND (info->>'thisMonthStartTime')::timestamptz
-                < (NOW() - INTERVAL '30 days')
-        """, nativeQuery = true)
+            SELECT *
+            FROM users
+            WHERE role = 'TEACHER'
+              AND (info->>'thisMonthStartTime')::timestamptz
+                    < (NOW() - INTERVAL '30 days')
+            """, nativeQuery = true)
     List<User> getTeachersByLastMonth();
 
     @Query(value = """
@@ -58,4 +55,10 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
             """, nativeQuery = true)
     List<User> getTeachersByPackExceptDefault(@Param("defaultPackName") String defaultPackName);
 
+    @Query("""
+                SELECT u.email
+                FROM User u
+                WHERE (:#{#spec} IS NULL OR :#{#spec.toPredicate(root, query, builder)} = TRUE)
+            """)
+    List<String> findEmailsBySpecification(Specification<User> spec);
 }

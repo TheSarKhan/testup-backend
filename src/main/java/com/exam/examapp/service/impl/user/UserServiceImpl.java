@@ -1,6 +1,5 @@
 package com.exam.examapp.service.impl.user;
 
-import com.exam.examapp.dto.request.UserFilterRequest;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.exception.custom.UserNotLoginException;
@@ -18,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getByPhoneNumber(String phoneNumber) {
-        return userRepository.findByPhoneNumber(phoneNumber).orElseThrow(()->
+        return userRepository.findByPhoneNumber(phoneNumber).orElseThrow(() ->
                 new ResourceNotFoundException("İstifadəçi tapılmadı: "));
     }
 
@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public TeacherInfo getTeacherInfo() {
         User user = getCurrentUser();
-        if (!Role.TEACHER.equals(user.getRole()))
+        if (Role.STUDENT.equals(user.getRole()) || Role.EMPTY.equals(user.getRole()))
             throw new BadRequestException("Sən müəllim deyilsən");
 
         return user.getInfo();
@@ -99,9 +99,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<String> getEmailList(UserFilterRequest request) {
-        Specification<User> specification = userSpecification.filter(request);
-        return userRepository.findAll(specification).stream().map(User::getEmail).toList();
+    public List<String> getEmailList(List<String> packNames,
+                                     List<Role> roles,
+                                     Boolean isActive,
+                                     Instant createAtAfter,
+                                     Instant createAtBefore) {
+        Specification<User> specification = userSpecification
+                .filter(packNames, roles, isActive, createAtAfter, createAtBefore);
+        return userRepository.findEmailsBySpecification(specification);
     }
 
     @Override

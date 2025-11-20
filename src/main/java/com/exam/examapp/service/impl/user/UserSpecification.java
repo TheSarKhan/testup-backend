@@ -1,6 +1,5 @@
 package com.exam.examapp.service.impl.user;
 
-import com.exam.examapp.dto.request.UserFilterRequest;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.model.Pack;
 import com.exam.examapp.model.User;
@@ -18,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserSpecification {
     private final PackRepository packRepository;
+
     public Specification<User> hasNameOrEmailLike(String searchTerm) {
         return (root, query, cb) -> {
             if (searchTerm == null || searchTerm.trim().isEmpty()) return null;
@@ -29,14 +29,29 @@ public class UserSpecification {
         };
     }
 
-    public Specification<User> filter(UserFilterRequest filter) {
-        Specification<User> specification = Specification.unrestricted();
-        return specification
-                .and(hasPackNames(filter.packNames()))
-                .and(hasRoles(filter.roles()))
-                .and(hasActiveStatus(filter.isActive()))
-                .and(createdAfter(filter.createAtAfter()))
-                .and(createdBefore(filter.createAtBefore()));
+    public Specification<User> filter(List<String> packNames,
+                                      List<Role> roles,
+                                      Boolean isActive,
+                                      Instant createAtAfter,
+                                      Instant createAtBefore) {
+        Specification<User> spec = Specification.unrestricted();
+
+        if (packNames != null && !packNames.isEmpty())
+            spec = spec.and(hasPackNames(packNames));
+
+        if (roles != null && !roles.isEmpty())
+            spec = spec.and(hasRoles(roles));
+
+        if (isActive != null)
+            spec = spec.and(hasActiveStatus(isActive));
+
+        if (createAtAfter != null)
+            spec = spec.and(createdAfter(createAtAfter));
+
+        if (createAtBefore != null)
+            spec = spec.and(createdBefore(createAtBefore));
+
+        return spec;
     }
 
     public Specification<User> hasPackNames(List<String> packNames) {
