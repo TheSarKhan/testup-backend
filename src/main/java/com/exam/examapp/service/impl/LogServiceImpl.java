@@ -45,8 +45,8 @@ public class LogServiceImpl implements LogService {
     public List<LogResponse> getAllByFilter(Role role, List<String> filters, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Specification<Log> specification = Specification.unrestricted();
-        specification.and(hasRole(role));
-        specification.and(hasFilter(filters));
+        specification = specification.and(hasRole(role));
+        specification = specification.and(hasFilter(filters));
 
         log.info("Role :{} Filters :{} Page :{} Size :{}", role, filters, page, size);
         List<Log> logs = logRepository.findAll(specification, pageable).getContent();
