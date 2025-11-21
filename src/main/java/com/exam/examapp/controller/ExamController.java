@@ -80,8 +80,7 @@ public class ExamController {
     @GetMapping("/all")
     @Operation(
             summary = "Get exams",
-            description =
-                    "Retrieve list of exam blocks . Returns summary info used in dashboard.")
+            description = "Retrieve list of exam blocks")
     public ResponseEntity<ApiResponse<ExamAllResponses>> getAllExams(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Integer minCost,
