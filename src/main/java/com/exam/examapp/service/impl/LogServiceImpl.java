@@ -41,7 +41,7 @@ public class LogServiceImpl implements LogService {
 
     @Override
     public List<LogResponse> getAllByFilter(Role role, List<String> filters, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("crateAt").descending());
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Specification<Log> specification = Specification.unrestricted();
         specification.and(hasRole(role));
         specification.and(hasFilter(filters));

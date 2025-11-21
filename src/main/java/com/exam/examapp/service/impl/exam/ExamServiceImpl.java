@@ -449,7 +449,8 @@ public class ExamServiceImpl implements ExamService {
                 .and(ExamSpecification.hasRatingInRange(rating))
                 .and(ExamSpecification.hasTags(tagIds))
                 .and(ExamSpecification.hasTeacher(userService.getUsersByRole(Role.ADMIN).getFirst().getId()))
-                .and(ExamSpecification.isDeletedFalse());
+                .and(ExamSpecification.isDeletedFalse())
+                .and(ExamSpecification.isReadyForSale());
 
         specification = validateForType(type, specification);
 

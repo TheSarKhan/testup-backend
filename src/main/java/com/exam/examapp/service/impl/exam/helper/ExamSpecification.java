@@ -34,6 +34,11 @@ public class ExamSpecification {
                 cb.equal(root.get("isDeleted"), false);
     }
 
+    public static Specification<Exam> isReadyForSale() {
+        return (root, query, cb) ->
+                cb.equal(root.get("isReadyForSale"), true);
+    }
+
     public static Specification<Exam> hasTags(List<UUID> tagIds) {
         return (root, query, criteriaBuilder) -> {
             if (tagIds == null || tagIds.isEmpty()) {
