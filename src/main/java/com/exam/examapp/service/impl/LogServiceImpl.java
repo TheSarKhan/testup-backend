@@ -9,6 +9,7 @@ import com.exam.examapp.repository.LogRepository;
 import com.exam.examapp.service.interfaces.LogService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LogServiceImpl implements LogService {
@@ -46,8 +48,11 @@ public class LogServiceImpl implements LogService {
         specification.and(hasRole(role));
         specification.and(hasFilter(filters));
 
-        return logRepository.findAll(specification, pageable)
-                .stream().map(this::logToResponse).toList();
+        log.info("Role :{} Filters :{} Page :{} Size :{}", role, filters, page, size);
+        List<Log> logs = logRepository.findAll(specification, pageable).getContent();
+        log.info("Logs size :{}", logs.size());
+        log.info("Log :{}", logs.isEmpty() ? "empty" : logs.getFirst());
+        return logs.stream().map(this::logToResponse).toList();
     }
 
     private Specification<Log> hasRole(Role role) {
