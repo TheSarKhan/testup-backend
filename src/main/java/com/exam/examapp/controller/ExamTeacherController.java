@@ -13,10 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -28,14 +25,14 @@ import java.util.UUID;
 public class ExamTeacherController {
     private final ExamTeacherService examTeacherService;
 
-    @GetMapping("/add")
+    @PatchMapping("/add")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Assign teacher to exam",
             description = "Assigns a teacher to an exam. Accessible only by users with ADMIN role."
     )
-    public ResponseEntity<ApiResponse<Void>> addExamTeacher(@RequestParam @Valid AddExamTeacherRequest request) {
+    public ResponseEntity<ApiResponse<Void>> addExamTeacher(@RequestBody @Valid AddExamTeacherRequest request) {
         String response = examTeacherService.addExamTeacher(request);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, response, null));
@@ -54,7 +51,7 @@ public class ExamTeacherController {
                 ApiResponse.build(HttpStatus.OK, "Retrieve exam info", examTeacher));
     }
 
-    @GetMapping("/remove")
+    @PatchMapping("/remove")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(
