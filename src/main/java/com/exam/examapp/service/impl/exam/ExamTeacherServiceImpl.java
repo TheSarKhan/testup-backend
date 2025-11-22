@@ -73,6 +73,11 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
             }
 
             User teacher = userService.getByEmail(emailListEntry.getKey());
+            if (examTeacherRepository.existsByExam_IdAndTeacher_Id(exam.getId(), teacher.getId())){
+                sb.append(emailListEntry.getKey()).append(" E-poçt ilə müəllim hazirda imthanda mövcuddur ").append("\n");
+                continue;
+            }
+
             List<Subject> subjects =
                     emailListEntry.getValue().stream().map(subjectService::getById).toList();
             examTeachers.add(ExamTeacher.builder().exam(exam).teacher(teacher).subject(subjects).build());

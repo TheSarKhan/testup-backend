@@ -16,4 +16,6 @@ public interface ExamTeacherRepository extends JpaRepository<ExamTeacher, UUID> 
     List<ExamTeacher> getByTeacher(User teacher);
 
     List<ExamTeacher> getByExam(Exam exam);
+
+    boolean existsByExam_IdAndTeacher_Id(UUID examId, UUID teacherId);
 }
