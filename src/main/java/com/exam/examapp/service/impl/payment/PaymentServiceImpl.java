@@ -68,25 +68,72 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public String initPayment(PaymentRequest request) {
+    public String initPayment(PaymentRequest paymentRequest) {
         log.info("Ödəniş yaradılır");
         String url = "https://api.payriff.com/api/v2/invoices";
 
         User user = userService.getCurrentUser();
 
-        UUID productId = request.productId();
-        String description = "Admin sınamağa çalışır";
+        UUID productId = paymentRequest.productId();
+        String description = getDescription(user, productId);
 
-        if (Role.TEACHER.equals(user.getRole())) {
-            Pack pack = packService.getPackById(productId);
-            description = pack.getPackName();
-        } else if (Role.STUDENT.equals(user.getRole())) {
-            Exam exam = examService.getById(productId);
-            description = exam.getExamTitle();
+        Body body = fillBody(paymentRequest, description, user, productId);
+
+        PaymentInitRequest request = generateRequest(body);
+        HttpHeaders headers = generateHeader();
+
+        HttpEntity<PaymentInitRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<PaymentInitResponse> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                entity,
+                PaymentInitResponse.class
+        );
+
+        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+            PaymentInitResponse.Payload payload = response.getBody().payload();
+            savePaymentResult(paymentRequest, user, description, payload);
+
+            log(paymentRequest, user, payload);
+            return payload.paymentUrl();
+        } else {
+            throw new RuntimeException("Ödəniş yaratmaq alınmadı: " +
+                    (response.getBody() != null ? response.getBody().message() : "Naməlum xəta"));
         }
+    }
 
+    private void savePaymentResult(PaymentRequest paymentRequest, User user, String description, PaymentInitResponse.Payload payload) {
+        paymentResultRepository.save(PaymentResult.builder()
+                .user(user).amount(paymentRequest.amount())
+                .description(description).productId(paymentRequest.productId())
+                .currency(paymentRequest.currency()).invoiceUuid(payload.invoiceUuid())
+                .uuid(payload.uuid()).build());
+    }
+
+    private void log(PaymentRequest paymentRequest, User user, PaymentInitResponse.Payload payload) {
+        String message = "Ödəniş məlumatı. Email : " + user.getEmail() +
+                " , Məbləğ : " + paymentRequest.amount() + " , Valyuta : " + paymentRequest.currency() +
+                " , Invoice UUID : " + payload.invoiceUuid();
+        log.info(message);
+        logService.save(message, user);
+    }
+
+    private PaymentInitRequest generateRequest(Body body) {
         PaymentInitRequest initRequest = new PaymentInitRequest();
+        initRequest.setBody(body);
+        initRequest.setMerchant(merchant);
+        return initRequest;
+    }
 
+    private HttpHeaders generateHeader() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", secretKey);
+        return headers;
+    }
+
+    private Body fillBody(PaymentRequest request, String description, User user, UUID productId) {
         Body body = new Body();
         body.setAmount(request.amount());
         body.setCurrencyType(request.currency());
@@ -110,37 +157,20 @@ public class PaymentServiceImpl implements PaymentService {
         body.setMetadata(
                 Map.of("UserId", user.getId().toString(), "ProductId", productId.toString())
         );
-        initRequest.setBody(body);
-        initRequest.setMerchant(merchant);
+        return body;
+    }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", secretKey);
+    private String getDescription(User user, UUID productId) {
+        String description = "Admin sınamağa çalışır";
 
-        HttpEntity<PaymentInitRequest> entity = new HttpEntity<>(initRequest, headers);
-
-        ResponseEntity<PaymentInitResponse> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                entity,
-                PaymentInitResponse.class
-        );
-
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            PaymentInitResponse.Payload payload = response.getBody().payload();
-            paymentResultRepository.save(PaymentResult.builder()
-                    .user(user).amount(request.amount())
-                    .description(description).productId(request.productId())
-                    .currency(request.currency()).invoiceUuid(payload.invoiceUuid())
-                    .uuid(payload.uuid()).build());
-
-            log.info("Ödəniş məlumatı. Email : {} , Məbləğ : {} , Valyuta : {} , Invoice UUID : {}",
-                    user.getEmail(), request.amount(), request.currency(), payload.invoiceUuid());
-            return payload.paymentUrl();
-        } else {
-            throw new RuntimeException("Ödəniş yaratmaq alınmadı: " +
-                    (response.getBody() != null ? response.getBody().message() : "Naməlum xəta"));
+        if (Role.TEACHER.equals(user.getRole())) {
+            Pack pack = packService.getPackById(productId);
+            description = pack.getPackName();
+        } else if (Role.STUDENT.equals(user.getRole())) {
+            Exam exam = examService.getById(productId);
+            description = exam.getExamTitle();
         }
+        return description;
     }
 
     @Override
@@ -159,7 +189,7 @@ public class PaymentServiceImpl implements PaymentService {
         paymentResultRepository.save(result);
 
         if (status.equals("APPROVED")) {
-            User user = userService.getCurrentUser();
+            User user = result.getUser();
             UUID productId = result.getProductId();
             if (Role.STUDENT.equals(user.getRole())) {
                 studentExamService.addExam(user.getId(), productId);
@@ -176,7 +206,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-    public PaymentInvoiceResponse getInvoice(String uuid) {
+    private PaymentInvoiceResponse getInvoice(String uuid) {
         String url = "https://api.payriff.com/api/v2/get-invoice";
 
         Map<String, Object> body = new HashMap<>();
@@ -186,15 +216,13 @@ public class PaymentServiceImpl implements PaymentService {
         request.put("merchant", merchant);
         request.put("body", body);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", secretKey);
+        HttpHeaders headers = generateHeader();
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
 
         ResponseEntity<PaymentInvoiceResponse> response = restTemplate.postForEntity(url, entity, PaymentInvoiceResponse.class);
 
-        System.out.println(response.getBody());
+        log.info(String.valueOf(response.getBody()));
         return response.getBody();
     }
 }

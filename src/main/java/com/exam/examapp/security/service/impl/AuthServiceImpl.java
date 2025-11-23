@@ -6,6 +6,8 @@ import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.model.TeacherInfo;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
+import com.exam.examapp.model.question.QuestionStorage;
+import com.exam.examapp.repository.QuestionStorageRepository;
 import com.exam.examapp.security.dto.request.LoginRequest;
 import com.exam.examapp.security.dto.request.RegisterRequest;
 import com.exam.examapp.security.dto.request.ResetPasswordRequest;
@@ -44,6 +46,7 @@ public class AuthServiceImpl implements AuthService {
     private final PackService packService;
     private final PasswordEncoder passwordEncoder;
     private final LogService logService;
+    private final QuestionStorageRepository questionStorageRepository;
 
     @Value("${app.default-pack-name}")
     private String defaultPackName;
@@ -81,7 +84,12 @@ public class AuthServiceImpl implements AuthService {
                                         ? new TeacherInfo(Instant.now(), 0, 0, new HashMap<>())
                                         : null)
                         .build();
+
         User save = userService.save(user);
+
+        if (Role.TEACHER.equals(request.role()))
+            questionStorageRepository.save(QuestionStorage.builder().teacher(save).build());
+
         String message = Role.TEACHER.equals(request.role()) ? "Müəllim " : "Tələbə ";
         message = message.concat("qeydiyyatdan keçdi: ").concat(request.fullName());
         log.info(message);
@@ -222,6 +230,9 @@ public class AuthServiceImpl implements AuthService {
 
         currentUser.setRole(role);
         userService.save(currentUser);
+
+        if (Role.TEACHER.equals(role))
+            questionStorageRepository.save(QuestionStorage.builder().teacher(currentUser).build());
 
         String accessToken = jwtService.generateAccessToken(currentUser.getEmail());
         String refreshToken = jwtService.generateRefreshToken(currentUser.getEmail());

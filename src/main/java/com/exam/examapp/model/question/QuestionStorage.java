@@ -35,6 +35,7 @@ public class QuestionStorage {
     void prePersist() {
         id = UUID.randomUUID();
         createdAt = updatedAt = Instant.now();
+        questions = questions == null ? List.of() : questions;
     }
 
     @PreUpdate

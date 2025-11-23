@@ -1,5 +1,6 @@
 package com.exam.examapp.service.impl;
 
+import com.exam.examapp.dto.request.NotificationRequest;
 import com.exam.examapp.dto.request.StudentFilter;
 import com.exam.examapp.dto.request.TeacherFilter;
 import com.exam.examapp.dto.response.AdminStatisticsResponse;
@@ -10,21 +11,15 @@ import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.mapper.ExamMapper;
 import com.exam.examapp.model.Pack;
 import com.exam.examapp.model.User;
-import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.model.exam.Exam;
-import com.exam.examapp.repository.ExamRepository;
-import com.exam.examapp.repository.PaymentResultRepository;
-import com.exam.examapp.repository.StudentExamRepository;
-import com.exam.examapp.repository.UserRepository;
+import com.exam.examapp.model.question.QuestionStorage;
+import com.exam.examapp.repository.*;
 import com.exam.examapp.service.GraphService;
 import com.exam.examapp.service.impl.exam.helper.ExamSort;
 import com.exam.examapp.service.impl.exam.helper.ExamType;
 import com.exam.examapp.service.impl.user.UserSpecification;
-import com.exam.examapp.service.interfaces.AdminService;
-import com.exam.examapp.service.interfaces.LogService;
-import com.exam.examapp.service.interfaces.PackService;
-import com.exam.examapp.service.interfaces.UserService;
+import com.exam.examapp.service.interfaces.*;
 import com.exam.examapp.service.interfaces.exam.ExamService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -63,21 +58,38 @@ public class AdminServiceImpl implements AdminService {
 
     private final ExamService examService;
 
+    private final NotificationService notificationService;
+
+    private final QuestionStorageRepository questionStorageRepository;
+
     @Override
     public void changeUserRoleViaEmail(String email, Role role) {
         log.info("E-poçt ünvanı {} olan istifadəçinin rolu {} olaraq dəyişdirilir", email, role);
+
         User user = userService.getByEmail(email);
         changeUserRole(user, role);
+
+        createStorageIfNeeded(role, user);
+
         log.info("E-poçt ünvanı {} olan istifadəçinin rolu {} olaraq dəyişdirildi", email, role);
         logService.save("E-poçt ünvanı " + email + " olan istifadəçinin rolu " + role + " olaraq dəyişdirildi",
                 userService.getCurrentUserOrNull());
     }
 
+    private void createStorageIfNeeded(Role role, User user) {
+        if (Role.TEACHER.equals(role) && questionStorageRepository.getByTeacher(user).isEmpty())
+            questionStorageRepository.save(QuestionStorage.builder().teacher(user).build());
+    }
+
     @Override
     public void changeUserRoleViaId(UUID id, Role role) {
         log.info("Id-si {} olan istifadəçinin rolu {} olaraq dəyişdirilir", id, role);
+
         User user = userService.getUserById(id);
         changeUserRole(user, role);
+
+        createStorageIfNeeded(role, user);
+
         log.info("Id-si {} olan istifadəçinin rolu {} olaraq dəyişdirildi", id, role);
         logService.save("Id-si " + id + " olan istifadəçinin rolu " + role + " olaraq dəyişdirildi",
                 userService.getCurrentUserOrNull());
@@ -129,9 +141,11 @@ public class AdminServiceImpl implements AdminService {
         Specification<User> specification = Specification.unrestricted();
         specification = specification.and(userSpecification.hasNameOrEmailLike(search))
                 .and(userSpecification.hasRoles(List.of(Role.TEACHER)));
+
         int totalTeachersCount = userRepository.findAll(specification).size();
         List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
                 .stream().map(this::mapUser).toList();
+
         return Map.of(totalTeachersCount, list);
     }
 
@@ -142,9 +156,11 @@ public class AdminServiceImpl implements AdminService {
         Specification<User> specification = Specification.unrestricted();
         specification = specification.and(userSpecification.hasNameOrEmailLike(search))
                 .and(userSpecification.hasRoles(List.of(Role.STUDENT)));
+
         int totalStudentsCount = userRepository.findAll(specification).size();
         List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
                 .stream().map(this::mapUser).toList();
+
         return Map.of(totalStudentsCount, list);
     }
 
@@ -158,9 +174,11 @@ public class AdminServiceImpl implements AdminService {
                 .and(userSpecification.hasActiveStatus(filter.isActive()))
                 .and(userSpecification.createdAfter(filter.createAtAfter()))
                 .and(userSpecification.createdBefore(filter.createAtBefore()));
+
         int totalTeachersCount = userRepository.findAll(specification).size();
         List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
                 .stream().map(this::mapUser).toList();
+
         return Map.of(totalTeachersCount, list);
     }
 
@@ -173,9 +191,11 @@ public class AdminServiceImpl implements AdminService {
                 .and(userSpecification.hasActiveStatus(filter.isActive()))
                 .and(userSpecification.createdAfter(filter.createAtAfter()))
                 .and(userSpecification.createdBefore(filter.createAtBefore()));
+
         int totalStudentsCount = userRepository.findAll(specification).size();
         List<UsersForAdminResponse> list = userRepository.findAll(specification, pageable)
                 .stream().map(this::mapUser).toList();
+
         return Map.of(totalStudentsCount, list);
     }
 
@@ -194,8 +214,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public List<ExamBlockResponse> getTeacherCooperationExams() {
         return examRepository.getTeacherCooperationExams().stream()
-                .map(exam -> ExamMapper
-                        .toBlockResponse(exam, null, null))
+                .map(ExamMapper::toBlockResponse)
                 .toList();
     }
 
@@ -205,7 +224,8 @@ public class AdminServiceImpl implements AdminService {
         List<Exam> exams = examRepository.getByTeacher(userService.getUserById(id));
         log.info("Admin get Simple Exam by Teacher: {}", exams.size());
         return exams.stream()
-                .map(examService.examToResponse(userService.getCurrentUserOrNull())).toList();
+                .map(examService.examToResponse(userService.getCurrentUserOrNull()))
+                .toList();
     }
 
     @Override
@@ -217,11 +237,11 @@ public class AdminServiceImpl implements AdminService {
 
         List<ExamBlockResponse> exams = studentExamRepository.getByStudent(user)
                 .stream()
-                .filter(studentExam -> !studentExam.getExam().isDeleted())
-                .map(studentExam -> {
-                    ExamStatus status = studentExam.getStatus();
-                    return ExamMapper.toBlockResponse(studentExam.getExam(), status, studentExam.getId());
-                }).toList();
+                .map(studentExam -> ExamMapper.toBlockResponse(
+                        studentExam.getExam(),
+                        studentExam.getStatus(),
+                        studentExam.getId())
+                ).toList();
         log.info("Admin get Simple Exam by Student: {}", exams.size());
         return exams;
     }
@@ -232,7 +252,8 @@ public class AdminServiceImpl implements AdminService {
         user.setActive(false);
         userService.save(user);
         log.info("{} e-poçt ünvanı olan istifadəçi deaktiv edildi", user.getEmail());
-        logService.save(user.getEmail() + " e-poçt ünvanı olan istifadəçi deaktiv edildi", userService.getCurrentUserOrNull());
+        logService.save(user.getEmail() + " e-poçt ünvanı olan istifadəçi deaktiv edildi",
+                userService.getCurrentUserOrNull());
     }
 
     @Override
@@ -241,23 +262,28 @@ public class AdminServiceImpl implements AdminService {
         user.setActive(true);
         userService.save(user);
         log.info("{} e-poçt ünvanı olan istifadəçi aktiv edildi.", user.getEmail());
-        logService.save(user.getEmail() + " e-poçt ünvanı olan istifadəçi aktiv edildi", userService.getCurrentUserOrNull());
+        logService.save(user.getEmail() + " e-poçt ünvanı olan istifadəçi aktiv edildi",
+                userService.getCurrentUserOrNull());
     }
 
     @Override
+    @Transactional
     public void changeTeacherPack(UUID id, UUID packId) {
         log.info("Admin müəllim paketini dəyişdirir");
+
         User user = userService.getUserById(id);
-        if (Role.TEACHER.equals(user.getRole()) || Role.ADMIN.equals(user.getRole())) {
-            Pack pack = packService.getPackById(packId);
-            user.setPack(pack);
-            userService.save(user);
-            String message = "Admin " + user.getEmail() + " e-poçt ünvanı sahibinin paketini dəyişdirdi. Paket adı: " + pack.getPackName();
-            log.info(message);
-            logService.save(message, userService.getCurrentUserOrNull());
-            return;
-        }
-        throw new BadRequestException("Yalnız müəllim və admin paketləri dəyişdirilə bilər.");
+        Pack pack = packService.getPackById(packId);
+        user.setPack(pack);
+        userService.save(user);
+
+        notificationService.sendNotification(new NotificationRequest("Testup Paket yeniliyi",
+                "Admin sizin paketi deyisdi. Paket adi:" + pack.getPackName(),
+                user.getEmail()));
+
+        String message = "Admin " + user.getEmail() + " e-poçt ünvanı sahibinin paketini dəyişdirdi. Paket adı: "
+                + pack.getPackName();
+        log.info(message);
+        logService.save(message, userService.getCurrentUserOrNull());
     }
 
     private void changeUserRole(User user, Role role) {

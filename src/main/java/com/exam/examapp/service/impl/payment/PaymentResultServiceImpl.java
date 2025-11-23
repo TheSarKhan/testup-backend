@@ -42,9 +42,11 @@ public class PaymentResultServiceImpl implements PaymentResultService {
     public void updateResults() {
         log.info("Ödəniş nəticələri yenilənir");
         User user = userService.getCurrentUser();
-        for (PaymentResult paymentResult : paymentResultRepository.getByUserAndLastCreatedAt(user,
-                Instant.now().minusSeconds(7 * 24 * 60 * 60 * 1000)))
+
+        for (PaymentResult paymentResult : paymentResultRepository.getByUserAndLastCreatedAt(
+                user, Instant.now().minusSeconds(7 * 24 * 60 * 60 * 1000)))
             paymentService.updateResults(paymentResult.getInvoiceUuid());
+
         log.info("Ödəniş nəticələri yeniləndi");
     }
 

@@ -1,6 +1,5 @@
 package com.exam.examapp.service.interfaces;
 
-import com.exam.examapp.model.TeacherInfo;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 
@@ -20,8 +19,6 @@ public interface UserService {
     User getUserById(UUID userId);
 
     User getCurrentUserOrNull();
-
-    TeacherInfo getTeacherInfo();
 
     List<User> getUsersByRole(Role role);
 

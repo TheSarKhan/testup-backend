@@ -1,9 +1,7 @@
 package com.exam.examapp.service.impl.user;
 
-import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.exception.custom.UserNotLoginException;
-import com.exam.examapp.model.TeacherInfo;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.repository.UserRepository;
@@ -34,7 +32,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(User user) {
         log.info("İstifadəçi yaradılır: {}", user.getEmail());
+
         User save = userRepository.save(user);
+
         log.info("İstifadəçi yaradıldı: {}", user.getEmail());
         logService.save("İstifadəçi yaradıldı:" + user.getEmail(), getCurrentUserOrNull());
         return save;
@@ -72,15 +72,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public TeacherInfo getTeacherInfo() {
-        User user = getCurrentUser();
-        if (Role.STUDENT.equals(user.getRole()) || Role.EMPTY.equals(user.getRole()))
-            throw new BadRequestException("Sən müəllim deyilsən");
-
-        return user.getInfo();
-    }
-
-    @Override
     public User getCurrentUserOrNull() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -106,6 +97,7 @@ public class UserServiceImpl implements UserService {
                                      Instant createAtBefore) {
         Specification<User> specification = userSpecification
                 .filter(packNames, roles, isActive, createAtAfter, createAtBefore);
+
         return userRepository.findEmailsBySpecification(specification);
     }
 

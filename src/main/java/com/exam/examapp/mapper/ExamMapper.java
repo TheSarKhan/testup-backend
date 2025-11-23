@@ -42,6 +42,28 @@ public class ExamMapper {
                 exam.getUpdatedAt());
     }
 
+    public static ExamBlockResponse toBlockResponse(Exam exam) {
+        Result result = getResult(exam);
+        List<UUID> studentExamIds = exam.getHasUncheckedQuestionStudentExamId();
+        Boolean hasUnchecked = studentExamIds == null ? null : !studentExamIds.isEmpty();
+        return new ExamBlockResponse(
+                exam.getId(),
+                null,
+                exam.getExamTitle(),
+                result.first(),
+                result.otherTags(),
+                exam.getDurationInSeconds(),
+                exam.getCost(),
+                exam.getRating(),
+                exam.isHidden(),
+                exam.getNumberOfQuestions(),
+                hasUnchecked,
+                exam.isReadyForSale(),
+                null,
+                exam.getCreatedAt(),
+                exam.getUpdatedAt());
+    }
+
     public static void update(Exam oldExam, ExamUpdateRequest request) {
         oldExam.setExamTitle(request.examTitle());
         oldExam.setExamDescription(request.examDescription());

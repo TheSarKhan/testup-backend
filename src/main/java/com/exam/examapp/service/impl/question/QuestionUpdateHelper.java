@@ -51,10 +51,11 @@ public class QuestionUpdateHelper {
         Question byId = questionRepository
                 .findById(updateRequest.id())
                 .orElseThrow(() -> new ResourceNotFoundException("Sual tapılmadı"));
+        String oldTitle = byId.getTitle();
         Question question = QuestionMapper.updateRequestTo(byId, updateRequest);
 
         if (updateRequest.isTitlePicture() && (updateRequest.title() == null || updateRequest.title().isEmpty())) {
-            fileService.deleteFile(IMAGE_TITLE_PATH, byId.getTitle());
+            fileService.deleteFile(IMAGE_TITLE_PATH, oldTitle);
             String titleUrl = fileService.uploadFile(IMAGE_TITLE_PATH, titles.getFirst());
             titles.removeFirst();
             question.setTitle(titleUrl);
