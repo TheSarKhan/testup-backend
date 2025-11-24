@@ -30,7 +30,7 @@ public class ExamTeacher {
     @ManyToOne
     User teacher;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     List<Subject> subject;
 
     private Instant createdAt;
