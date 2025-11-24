@@ -120,7 +120,13 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
     private List<ExamStatisticsStudent> getExamStudents(List<StudentExam> studentExams) {
         log.info("Tələbələr hazırlanır");
-        List<ExamStatisticsStudent> list = studentExams.stream().filter(studentExam -> ExamStatus.COMPLETED.equals(studentExam.getStatus()) || ExamStatus.EXPIRED.equals(studentExam.getStatus()) || ExamStatus.WAITING_OPEN_ENDED_QUESTION.equals(studentExam.getStatus())).sorted(Comparator.comparing(StudentExam::getEndTime).reversed()).map(examStudent -> {
+        List<ExamStatisticsStudent> list = studentExams.stream()
+                .filter(studentExam -> ExamStatus.COMPLETED.equals(studentExam.getStatus()) ||
+                        ExamStatus.EXPIRED.equals(studentExam.getStatus()) ||
+                        ExamStatus.WAITING_OPEN_ENDED_QUESTION.equals(studentExam.getStatus()))
+                .sorted(Comparator.comparing(StudentExam::getEndTime, Comparator.reverseOrder())
+                        .reversed())
+                .map(examStudent -> {
             Instant endTime = examStudent.getEndTime();
             long durationInSecond = endTime.getEpochSecond() - examStudent.getStartTime().getEpochSecond();
             Integer examDurationLimit = examStudent.getExam().getDurationInSeconds();
@@ -148,13 +154,20 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
     private List<ExamStatisticsBestStudent> getBestStudents(List<StudentExam> studentExams) {
         log.info("Ən yaxşı tələbələr hazırlanır");
-        List<ExamStatisticsBestStudent> list = studentExams.stream().filter(studentExam -> ExamStatus.COMPLETED.equals(studentExam.getStatus()) || ExamStatus.EXPIRED.equals(studentExam.getStatus()) || ExamStatus.WAITING_OPEN_ENDED_QUESTION.equals(studentExam.getStatus())).sorted(Comparator.comparing(StudentExam::getScore)).limit(5).map(examStudent -> {
-            long durationInSecond = examStudent.getEndTime().getEpochSecond() - examStudent.getStartTime().getEpochSecond();
-            Integer examDurationLimit = examStudent.getExam().getDurationInSeconds();
-            if (examDurationLimit != null)
-                durationInSecond = examDurationLimit < durationInSecond ? examDurationLimit : durationInSecond;
-            return new ExamStatisticsBestStudent(examStudent.getExam().getId(), examStudent.getId(), examStudent.getStudent() == null ? examStudent.getStudentName() : examStudent.getStudent().getFullName(), durationInSecond, examStudent.getScore());
-        }).toList();
+        List<ExamStatisticsBestStudent> list = studentExams.stream()
+                .filter(studentExam ->
+                        ExamStatus.COMPLETED.equals(studentExam.getStatus()) ||
+                                ExamStatus.EXPIRED.equals(studentExam.getStatus()) ||
+                                ExamStatus.WAITING_OPEN_ENDED_QUESTION.equals(studentExam.getStatus()))
+                .sorted(Comparator.comparing(StudentExam::getScore, Comparator.reverseOrder()))
+                .limit(5)
+                .map(examStudent -> {
+                    long durationInSecond = examStudent.getEndTime().getEpochSecond() - examStudent.getStartTime().getEpochSecond();
+                    Integer examDurationLimit = examStudent.getExam().getDurationInSeconds();
+                    if (examDurationLimit != null)
+                        durationInSecond = examDurationLimit < durationInSecond ? examDurationLimit : durationInSecond;
+                    return new ExamStatisticsBestStudent(examStudent.getExam().getId(), examStudent.getId(), examStudent.getStudent() == null ? examStudent.getStudentName() : examStudent.getStudent().getFullName(), durationInSecond, examStudent.getScore());
+                }).toList();
         log.info("Ən yaxşı tələbələr hazırlandı");
         return list;
     }
@@ -169,7 +182,8 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
         Integer participatedStudentCount = exam.getTeacher().getInfo().getExamToStudentCountMap().get(exam.getId());
         if (participatedStudentCount == null) participatedStudentCount = 0;
-        ExamStatistics examStatistics = new ExamStatistics(getExamStatisticsRating(exam), getBestStudents(studentExams), getExamStudents(studentExams), participatedStudentCount, exam.getTeacher().getPack().getStudentPerExam());
+        ExamStatistics examStatistics = new ExamStatistics(getExamStatisticsRating(exam),
+                getBestStudents(studentExams), getExamStudents(studentExams), participatedStudentCount, exam.getTeacher().getPack().getStudentPerExam());
         log.info("İmtahan statistikası: {}", examStatistics);
         return examStatistics;
     }

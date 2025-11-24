@@ -86,6 +86,16 @@ public class StartExamService {
                     first.setStatus(ExamStatus.EXPIRED);
                     first.setEndTime(Instant.now());
                     examResultService.calculateResult(first);
+                    User student = first.getStudent();
+                    List<CurrentExam> currentExams = student.getCurrentExams();
+                    CurrentExam activeExam = currentExams.stream().filter(currentExam ->
+                            currentExam.studentExamId().equals(first.getId())).findFirst().orElse(null);
+
+                    if (activeExam != null){
+                        currentExams.remove(activeExam);
+                        student.setCurrentExams(currentExams);
+                        userService.save(student);
+                    }
                     throw new ExamExpiredException("Imtahanın vaxtı bitib");
                 }
             }

@@ -1,5 +1,6 @@
 package com.exam.examapp.service.impl.exam;
 
+import com.exam.examapp.dto.CurrentExam;
 import com.exam.examapp.dto.request.QuestionUpdateRequestForExam;
 import com.exam.examapp.dto.request.exam.ExamRequest;
 import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
@@ -274,8 +275,23 @@ public class ExamServiceImpl implements ExamService {
         studentExam.setEndTime(Instant.now());
         studentExamRepository.save(studentExam);
 
+        removeExamInCurrentExam(studentExamId, studentExam);
+
         log.info("İmtahan bitirildi");
         return examResultService.getResultStatisticResponse(studentExamId, studentExam);
+    }
+
+    private void removeExamInCurrentExam(UUID studentExamId, StudentExam studentExam) {
+        User student = studentExam.getStudent();
+        List<CurrentExam> currentExams = student.getCurrentExams();
+        CurrentExam activeExam = currentExams.stream().filter(currentExam ->
+                currentExam.studentExamId().equals(studentExamId)).findFirst().orElse(null);
+
+        if (activeExam != null){
+            currentExams.remove(activeExam);
+            student.setCurrentExams(currentExams);
+            userService.save(student);
+        }
     }
 
     @Override
