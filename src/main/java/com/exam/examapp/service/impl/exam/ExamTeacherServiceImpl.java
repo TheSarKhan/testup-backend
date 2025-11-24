@@ -45,7 +45,8 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
         return subjectToQuestionCountMap;
     }
 
-    private static List<TeacherResponse> getTeachers(List<ExamTeacher> teachers) {
+    @Transactional
+    public List<TeacherResponse> getTeachers(List<ExamTeacher> teachers) {
         return teachers.stream()
                 .map(examTeacher -> {
                     User teacher = examTeacher.getTeacher();
