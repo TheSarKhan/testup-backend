@@ -35,12 +35,12 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
 
     private final LogService logService;
 
-    private static Map<Subject, Integer> getSubjectIntegerMap(Exam exam) {
-        Map<Subject, Integer> subjectToQuestionCountMap = new HashMap<>();
+    private static Map<String, Integer> getSubjectIntegerMap(Exam exam) {
+        Map<String, Integer> subjectToQuestionCountMap = new HashMap<>();
         for (SubjectStructureQuestion structureQuestion : exam.getSubjectStructureQuestions()) {
-            Subject subject = structureQuestion.getSubjectStructure().getSubject();
+            String subjectName = structureQuestion.getSubjectStructure().getSubject().getName();
             int size = structureQuestion.getQuestion().size();
-            subjectToQuestionCountMap.put(subject, size);
+            subjectToQuestionCountMap.put(subjectName, size);
         }
         return subjectToQuestionCountMap;
     }
@@ -74,7 +74,7 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
             }
 
             User teacher = userService.getByEmail(emailListEntry.getKey());
-            if (examTeacherRepository.existsByExam_IdAndTeacher_Id(exam.getId(), teacher.getId())){
+            if (examTeacherRepository.existsByExam_IdAndTeacher_Id(exam.getId(), teacher.getId())) {
                 sb.append(emailListEntry.getKey()).append(" E-poçt ilə müəllim hazirda imthanda mövcuddur ").append("\n");
                 continue;
             }
@@ -96,7 +96,7 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
         Exam exam = examService.getById(examId);
         List<ExamTeacher> teachers = examTeacherRepository.getByExam(exam);
         List<TeacherResponse> teacherResponses = getTeachers(teachers);
-        Map<Subject, Integer> subjectToQuestionCountMap = getSubjectIntegerMap(exam);
+        Map<String, Integer> subjectToQuestionCountMap = getSubjectIntegerMap(exam);
         return new ExamTeacherResponse(
                 examId,
                 teacherResponses,
