@@ -35,7 +35,7 @@ import java.util.UUID;
 public class AuthServiceImpl implements AuthService {
     private final String REFRESH_TOKEN_HEADER = "refresh_token_";
 
-    private final String FORGET_PASSWORD_HEADER = "refresh_token_";
+    private final String FORGET_PASSWORD_HEADER = "forget_password_";
 
     private final String ACCESS_RESET_PASSWORD = "access_reset_password_";
 

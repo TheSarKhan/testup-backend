@@ -61,6 +61,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     private Question getQuestion(QuestionRequest request, List<MultipartFile> titles, List<MultipartFile> variantPictures, List<MultipartFile> numberPictures, List<MultipartFile> sounds) {
+        log.info("Sual yaradilmaga baslanilir: " + request.title() + " type: " + request.type());
         Question question = QuestionMapper.requestTo(request);
         log.info("Sual uğurla xəritələndi");
 
@@ -199,7 +200,7 @@ public class QuestionServiceImpl implements QuestionService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
-        return questionUpdateHelper.update(updateRequest, titles,variantPictures, numberPictures, sounds);
+        return questionUpdateHelper.update(updateRequest, titles, variantPictures, numberPictures, sounds);
     }
 
     private Question finishEdit(

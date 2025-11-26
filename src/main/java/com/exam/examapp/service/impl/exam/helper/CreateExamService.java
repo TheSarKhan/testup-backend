@@ -11,7 +11,6 @@ import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.subject.SubjectStructure;
 import com.exam.examapp.model.subject.SubjectStructureQuestion;
 import com.exam.examapp.repository.ExamRepository;
-import com.exam.examapp.service.interfaces.LogService;
 import com.exam.examapp.service.interfaces.TagService;
 import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.question.QuestionService;
@@ -116,6 +115,7 @@ public class CreateExamService {
 
             List<Question> questions = new ArrayList<>();
             for (QuestionRequest questionRequest : req.questionRequests()) {
+                log.info("Sual yaradılır: {}", questionRequest.title());
                 questions.add(questionService.save(questionRequest, titles, variantPictures, numberPictures, sounds));
                 log.info("Sual yaradıldı. Sualın başlığı:{}", questionRequest.title());
             }
