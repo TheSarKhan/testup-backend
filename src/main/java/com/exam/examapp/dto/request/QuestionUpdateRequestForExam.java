@@ -14,7 +14,7 @@ public record QuestionUpdateRequestForExam(
         String title,
         String titleDescription,
         boolean isTitlePicture,
-        boolean isTitleContainMath,
+        String mathTitle,
         @NotNull QuestionType questionType,
         Difficulty difficulty,
         UUID topicId,

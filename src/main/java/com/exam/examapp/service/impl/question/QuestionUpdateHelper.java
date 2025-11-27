@@ -144,11 +144,11 @@ public class QuestionUpdateHelper {
                 new QuestionDetails(
                         variantToContentMap,
                         questionDetails.variantToIsPictureMap(),
-                        questionDetails.variantToHasMathContentMap(),
+                        questionDetails.variantToMathContentMap(),
                         questionDetails.correctVariants(),
                         numberToContentMap,
                         questionDetails.numberToIsPictureMap(),
-                        questionDetails.numberToHasMathContentMap(),
+                        questionDetails.numberToMathContentMap(),
                         questionDetails.numberToCorrectVariantsMap(),
                         questionDetails.isAuto(),
                         questionDetails.listeningTime(),

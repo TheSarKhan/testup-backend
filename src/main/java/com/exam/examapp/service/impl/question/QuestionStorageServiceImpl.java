@@ -34,8 +34,6 @@ import java.util.UUID;
 public class QuestionStorageServiceImpl implements QuestionStorageService {
     private final QuestionStorageRepository questionStorageRepository;
 
-    private final QuestionStorageSpecification questionStorageSpecification;
-
     private final UserService userService;
 
     private final QuestionService questionService;

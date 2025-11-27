@@ -30,11 +30,12 @@ public class Question {
     private String title;
 
     @Column(columnDefinition = "TEXT")
+    private String mathTitle;
+
+    @Column(columnDefinition = "TEXT")
     private String titleDescription;
 
     private boolean isTitlePicture;
-
-    private boolean isTitleContainMath;
 
     @Enumerated(EnumType.STRING)
     private QuestionType type;

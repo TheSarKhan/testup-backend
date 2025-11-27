@@ -12,7 +12,7 @@ public record QuestionRequest(
         String title,
         String titleDescription,
         boolean isTitlePicture,
-        boolean isTitleContainMath,
+        String mathTitle,
         @NotNull QuestionType type,
         Difficulty difficulty,
         UUID topicId,
