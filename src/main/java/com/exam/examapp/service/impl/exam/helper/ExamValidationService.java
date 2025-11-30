@@ -65,13 +65,8 @@ public class ExamValidationService {
 
         List<QuestionRequest> questionRequests =
                 request.subjectStructures().stream()
-                        .map(SubjectStructureQuestionsRequest::questionRequests)
-                        .reduce(
-                                (a, b) -> {
-                                    a.addAll(b);
-                                    return a;
-                                })
-                        .orElseThrow(() -> new BadRequestException("Sual boş ola bilməz"));
+                        .flatMap(ss -> ss.questionRequests().stream())
+                        .toList();
 
         ExamValidationService.validateExam(
                 user,

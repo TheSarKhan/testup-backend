@@ -62,11 +62,9 @@ public class CreateExamService {
 
         User user = userService.getCurrentUser();
 
-        //if (Role.TEACHER.equals(user.getRole())) ExamValidationService.validateRequest(request, user);
+        if (Role.TEACHER.equals(user.getRole())) ExamValidationService.validateRequest(request, user);
 
         log.info("Müəllim yoxlaması keçdi");
-
-        log.info(request.subjectStructures().toString());
 
         List<SubjectStructureQuestion> subjectStructureQuestions =
                 buildSubjectStructureQuestions(
