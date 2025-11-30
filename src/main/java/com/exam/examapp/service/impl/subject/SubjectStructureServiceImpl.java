@@ -59,6 +59,19 @@ public class SubjectStructureServiceImpl implements SubjectStructureService {
     }
 
     @Override
+    public SubjectStructure create(SubjectStructureUpdateRequest request) {
+        return create(new SubjectStructureRequest(
+                request.subjectId(),
+                request.submoduleId(),
+                request.questionCount(),
+                request.questionTypeCountMap(),
+                request.textListeningQuestionToCountMap(),
+                request.questionToPointMap(),
+                request.formula()
+        ));
+    }
+
+    @Override
     public List<SubjectStructure> getAll() {
         return subjectStructureRepository.findByIsActive(true);
     }
@@ -108,7 +121,7 @@ public class SubjectStructureServiceImpl implements SubjectStructureService {
         log.info("Mövzu strukturu yenilənir");
         deactivate(request.id());
 
-        return create(request.request());
+        return create(request);
     }
 
     @Override

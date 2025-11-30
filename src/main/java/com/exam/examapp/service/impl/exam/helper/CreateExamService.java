@@ -114,7 +114,9 @@ public class CreateExamService {
             log.info("Mövzu strukturu yaradılmışdır");
 
             List<Question> questions = new ArrayList<>();
-            for (QuestionRequest questionRequest : req.questionRequests()) {
+            List<QuestionRequest> questionRequests = req.questionRequests();
+            log.info("Movzudaki sual sayi: {}", questionRequests.size());
+            for (QuestionRequest questionRequest : questionRequests) {
                 log.info("Sual yaradılır: {}", questionRequest.title());
                 questions.add(questionService.save(questionRequest, titles, variantPictures, numberPictures, sounds));
                 log.info("Sual yaradıldı. Sualın başlığı:{}", questionRequest.title());

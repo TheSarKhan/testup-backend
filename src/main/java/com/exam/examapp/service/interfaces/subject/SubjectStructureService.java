@@ -3,13 +3,14 @@ package com.exam.examapp.service.interfaces.subject;
 import com.exam.examapp.dto.request.subject.SubjectStructureRequest;
 import com.exam.examapp.dto.request.subject.SubjectStructureUpdateRequest;
 import com.exam.examapp.model.subject.SubjectStructure;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface SubjectStructureService {
     SubjectStructure create(SubjectStructureRequest request);
+
+    SubjectStructure create(SubjectStructureUpdateRequest request);
 
     List<SubjectStructure> getAll();
 

@@ -361,11 +361,11 @@ public class ExamServiceImpl implements ExamService {
             SubjectStructureQuestion subjectStructureQuestion = new SubjectStructureQuestion();
             var subjectStructureUpdateRequest = subjectStructureQuestionsUpdateRequest.subjectStructureUpdateRequest();
             SubjectStructure subjectStructure;
-            if (subjectStructureUpdateRequest.request().submoduleId() != null) {
+            if (subjectStructureUpdateRequest.submoduleId() != null) {
                 subjectStructure = subjectStructureService.getById(subjectStructureUpdateRequest.id());
             } else {
                 subjectStructureService.delete(subjectStructureUpdateRequest.id());
-                subjectStructure = subjectStructureService.create(subjectStructureUpdateRequest.request());
+                subjectStructure = subjectStructureService.create(subjectStructureUpdateRequest);
             }
             subjectStructureQuestion.setSubjectStructure(subjectStructure);
 

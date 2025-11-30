@@ -17,12 +17,11 @@ public class SubjectStructureMapper {
 
     public static SubjectStructure updateRequestTo(SubjectStructure subjectStructure,
                                                    SubjectStructureUpdateRequest request) {
-        SubjectStructureRequest request1 = request.request();
-        subjectStructure.setQuestionCount(request1.questionCount());
-        subjectStructure.setQuestionTypeCountMap(request1.questionTypeCountMap());
-        subjectStructure.setQuestionToPointMap(request1.questionToPointMap());
-        subjectStructure.setTextListeningQuestionToCountMap(request1.textListeningQuestionToCountMap());
-        subjectStructure.setFormula(request1.formula());
+        subjectStructure.setQuestionCount(request.questionCount());
+        subjectStructure.setQuestionTypeCountMap(request.questionTypeCountMap());
+        subjectStructure.setQuestionToPointMap(request.questionToPointMap());
+        subjectStructure.setTextListeningQuestionToCountMap(request.textListeningQuestionToCountMap());
+        subjectStructure.setFormula(request.formula());
         return subjectStructure;
     }
 }

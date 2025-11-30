@@ -89,8 +89,7 @@ public class ExamValidationService {
         Integer questionCountTotal =
                 request.subjectStructures().stream()
                         .map(SubjectStructureQuestionsUpdateRequest::subjectStructureUpdateRequest)
-                        .map(SubjectStructureUpdateRequest::request)
-                        .map(SubjectStructureRequest::questionCount)
+                        .map(SubjectStructureUpdateRequest::questionCount)
                         .reduce(Integer::sum)
                         .orElse(0);
 
