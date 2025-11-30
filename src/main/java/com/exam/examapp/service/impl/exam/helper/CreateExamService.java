@@ -66,6 +66,8 @@ public class CreateExamService {
 
         log.info("Müəllim yoxlaması keçdi");
 
+        log.info(request.subjectStructures().toString());
+
         List<SubjectStructureQuestion> subjectStructureQuestions =
                 buildSubjectStructureQuestions(
                         request.subjectStructures(), titles, variantPictures, numberPictures, sounds);
