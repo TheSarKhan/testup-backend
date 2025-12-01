@@ -252,4 +252,11 @@ public class AdminController {
         List<String> emailList = userService.getEmailList(packNames, roles, isActive, createAtAfter, createAtBefore);
         return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK, "E-poçtlar uğurla filtrləndi", emailList));
     }
+
+    @DeleteMapping("/hard-delete-exam")
+    @Operation(summary = "Hard delete exam", description = "Allows an **ADMIN** to delete an exam by id.")
+    public ResponseEntity<ApiResponse<Void>> hardDeleteExam(@RequestParam UUID id) {
+        adminService.hardDeleteExam(id);
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.NO_CONTENT, "Exam deleted", null));
+    }
 }

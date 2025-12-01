@@ -1,4 +1,4 @@
-package com.exam.examapp.service.impl;
+package com.exam.examapp.service.impl.admin;
 
 import com.exam.examapp.dto.request.NotificationRequest;
 import com.exam.examapp.dto.request.StudentFilter;
@@ -284,6 +284,14 @@ public class AdminServiceImpl implements AdminService {
                 + pack.getPackName();
         log.info(message);
         logService.save(message, userService.getCurrentUserOrNull());
+    }
+
+    @Override
+    public void hardDeleteExam(UUID id) {
+        log.info("Admin imtahani tamaile silir: {}", id);
+        examRepository.hardDeleteExam(id);
+        log.info("Admin imtahani tamaile sildi: {}", id);
+        logService.save("Admin imtahani tamaile sildi: " + id, userService.getCurrentUserOrNull());
     }
 
     private void changeUserRole(User user, Role role) {

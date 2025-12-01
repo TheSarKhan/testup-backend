@@ -2,8 +2,10 @@ package com.exam.examapp.repository;
 
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.exam.Exam;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -31,4 +33,31 @@ public interface ExamRepository extends JpaRepository<Exam, UUID>, JpaSpecificat
             on ex = ext.exam
             """)
     List<Exam> getTeacherCooperationExams();
+
+    @Modifying
+    @Transactional
+    @Query(value = """ 
+    DELETE FROM students_exams WHERE exam_id = :examId;
+    DELETE FROM exam_teachers WHERE exam_id = :examId;
+    DELETE FROM exams_tags WHERE exam_id = :examId;
+    DELETE FROM exams_subject_structure_questions WHERE exam_id = :examId;
+
+    DELETE FROM subject_structure_questions_question
+    WHERE subject_structure_question_id IN (
+            SELECT ssq.id FROM subject_structures_questions ssq
+                    JOIN exams_subject_structure_questions esq
+                    ON esq.subject_structure_questions_id = ssq.id
+                    WHERE esq.exam_id = :examId
+    );
+
+    DELETE FROM subject_structures_questions
+    WHERE id IN (
+            SELECT subject_structure_questions_id
+          FROM exams_subject_structure_questions
+                  WHERE exam_id = :examId
+    );
+
+    DELETE FROM exams WHERE id = :examId;
+    """, nativeQuery = true)
+    void hardDeleteExam(UUID examId);
 }

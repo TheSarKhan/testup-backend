@@ -49,4 +49,6 @@ public interface AdminService {
     void activateUser(UUID id);
 
     void changeTeacherPack(UUID id, UUID packId);
+
+    void hardDeleteExam(UUID id);
 }
