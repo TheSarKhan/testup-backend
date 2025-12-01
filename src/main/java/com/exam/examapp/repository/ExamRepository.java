@@ -10,14 +10,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface ExamRepository extends JpaRepository<Exam, UUID>, JpaSpecificationExecutor<Exam> {
-    long countBySubjectStructureQuestions_IdIn(List<UUID> questionIds);
-
     List<Exam> getByTeacher(User teacher);
 
     @Query("from Exam order by createdAt desc ")
@@ -60,4 +59,6 @@ public interface ExamRepository extends JpaRepository<Exam, UUID>, JpaSpecificat
     DELETE FROM exams WHERE id = :examId;
     """, nativeQuery = true)
     void hardDeleteExam(UUID examId);
+
+    List<Exam> getByTeacherOrderByCreatedAtDesc(User teacher);
 }

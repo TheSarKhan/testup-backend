@@ -43,10 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 @Slf4j
@@ -136,15 +133,17 @@ public class ExamServiceImpl implements ExamService {
 
     private List<ExamBlockResponse> getExamBlockResponses(User user) {
         if (Role.TEACHER.equals(user.getRole()) || Role.ADMIN.equals(user.getRole())) {
-            return examRepository.getByTeacher(user)
+            return examRepository.getByTeacherOrderByCreatedAtDesc(user)
                     .stream().filter(exam -> !exam.isDeleted())
                     .map(exam -> ExamMapper.toBlockResponse(exam, null, null))
                     .toList();
         } else {
-            return studentExamRepository.getByStudent(user).stream().filter(studentExam -> !studentExam.getExam().isDeleted()).map(studentExam -> {
-                ExamStatus status = studentExam.getStatus();
-                return ExamMapper.toBlockResponse(studentExam.getExam(), status, studentExam.getId());
-            }).toList();
+            return studentExamRepository.getByStudent(user).stream()
+                    .filter(studentExam -> !studentExam.getExam().isDeleted())
+                    .map(studentExam -> {
+                        ExamStatus status = studentExam.getStatus();
+                        return ExamMapper.toBlockResponse(studentExam.getExam(), status, studentExam.getId());
+                    }).sorted(Comparator.comparing(ExamBlockResponse::createAt).reversed()).toList();
         }
     }
 
@@ -152,7 +151,7 @@ public class ExamServiceImpl implements ExamService {
     @Transactional
     public List<ExamBlockResponse> getAdminCooperationExams() {
         User user = userService.getCurrentUser();
-        return examTeacherRepository.getByTeacher(user)
+        return examTeacherRepository.getByTeacherOrderByCreatedAtDesc(user)
                 .stream().filter(examTeacher -> !examTeacher.getExam().isDeleted())
                 .map(examTeacher -> ExamMapper.toBlockResponse(examTeacher.getExam(), null, null))
                 .toList();
@@ -287,7 +286,7 @@ public class ExamServiceImpl implements ExamService {
         CurrentExam activeExam = currentExams.stream().filter(currentExam ->
                 currentExam.studentExamId().equals(studentExamId)).findFirst().orElse(null);
 
-        if (activeExam != null){
+        if (activeExam != null) {
             currentExams.remove(activeExam);
             student.setCurrentExams(currentExams);
             userService.save(student);

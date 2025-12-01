@@ -13,6 +13,6 @@ import java.util.UUID;
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
     List<Notification> getNotificationsByUser(User user);
 
-    @Query("from Notification where user = :user order by createdAt")
+    @Query("from Notification where user = :user order by createdAt desc")
     List<Notification> getAllNotificationsSortedByCreatedAt(User user);
 }
