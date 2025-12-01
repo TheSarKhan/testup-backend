@@ -1,16 +1,19 @@
 package com.exam.examapp.mapper;
 
+import com.exam.examapp.dto.QuestionDetails;
 import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
+import com.exam.examapp.dto.response.QuestionDetailsResponseWithoutAnswer;
+import com.exam.examapp.dto.response.QuestionResponseWithoutAnswer;
 import com.exam.examapp.dto.response.UserResponseForExam;
-import com.exam.examapp.dto.response.exam.ExamBlockResponse;
-import com.exam.examapp.dto.response.exam.ExamDetailedResponse;
-import com.exam.examapp.dto.response.exam.ExamResponse;
-import com.exam.examapp.dto.response.exam.ExamStartLinkResponse;
+import com.exam.examapp.dto.response.exam.*;
+import com.exam.examapp.dto.response.subject.SubjectStructureQuestionResponseWithoutAnswer;
 import com.exam.examapp.model.Tag;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.exam.Exam;
+import com.exam.examapp.model.question.Question;
 import com.exam.examapp.model.subject.Subject;
+import com.exam.examapp.model.subject.SubjectStructureQuestion;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
@@ -147,6 +150,80 @@ public class ExamMapper {
                 exam.isDeleted(),
                 exam.getCreatedAt(),
                 exam.getUpdatedAt());
+    }
+
+    @Transactional
+    public ExamResponseWithoutAnswer toResponseWithoutAnswer(Exam exam) {
+        Result result = getResult(exam);
+        User user = exam.getTeacher();
+        UserResponseForExam teacher =
+                new UserResponseForExam(
+                        user.getId(), user.getEmail(), user.getProfilePictureUrl(), user.getRole());
+        List<SubjectStructureQuestion> subjectStructureQuestions = exam.getSubjectStructureQuestions();
+        var withoutAnswers = subjectStructureQuestions.stream()
+                .map(this::subjectStructureRemoveAnswer).toList();
+        return new ExamResponseWithoutAnswer(
+                exam.getId(),
+                exam.getExamTitle(),
+                result.first,
+                exam.getTags(),
+                exam.getDurationInSeconds(),
+                exam.getCost(),
+                exam.getRating(),
+                teacher,
+                withoutAnswers,
+                exam.getExamDescription(),
+                !(exam.getHasUncheckedQuestionStudentExamId() == null ||
+                        exam.getHasUncheckedQuestionStudentExamId().isEmpty()),
+                exam.getExplanationVideoUrl(),
+                exam.getNumberOfQuestions(),
+                exam.isReadyForSale(),
+                exam.isHidden(),
+                exam.isDeleted(),
+                exam.getCreatedAt(),
+                exam.getUpdatedAt());
+    }
+
+    private SubjectStructureQuestionResponseWithoutAnswer subjectStructureRemoveAnswer(SubjectStructureQuestion subjectStructureQuestion) {
+        return new SubjectStructureQuestionResponseWithoutAnswer(
+                subjectStructureQuestion.getId(),
+                subjectStructureQuestion.getSubjectStructure(),
+                subjectStructureQuestion.getQuestion().stream().map(this::questionRemoveAnswer).toList(),
+                subjectStructureQuestion.getCreatedAt(),
+                subjectStructureQuestion.getUpdatedAt()
+        );
+    }
+
+    private QuestionResponseWithoutAnswer questionRemoveAnswer(Question question) {
+        return new QuestionResponseWithoutAnswer(
+                question.getId(),
+                question.getTitle(),
+                question.getTitleDescription(),
+                question.isTitlePicture(),
+                question.isTitleContainMath(),
+                question.getType(),
+                question.getDifficulty(),
+                question.getTopic(),
+                question.getSoundUrl(),
+                question.getQuestionCount(),
+                question.getQuestions().stream().map(this::questionRemoveAnswer).toList(),
+                detailsRemoveAnswer(question.getQuestionDetails()),
+                question.getCreatedAt(),
+                question.getUpdatedAt()
+        );
+    }
+
+    private QuestionDetailsResponseWithoutAnswer detailsRemoveAnswer(QuestionDetails details) {
+        return new QuestionDetailsResponseWithoutAnswer(
+                details.variantToContentMap(),
+                details.variantToIsPictureMap(),
+                details.variantToHasMathContentMap(),
+                details.numberToContentMap(),
+                details.numberToIsPictureMap(),
+                details.numberToHasMathContentMap(),
+                details.isAuto(),
+                details.listeningTime()
+        );
     }
 
     private record Result(Tag first, List<Tag> otherTags) {

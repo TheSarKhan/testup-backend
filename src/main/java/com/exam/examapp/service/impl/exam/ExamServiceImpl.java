@@ -235,7 +235,7 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional
-    public StartExamResponse startExamViaCode(String studentName, String examCode) {
+    public StartExamResponseWithoutAnswer startExamViaCode(String studentName, String examCode) {
         log.info("Kod vasitəsilə imtahan başlayır: {}", examCode);
         if (examCode == null || examCode.length() != 8)
             throw new BadRequestException("İmtahan Kodunun uzunluğu 8 olmalıdır. İmtahan Kodu: " + examCode);
@@ -244,19 +244,19 @@ public class ExamServiceImpl implements ExamService {
         cacheService.deleteContent(EXAM_CODE_PREFIX, examCode.substring(1));
         Exam exam = getById(UUID.fromString(examId));
         if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
-        StartExamResponse result = startExamService.startExam(studentName, exam);
+        StartExamResponseWithoutAnswer result = startExamService.startExam(studentName, exam);
         printStartExam(exam);
         logService.save("İmtahan başladı. İmtahan: " + exam.getExamTitle(), userService.getCurrentUserOrNull());
-        return getResponse(result);
+        return result;
     }
 
     @Override
     @Transactional
-    public StartExamResponse startExamViaId(String studentName, UUID id) {
+    public StartExamResponseWithoutAnswer startExamViaId(String studentName, UUID id) {
         log.info("Id vasitəsilə imtahan başlayır : {}", id);
         Exam exam = examRepository.getExamByStartId(id).orElseThrow(() -> new ResourceNotFoundException("İmtahan tapılmadı"));
         if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
-        StartExamResponse result = startExamService.startExam(studentName, exam);
+        StartExamResponseWithoutAnswer result = startExamService.startExam(studentName, exam);
         printStartExam(exam);
         logService.save("İmtahan başladı. İmtahan: " + exam.getExamTitle(), userService.getCurrentUserOrNull());
         return result;
@@ -505,11 +505,6 @@ public class ExamServiceImpl implements ExamService {
             case CREATED_DATE_DESC -> Sort.by("createdAt").descending();
             default -> Sort.unsorted();
         };
-    }
-
-    @Transactional
-    public StartExamResponse getResponse(StartExamResponse response) {
-        return new StartExamResponse(response.studentExamId(), response.status(), response.questionIdToAnswerMap(), response.listeningIdToPlayTimeMap(), response.startTime(), examMapper.toResponse(getById(response.exam().id())));
     }
 
     @Override

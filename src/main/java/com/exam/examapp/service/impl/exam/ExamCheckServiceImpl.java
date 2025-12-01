@@ -127,13 +127,13 @@ public class ExamCheckServiceImpl implements ExamCheckService {
                 .sorted(Comparator.comparing(StudentExam::getEndTime, Comparator.reverseOrder())
                         .reversed())
                 .map(examStudent -> {
-            Instant endTime = examStudent.getEndTime();
-            long durationInSecond = endTime.getEpochSecond() - examStudent.getStartTime().getEpochSecond();
-            Integer examDurationLimit = examStudent.getExam().getDurationInSeconds();
-            if (examDurationLimit != null)
-                durationInSecond = examDurationLimit < durationInSecond ? examDurationLimit : durationInSecond;
-            return new ExamStatisticsStudent(examStudent.getExam().getId(), examStudent.getId(), examStudent.getStudent() == null ? examStudent.getStudentName() : examStudent.getStudent().getFullName(), durationInSecond, examStudent.getScore(), examStudent.getNumberOfQuestions(), examStudent.getNumberOfCorrectAnswers(), examStudent.getNumberOfNotCheckedYetQuestions() > 0);
-        }).toList();
+                    Instant endTime = examStudent.getEndTime();
+                    long durationInSecond = endTime.getEpochSecond() - examStudent.getStartTime().getEpochSecond();
+                    Integer examDurationLimit = examStudent.getExam().getDurationInSeconds();
+                    if (examDurationLimit != null)
+                        durationInSecond = examDurationLimit < durationInSecond ? examDurationLimit : durationInSecond;
+                    return new ExamStatisticsStudent(examStudent.getExam().getId(), examStudent.getId(), examStudent.getStudent() == null ? examStudent.getStudentName() : examStudent.getStudent().getFullName(), durationInSecond, examStudent.getScore(), examStudent.getNumberOfQuestions(), examStudent.getNumberOfCorrectAnswers(), examStudent.getNumberOfNotCheckedYetQuestions() > 0);
+                }).toList();
         log.info("Tələbələr hazırlandı");
         return list;
     }
@@ -194,7 +194,13 @@ public class ExamCheckServiceImpl implements ExamCheckService {
         log.info("İmtahan götürülür tələbə imtahan id-si: {}", studentExamId);
         StudentExam studentExam = getStudentExam(studentExamId);
 
-        return new StartExamResponse(studentExamId, studentExam.getStatus(), studentExam.getQuestionIdToAnswerMap(), studentExam.getListeningIdToPlayTimeMap(), studentExam.getStartTime(), examMapper.toResponse(studentExam.getExam()));
+        return new StartExamResponse(
+                studentExamId,
+                studentExam.getStatus(),
+                studentExam.getQuestionIdToAnswerMap(),
+                studentExam.getListeningIdToPlayTimeMap(),
+                studentExam.getStartTime(),
+                examMapper.toResponse(studentExam.getExam()));
     }
 
     @Override

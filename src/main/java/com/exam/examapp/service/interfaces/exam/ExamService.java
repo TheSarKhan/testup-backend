@@ -63,9 +63,9 @@ public interface ExamService {
 
     String getExamLink(UUID id);
 
-    StartExamResponse startExamViaCode(String studentName, String examCode);
+    StartExamResponseWithoutAnswer startExamViaCode(String studentName, String examCode);
 
-    StartExamResponse startExamViaId(String studentName, UUID id);
+    StartExamResponseWithoutAnswer startExamViaId(String studentName, UUID id);
 
     ResultStatisticResponse finishExam(UUID studentExamId);
 

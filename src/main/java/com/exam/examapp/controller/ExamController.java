@@ -184,9 +184,9 @@ public class ExamController {
             summary = "Start exam via code",
             description =
                     "Start/join an exam by providing access code (for students). Returns studentExamId and exam payload.")
-    public ResponseEntity<ApiResponse<StartExamResponse>> startExam(@RequestParam(required = false) String studentName,
+    public ResponseEntity<ApiResponse<StartExamResponseWithoutAnswer>> startExam(@RequestParam(required = false) String studentName,
                                                                     @RequestParam String code) {
-        StartExamResponse startExamResponse = examService.startExamViaCode(studentName, code);
+        StartExamResponseWithoutAnswer startExamResponse = examService.startExamViaCode(studentName, code);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "İmtahan uğurla başladı", startExamResponse));
     }
@@ -197,9 +197,9 @@ public class ExamController {
             summary = "Start exam by UUID",
             description =
                     "Start an exam by providing its UUID (teacher/admin or system-start). Useful for scheduled or manual starts.")
-    public ResponseEntity<ApiResponse<StartExamResponse>> startExam(@RequestParam(required = false) String studentName,
+    public ResponseEntity<ApiResponse<StartExamResponseWithoutAnswer>> startExam(@RequestParam(required = false) String studentName,
                                                                     @RequestParam UUID id) {
-        StartExamResponse startExamResponse = examService.startExamViaId(studentName, id);
+        StartExamResponseWithoutAnswer startExamResponse = examService.startExamViaId(studentName, id);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "İmtahan uğurla başladı", startExamResponse));
     }

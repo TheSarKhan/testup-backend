@@ -1,7 +1,7 @@
 package com.exam.examapp.service.impl.exam.helper;
 
 import com.exam.examapp.dto.CurrentExam;
-import com.exam.examapp.dto.response.exam.StartExamResponse;
+import com.exam.examapp.dto.response.exam.StartExamResponseWithoutAnswer;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ExamExpiredException;
 import com.exam.examapp.exception.custom.ReachedLimitException;
@@ -37,7 +37,7 @@ public class StartExamService {
     private final ExamMapper examMapper;
 
     @Transactional
-    public StartExamResponse startExam(String studentName, Exam exam) {
+    public StartExamResponseWithoutAnswer startExam(String studentName, Exam exam) {
         log.info("İmtahan id ilə başlayır: {}", exam.getId());
         User user = userService.getCurrentUserOrNull();
         User examCreator = exam.getTeacher();
@@ -64,23 +64,23 @@ public class StartExamService {
 
             if (first.getExam().getDurationInSeconds() == null) {
                 log.info("Hazırki imtahan başladılır. Vaxt limitsizdir.");
-                return new StartExamResponse(
+                return new StartExamResponseWithoutAnswer(
                         first.getId(),
                         ExamStatus.STARTED,
                         first.getQuestionIdToAnswerMap(),
                         first.getListeningIdToPlayTimeMap(),
                         first.getStartTime(),
-                        examMapper.toResponse(exam));
+                        examMapper.toResponseWithoutAnswer(exam));
             } else {
                 if (first.getStartTime().plusSeconds(first.getExam().getDurationInSeconds()).isBefore(Instant.now())) {
                     log.info("Hazırki imtahan başladılır");
-                    return new StartExamResponse(
+                    return new StartExamResponseWithoutAnswer(
                             first.getId(),
                             first.getStatus(),
                             first.getQuestionIdToAnswerMap(),
                             first.getListeningIdToPlayTimeMap(),
                             first.getStartTime(),
-                            examMapper.toResponse(exam));
+                            examMapper.toResponseWithoutAnswer(exam));
                 } else {
                     log.info("Imtahanın vaxtı bitib");
                     first.setStatus(ExamStatus.EXPIRED);
@@ -91,7 +91,7 @@ public class StartExamService {
                     CurrentExam activeExam = currentExams.stream().filter(currentExam ->
                             currentExam.studentExamId().equals(first.getId())).findFirst().orElse(null);
 
-                    if (activeExam != null){
+                    if (activeExam != null) {
                         currentExams.remove(activeExam);
                         student.setCurrentExams(currentExams);
                         userService.save(student);
@@ -114,19 +114,19 @@ public class StartExamService {
                     exam.getId()));
             userService.save(user);
 
-            return new StartExamResponse(
+            return new StartExamResponseWithoutAnswer(
                     studentExam.getId(),
                     ExamStatus.STARTED,
                     Map.of(),
                     Map.of(),
                     Instant.now(),
-                    examMapper.toResponse(exam));
+                    examMapper.toResponseWithoutAnswer(exam));
         } else {
             return createStudentExamEntry(exam, user);
         }
     }
 
-    private StartExamResponse startExamWithoutLogin(String studentName, UUID id, User examCreator, Exam exam) {
+    private StartExamResponseWithoutAnswer startExamWithoutLogin(String studentName, UUID id, User examCreator, Exam exam) {
         log.info("Girişsiz imtahan başlayır. StudentName: {}", studentName);
         updateExamStudentCount(id, examCreator);
 
@@ -144,13 +144,13 @@ public class StartExamService {
                                 .exam(exam)
                                 .build());
 
-        return new StartExamResponse(
+        return new StartExamResponseWithoutAnswer(
                 save.getId(),
                 ExamStatus.STARTED,
                 Map.of(),
                 Map.of(),
                 Instant.now(),
-                examMapper.toResponse(exam));
+                examMapper.toResponseWithoutAnswer(exam));
     }
 
     private void updateExamStudentCount(UUID id, User examCreator) {
@@ -171,7 +171,7 @@ public class StartExamService {
         log.info("Tələbələrin iştirak sayını yenilədi");
     }
 
-    private StartExamResponse createStudentExamEntry(Exam exam, User user) {
+    private StartExamResponseWithoutAnswer createStudentExamEntry(Exam exam, User user) {
         log.info("Tələbə imtahanı hazırlanır");
         StudentExam save =
                 studentExamRepository.save(
@@ -194,12 +194,12 @@ public class StartExamService {
         userService.save(user);
 
         log.info("tələbə imtahanı hazırlandı");
-        return new StartExamResponse(
+        return new StartExamResponseWithoutAnswer(
                 save.getId(),
                 ExamStatus.STARTED,
                 Map.of(),
                 Map.of(),
                 Instant.now(),
-                examMapper.toResponse(exam));
+                examMapper.toResponseWithoutAnswer(exam));
     }
 }
