@@ -17,7 +17,7 @@ public record ExamRequest(
     List<UUID> otherTagIds,
     @Min(30) @Schema(defaultValue = "300") Integer durationInSeconds,
     @Schema(description = "Cost for only admin if other teacher create please give null.")
-        BigDecimal cost,
+    BigDecimal cost,
     boolean isHidden,
     boolean hasSound,
     boolean hasPicture,

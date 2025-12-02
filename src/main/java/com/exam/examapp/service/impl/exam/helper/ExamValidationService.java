@@ -125,7 +125,7 @@ public class ExamValidationService {
                 questionRequests.stream()
                         .filter(
                                 questionRequest ->
-                                        QuestionType.OPEN_ENDED.equals(questionRequest.questionType())
+                                        QuestionType.OPEN_ENDED.equals(questionRequest.type())
                                                 && (questionRequest.questionDetails().isAuto() != null
                                                 && !questionRequest.questionDetails().isAuto()))
                         .findFirst();

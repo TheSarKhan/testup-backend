@@ -26,7 +26,7 @@ public class QuestionMapper {
                 request.titleDescription(),
                 request.isTitlePicture(),
                 request.isTitleContainMath(),
-                request.questionType(),
+                request.type(),
                 request.difficulty(),
                 request.topicId(),
                 request.questionCount(),
