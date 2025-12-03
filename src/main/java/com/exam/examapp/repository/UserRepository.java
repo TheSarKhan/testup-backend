@@ -58,7 +58,7 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     @Query("""
     SELECT u.email
     FROM User u
-    JOIN u.pack p
+    LEFT JOIN u.pack p
     WHERE (:roles IS NULL OR u.role IN (:roles))
         AND (:packNames IS NULL OR p.packName IN (:packNames))
         AND (:isActive IS NULL OR u.isActive = :isActive)
