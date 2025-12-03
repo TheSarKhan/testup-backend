@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
         Specification<User> specification = userSpecification
                 .filter(packNames, roles, isActive, createAtAfter, createAtBefore);
 
-        return userRepository.findEmailsBySpecification(specification);
+        return userRepository.findAllEmails(specification);
     }
 
     @Override

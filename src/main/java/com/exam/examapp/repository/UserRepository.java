@@ -55,6 +55,5 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
             """, nativeQuery = true)
     List<User> getTeachersByPackExceptDefault(@Param("defaultPackName") String defaultPackName);
 
-    @Query("select u.email from User u")
-    List<String> findEmailsBySpecification(Specification<User> spec);
+    List<String> findAllEmails(Specification<User> spec);
 }
