@@ -29,31 +29,6 @@ public class UserSpecification {
         };
     }
 
-    public Specification<User> filter(List<String> packNames,
-                                      List<Role> roles,
-                                      Boolean isActive,
-                                      Instant createAtAfter,
-                                      Instant createAtBefore) {
-        Specification<User> spec = Specification.unrestricted();
-
-        if (packNames != null && !packNames.isEmpty())
-            spec = spec.and(hasPackNames(packNames));
-
-        if (roles != null && !roles.isEmpty())
-            spec = spec.and(hasRoles(roles));
-
-        if (isActive != null)
-            spec = spec.and(hasActiveStatus(isActive));
-
-        if (createAtAfter != null)
-            spec = spec.and(createdAfter(createAtAfter));
-
-        if (createAtBefore != null)
-            spec = spec.and(createdBefore(createAtBefore));
-
-        return spec;
-    }
-
     public Specification<User> hasPackNames(List<String> packNames) {
         return (root, query, cb) -> {
             if (packNames == null || packNames.isEmpty()) return null;

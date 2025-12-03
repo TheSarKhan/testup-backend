@@ -95,10 +95,14 @@ public class UserServiceImpl implements UserService {
                                      Boolean isActive,
                                      Instant createAtAfter,
                                      Instant createAtBefore) {
-        Specification<User> specification = userSpecification
-                .filter(packNames, roles, isActive, createAtAfter, createAtBefore);
+        return userRepository.findAllEmails(
+                packNames == null || packNames.isEmpty() ? null : packNames,
+                roles == null || roles.isEmpty() ? null : roles,
+                isActive,
+                createAtAfter,
+                createAtBefore
+        );
 
-        return userRepository.findAllEmails(specification);
     }
 
     @Override
