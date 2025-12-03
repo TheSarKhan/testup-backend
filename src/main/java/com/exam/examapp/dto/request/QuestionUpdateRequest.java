@@ -21,6 +21,7 @@ public record QuestionUpdateRequest(
         int questionCount,
         List<QuestionUpdateRequest> questions,
         String soundUrl,
-        @NotNull QuestionDetails questionDetails
+        @NotNull QuestionDetails questionDetails,
+        UUID questionDbId
 ) {
 }

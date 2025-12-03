@@ -22,6 +22,7 @@ public record QuestionUpdateRequestForExam(
         String soundUrl,
         List<QuestionUpdateRequest> questions,
         @NotNull QuestionDetails questionDetails,
-        boolean hasChange
+        boolean hasChange,
+        UUID questionDbId
 ) {
 }

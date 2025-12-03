@@ -18,5 +18,6 @@ public record QuestionRequest(
         UUID topicId,
         int questionCount,
         List<QuestionRequest> questions,
-        @NotNull QuestionDetails questionDetails) {
+        @NotNull QuestionDetails questionDetails,
+        UUID questionDbId) {
 }

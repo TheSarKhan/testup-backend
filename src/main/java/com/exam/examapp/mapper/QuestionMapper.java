@@ -32,7 +32,8 @@ public class QuestionMapper {
                 request.questionCount(),
                 request.questions(),
                 request.soundUrl(),
-                request.questionDetails()
+                request.questionDetails(),
+                request.questionDbId()
         );
     }
 
