@@ -55,16 +55,16 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
             """, nativeQuery = true)
     List<User> getTeachersByPackExceptDefault(@Param("defaultPackName") String defaultPackName);
 
-    @Query(value = """
+    @Query("""
     SELECT u.email
-    FROM users u
-    JOIN packs p ON p.id = u.pack_id
+    FROM User u
+    JOIN u.pack p
     WHERE (:roles IS NULL OR u.role IN (:roles))
-        AND (:packNames IS NULL OR p.pack_name IN (:packNames))
-        AND (:isActive IS NULL OR u.is_active = :isActive)
-        AND (:createAtAfter IS NULL OR u.created_at >= :createAtAfter)
-        AND (:createAtBefore IS NULL OR u.created_at <= :createAtBefore)
-    """, nativeQuery = true)
+        AND (:packNames IS NULL OR p.packName IN (:packNames))
+        AND (:isActive IS NULL OR u.isActive = :isActive)
+        AND (COALESCE(:createAtAfter, null) IS NULL OR u.createdAt >= :createAtAfter)
+        AND (COALESCE(:createAtBefore, null) IS NULL OR u.createdAt <= :createAtBefore)
+    """)
     List<String> findAllEmails(
             @Param("packNames") List<String> packNames,
             @Param("roles") List<Role> roles,
