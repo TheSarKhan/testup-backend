@@ -61,7 +61,7 @@ server:
 
 jwt:
   access-token-expire-time: ${ONE_MINUTE}
-  refresh-token-expire-time: ${TWO_MINUTE}
+  refresh-token-expire-time: ${ONE_DAY}
   secretKey: ${JWT_SECRET_KEY}
 
 app:
