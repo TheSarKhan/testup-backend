@@ -3,6 +3,8 @@ package com.exam.examapp.init;
 import com.exam.examapp.model.TeacherInfo;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
+import com.exam.examapp.model.question.QuestionStorage;
+import com.exam.examapp.repository.QuestionStorageRepository;
 import com.exam.examapp.service.interfaces.PackService;
 import com.exam.examapp.service.interfaces.UserService;
 import jakarta.annotation.PostConstruct;
@@ -20,6 +22,8 @@ import java.util.HashMap;
 @RequiredArgsConstructor
 public class UserInitializer {
     private final UserService userService;
+
+    private final QuestionStorageRepository questionStorageRepository;
 
     private final PackService packService;
 
@@ -50,6 +54,8 @@ public class UserInitializer {
                     .info(new TeacherInfo(Instant.now(), 0, 0, new HashMap<>()))
                     .isAcceptedTerms(true)
                     .build();
+
+            questionStorageRepository.save(QuestionStorage.builder().teacher(admin).build());
 
             admin = userService.save(admin);
 
