@@ -257,23 +257,25 @@ public class QuestionServiceImpl implements QuestionService {
     private void deleteQuestionPictures(Question byId) {
         log.info("Sual şəkilləri silinir");
         QuestionDetails questionDetails = byId.getQuestionDetails();
-        for (Map.Entry<Character, Boolean> characterBooleanEntry :
-                questionDetails.variantToIsPictureMap().entrySet()) {
-            if (characterBooleanEntry.getValue()) {
-                String imageUrl = questionDetails.variantToContentMap().get(characterBooleanEntry.getKey());
-                fileService.deleteFile(IMAGE_VARIANT_PATH, imageUrl);
+        if (questionDetails.variantToIsPictureMap() != null)
+            for (Map.Entry<Character, Boolean> characterBooleanEntry :
+                    questionDetails.variantToIsPictureMap().entrySet()) {
+                if (characterBooleanEntry.getValue()) {
+                    String imageUrl = questionDetails.variantToContentMap().get(characterBooleanEntry.getKey());
+                    fileService.deleteFile(IMAGE_VARIANT_PATH, imageUrl);
+                }
             }
-        }
 
-        if (byId.getSoundUrl() != null) fileService.deleteFile(IMAGE_NUMBER_PATH, byId.getSoundUrl());
+        if (byId.getSoundUrl() != null) fileService.deleteFile(SOUND_PATH, byId.getSoundUrl());
 
-        for (Map.Entry<Character, Boolean> characterBooleanEntry :
-                questionDetails.numberToIsPictureMap().entrySet()) {
-            if (characterBooleanEntry.getValue()) {
-                String imageUrl = questionDetails.numberToContentMap().get(characterBooleanEntry.getKey());
-                fileService.deleteFile(IMAGE_NUMBER_PATH, imageUrl);
+        if (questionDetails.numberToIsPictureMap() != null)
+            for (Map.Entry<Character, Boolean> characterBooleanEntry :
+                    questionDetails.numberToIsPictureMap().entrySet()) {
+                if (characterBooleanEntry.getValue()) {
+                    String imageUrl = questionDetails.numberToContentMap().get(characterBooleanEntry.getKey());
+                    fileService.deleteFile(IMAGE_NUMBER_PATH, imageUrl);
+                }
             }
-        }
 
         log.info("Sual şəkilləri silindi");
     }
