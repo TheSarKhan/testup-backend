@@ -131,21 +131,18 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public TokenResponse refresh(String refreshToken) {
         log.info("Token yenilənir:{}", refreshToken);
-        String email = jwtService.extractEmail(refreshToken);
+        String email = cacheService.getContent(REFRESH_TOKEN_HEADER, refreshToken);
+
         if (email == null)
-            throw new InvalidCredentialsException("Email yanlışdır");
-
-        String content = cacheService.getContent(REFRESH_TOKEN_HEADER, email);
-
-        if (content == null)
             throw new InvalidCredentialsException("Kontent mövcud deyil");
 
-        cacheService.deleteContent(REFRESH_TOKEN_HEADER, email);
+        User user = userService.getByEmail(email);
+
+        cacheService.deleteContent(REFRESH_TOKEN_HEADER, refreshToken);
 
         String accessToken = jwtService.generateAccessToken(email);
         String newRefreshToken = jwtService.generateRefreshToken(email);
 
-        User user = userService.getByEmail(email);
         log.info("Token yeniləndi:{}", email);
         return new TokenResponse(accessToken, newRefreshToken, user.getRole(), user.getPack());
     }

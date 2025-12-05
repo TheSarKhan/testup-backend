@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -29,23 +30,19 @@ public class JwtService {
     @Value("${jwt.secretKey}")
     private String secretKey;
 
-    public String generateAccessToken(String username) {
-        return generateToken(username, accessTokenExpireTime);
-    }
-
-    public String generateRefreshToken(String username) {
-        String refreshToken = generateToken(username, refreshTokenExpireTime);
-        cacheService.saveContent("refresh_token_", username, refreshToken, refreshTokenExpireTime);
-        return refreshToken;
-    }
-
-    private String generateToken(String username, Long expireTime) {
+    public String generateAccessToken(String email) {
         return Jwts.builder().
-                subject(username).
+                subject(email).
                 issuedAt(new Date(System.currentTimeMillis())).
-                expiration(new Date(System.currentTimeMillis() + expireTime)).
+                expiration(new Date(System.currentTimeMillis() + accessTokenExpireTime)).
                 signWith(getSecretKey(secretKey)).
                 compact();
+    }
+
+    public String generateRefreshToken(String email) {
+        String refreshToken = UUID.randomUUID().toString();
+        cacheService.saveContent("refresh_token_", refreshToken, email, refreshTokenExpireTime);
+        return refreshToken;
     }
 
     private SecretKey getSecretKey(String secretKey) {
