@@ -11,12 +11,12 @@ import java.util.UUID;
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, UUID>, JpaSpecificationExecutor<Question> {
     @Query("""
-            select 1
-            from Exam e
-                left join e.subjectStructureQuestions ssq
-                left join ssq.question q
-                left join q.questions qq
-            where q.id = :id or qq.id = :id
-            """)
+    select (count(e) > 0)
+    from Exam e
+        join e.subjectStructureQuestions ssq
+        join ssq.question q
+        left join q.questions qq
+    where q.id = :id or qq.id = :id
+    """)
     boolean existsInExam(UUID id);
 }
