@@ -3,6 +3,7 @@ package com.exam.examapp.service.impl.question;
 import com.exam.examapp.dto.QuestionDetails;
 import com.exam.examapp.dto.request.QuestionRequest;
 import com.exam.examapp.dto.request.QuestionUpdateRequest;
+import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.mapper.QuestionMapper;
 import com.exam.examapp.model.enums.Difficulty;
@@ -242,7 +243,12 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public void delete(UUID id) {
         log.info("Sual silinir");
+
+        if (questionRepository.existsInExam(id))
+            throw new BadRequestException("Bu sual hansisa imtahanda istifade olunur.");
+
         Question byId = getQuestionById(id);
+
         if (byId.isTitlePicture()) fileService.deleteFile(IMAGE_TITLE_PATH, byId.getTitle());
 
         for (Question question : byId.getQuestions()) delete(question.getId());
