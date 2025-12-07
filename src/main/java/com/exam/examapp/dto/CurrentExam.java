@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public record CurrentExam(
         Instant startTime,
-        long durationInSeconds,
+        Integer durationInSeconds,
         UUID studentExamId,
         UUID startId,
         UUID examId
