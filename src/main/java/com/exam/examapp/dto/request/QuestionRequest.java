@@ -18,6 +18,7 @@ public record QuestionRequest(
         UUID topicId,
         int questionCount,
         List<QuestionRequest> questions,
+        String soundUrl,
         @NotNull QuestionDetails questionDetails,
         UUID questionDbId) {
 }

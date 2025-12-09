@@ -58,13 +58,13 @@ public class QuestionServiceImpl implements QuestionService {
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
         log.info("Sual yaradılır");
+        if (request.questionDbId() != null)
+            return update(QuestionMapper.requestToUpdateRequest(request), titles, variantPictures, numberPictures, sounds);
         return getQuestion(request, titles, variantPictures, numberPictures, sounds);
     }
 
     private Question getQuestion(QuestionRequest request, List<MultipartFile> titles, List<MultipartFile> variantPictures, List<MultipartFile> numberPictures, List<MultipartFile> sounds) {
         log.info("Sual yaradilmaga baslanilir: {} type: {}", request.title(), request.type());
-        if (request.questionDbId() != null)
-            return getQuestionById(request.questionDbId());
 
         Question question = QuestionMapper.requestTo(request);
         log.info("Sual uğurla xəritələndi");
@@ -204,8 +204,6 @@ public class QuestionServiceImpl implements QuestionService {
             List<MultipartFile> variantPictures,
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
-        if (updateRequest.questionDbId() != null)
-            return getQuestionById(updateRequest.questionDbId());
         return questionUpdateHelper.update(updateRequest, titles, variantPictures, numberPictures, sounds);
     }
 

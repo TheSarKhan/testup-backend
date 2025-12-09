@@ -47,4 +47,23 @@ public class QuestionMapper {
         question.setQuestionCount(request.questionCount());
         return question;
     }
+
+    public static QuestionUpdateRequest requestToUpdateRequest(QuestionRequest request) {
+        return new QuestionUpdateRequest(
+                null,
+                request.title(),
+                request.titleDescription(),
+                request.isTitlePicture(),
+                request.isTitleContainMath(),
+                request.type(),
+                request.difficulty(),
+                request.topicId(),
+                request.questionCount(),
+                request.questions().stream()
+                        .map(QuestionMapper::requestToUpdateRequest).toList(),
+                request.soundUrl(),
+                request.questionDetails(),
+                request.questionDbId()
+        );
+    }
 }

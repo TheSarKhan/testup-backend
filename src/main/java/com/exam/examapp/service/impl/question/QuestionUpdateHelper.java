@@ -48,9 +48,18 @@ public class QuestionUpdateHelper {
             List<MultipartFile> numberPictures,
             List<MultipartFile> sounds) {
         log.info("Sual yenilənir");
-        Question byId = questionRepository
-                .findById(updateRequest.id())
-                .orElseThrow(() -> new ResourceNotFoundException("Sual tapılmadı"));
+        Question byId;
+        if (updateRequest.questionDbId() != null) {
+            log.info("storagde suali update edilir.");
+            byId = questionRepository.findById(updateRequest.questionDbId()).orElseThrow(() ->
+                    new ResourceNotFoundException("Sual storege de tapilmadi"));
+            byId.setId(UUID.randomUUID());
+        } else
+            byId = questionRepository
+                    .findById(updateRequest.id())
+                    .orElseThrow(() -> new ResourceNotFoundException("Sual tapılmadı"));
+
+
         String oldTitle = byId.getTitle();
         Question question = QuestionMapper.updateRequestTo(byId, updateRequest);
 
