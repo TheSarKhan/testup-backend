@@ -274,7 +274,8 @@ public class ExamServiceImpl implements ExamService {
         studentExam.setEndTime(Instant.now());
         studentExamRepository.save(studentExam);
 
-        removeExamInCurrentExam(studentExamId, studentExam);
+        if (studentExam.getStudent() != null)
+            removeExamInCurrentExam(studentExamId, studentExam);
 
         log.info("İmtahan bitirildi");
         return examResultService.getResultStatisticResponse(studentExamId, studentExam);
