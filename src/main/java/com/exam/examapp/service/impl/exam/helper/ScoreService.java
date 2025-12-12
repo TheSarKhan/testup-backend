@@ -37,9 +37,10 @@ public class ScoreService {
                                                    Map<UUID, AnswerStatus> answerStatusMap) {
         log.info("Bal əsasında hesablanır");
         Map<Integer, Integer> questionToPointMap = subjectStructureQuestion.getSubjectStructure().getQuestionToPointMap();
-        List<Question> questions = new ArrayList<>(subjectStructureQuestion.getQuestion());
+        List<Question> original = subjectStructureQuestion.getQuestion();
+        List<Question> questions = new ArrayList<>(original);
 
-        for (Question question : questions) {
+        for (Question question : original) {
             List<Question> questionList = question.getQuestions();
             if (questionList != null && !questionList.isEmpty()){
                 log.info("Questions shifted: {}", questionList.size());
@@ -50,6 +51,8 @@ public class ScoreService {
                 }
             }
         }
+
+        log.info("Questions shifted");
 
         double score = 0;
         for (Map.Entry<Integer, Integer> entry : questionToPointMap.entrySet()) {
