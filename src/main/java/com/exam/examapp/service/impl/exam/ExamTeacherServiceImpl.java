@@ -105,10 +105,10 @@ public class ExamTeacherServiceImpl implements ExamTeacherService {
     }
 
     @Override
+    @Transactional
     public void removeExamTeacher(UUID examId, UUID teacherId) {
         log.info("Müəllim imtahandan kənarlaşdırılır");
-        examTeacherRepository.deleteByTeacherAndExam(
-                userService.getUserById(teacherId), examService.getById(examId));
+        examTeacherRepository.deleteExamTeacherByExam_IdAndTeacher_Id(examId, teacherId);
         log.info("Müəllim imtahandan kənarlaşdırıldı. Id:{}", teacherId);
         logService.save("Müəllim imtahandan kənarlaşdırıldı. Id:" + teacherId, userService.getCurrentUserOrNull());
     }

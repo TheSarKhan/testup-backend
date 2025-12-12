@@ -12,11 +12,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ExamTeacherRepository extends JpaRepository<ExamTeacher, UUID> {
-    void deleteByTeacherAndExam(User teacher, Exam exam);
-
     List<ExamTeacher> getByExam(Exam exam);
 
     boolean existsByExam_IdAndTeacher_Id(UUID examId, UUID teacherId);
 
     List<ExamTeacher> getByTeacherOrderByCreatedAtDesc(User teacher);
+
+    void deleteExamTeacherByExam_IdAndTeacher_Id(UUID examId, UUID teacherId);
 }
