@@ -7,6 +7,7 @@ import com.exam.examapp.model.subject.SubjectStructureQuestion;
 import lombok.extern.slf4j.Slf4j;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -36,7 +37,19 @@ public class ScoreService {
                                                    Map<UUID, AnswerStatus> answerStatusMap) {
         log.info("Bal əsasında hesablanır");
         Map<Integer, Integer> questionToPointMap = subjectStructureQuestion.getSubjectStructure().getQuestionToPointMap();
-        List<Question> questions = subjectStructureQuestion.getQuestion();
+        List<Question> questions = new ArrayList<>(subjectStructureQuestion.getQuestion());
+
+        for (Question question : questions) {
+            List<Question> questionList = question.getQuestions();
+            if (questionList != null && !questionList.isEmpty()){
+                log.info("Questions shifted: {}", questionList.size());
+                int index = questions.indexOf(question);
+                questions.remove(index);
+                for (int i = 0; i < questionList.size(); i++) {
+                    questions.add(index + i, questionList.get(i));
+                }
+            }
+        }
 
         double score = 0;
         for (Map.Entry<Integer, Integer> entry : questionToPointMap.entrySet()) {
