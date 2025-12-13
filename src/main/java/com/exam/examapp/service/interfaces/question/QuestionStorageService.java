@@ -2,6 +2,7 @@ package com.exam.examapp.service.interfaces.question;
 
 import com.exam.examapp.dto.request.QuestionRequest;
 import com.exam.examapp.dto.request.QuestionUpdateRequest;
+import com.exam.examapp.dto.response.subject.QuestionResponse;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Difficulty;
 import com.exam.examapp.model.enums.QuestionType;
@@ -18,21 +19,21 @@ public interface QuestionStorageService {
                              List<MultipartFile> numberPictures,
                              List<MultipartFile> sounds);
 
-  List<Question> getAllQuestionsFromMyStorage();
+  List<QuestionResponse> getAllQuestionsFromMyStorage();
 
-  List<Question> getQuestionsFromMyStorage(
+  List<QuestionResponse> getQuestionsFromMyStorage(
       QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions);
 
-  List<Question> getQuestionsFromMyStorage(UUID subjectId);
+  List<QuestionResponse> getQuestionsFromMyStorage(UUID subjectId);
 
-  List<Question> getAllQuestionsFromAdminStorage();
+  List<QuestionResponse> getAllQuestionsFromAdminStorage();
 
-  List<Question> getQuestionFromAdminStorage(
+  List<QuestionResponse> getQuestionFromAdminStorage(
       QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions);
 
   List<User> getTeachersHasQuestionStorage();
 
-  List<Question> getQuestionsByTeacherId(UUID teacherId);
+  List<QuestionResponse> getQuestionsByTeacherId(UUID teacherId);
 
   void updateQuestionInStorage(QuestionUpdateRequest request,
                                 List<MultipartFile> titles,

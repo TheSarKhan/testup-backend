@@ -50,20 +50,23 @@ public class AnswerService {
         for (SubjectStructureQuestion subjectStructureQuestion : subjectStructureQuestions) {
             for (Question question : subjectStructureQuestion.getQuestion()) {
                 if (questionIdToAnswerMap.containsKey(question.getId())) {
-                    if (QuestionType.TEXT_BASED.equals(question.getType()) || QuestionType.LISTENING.equals(question.getType())) {
+                    if ((QuestionType.TEXT_BASED.equals(question.getType()) ||
+                            QuestionType.LISTENING.equals(question.getType()) &&
+                                    (question.getQuestions() == null || question.getQuestions().isEmpty()))) {
                         checkListeningOrText(question,
                                 questionIdToAnswerMap.get(question.getId()),
                                 answerStatusMap,
                                 correctAndWrongCounts);
+                    }else {
+                        AnswerChecker checker = factory.getChecker(question.getType());
+                        checker.check(
+                                question,
+                                question.getQuestionDetails(),
+                                questionIdToAnswerMap.get(question.getId()),
+                                answerStatusMap,
+                                correctAndWrongCounts
+                        );
                     }
-                    AnswerChecker checker = factory.getChecker(question.getType());
-                    checker.check(
-                            question,
-                            question.getQuestionDetails(),
-                            questionIdToAnswerMap.get(question.getId()),
-                            answerStatusMap,
-                            correctAndWrongCounts
-                    );
                 } else {
                     answerStatusMap.put(question.getId(), AnswerStatus.NOT_ANSWERED);
                 }
@@ -131,9 +134,6 @@ public class AnswerService {
     }
 
     public void checkListeningOrText(Question question, String answer, Map<UUID, AnswerStatus> answerStatusMap, List<Integer> counts) {
-        if (question.getQuestions() == null) {
-            return;
-        }
         for (Question questionQuestion : question.getQuestions()) {
             QuestionDetails questionDetails = questionQuestion.getQuestionDetails();
             AnswerChecker answerChecker = factory.getChecker(questionQuestion.getType());

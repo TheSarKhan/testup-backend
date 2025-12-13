@@ -3,8 +3,10 @@ package com.exam.examapp.service.impl.question;
 import com.exam.examapp.dto.QuestionDetails;
 import com.exam.examapp.dto.request.QuestionRequest;
 import com.exam.examapp.dto.request.QuestionUpdateRequest;
+import com.exam.examapp.dto.response.subject.QuestionResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
+import com.exam.examapp.mapper.ExamMapper;
 import com.exam.examapp.mapper.QuestionMapper;
 import com.exam.examapp.model.enums.Difficulty;
 import com.exam.examapp.model.enums.QuestionType;
@@ -38,6 +40,8 @@ public class QuestionServiceImpl implements QuestionService {
     private static final String SOUND_PATH = "uploads/sounds";
 
     private final QuestionRepository questionRepository;
+
+    private final ExamMapper examMapper;
 
     private final TopicService topicService;
 
@@ -191,10 +195,20 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    public List<QuestionResponse> getFilteredQuestionResponses(Difficulty difficulty, QuestionType questionType, UUID topicId) {
+        return getFilteredQuestions(difficulty, questionType, topicId).stream().map(examMapper::questionToResponse).toList();
+    }
+
+    @Override
     public Question getQuestionById(UUID id) {
         return questionRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Sual tapılmadı"));
+    }
+
+    @Override
+    public QuestionResponse getQuestionResponseById(UUID id) {
+        return examMapper.questionToResponse(getQuestionById(id));
     }
 
     @Override

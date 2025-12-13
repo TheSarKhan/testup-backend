@@ -2,6 +2,7 @@ package com.exam.examapp.service.interfaces.question;
 
 import com.exam.examapp.dto.request.QuestionRequest;
 import com.exam.examapp.dto.request.QuestionUpdateRequest;
+import com.exam.examapp.dto.response.subject.QuestionResponse;
 import com.exam.examapp.model.enums.Difficulty;
 import com.exam.examapp.model.enums.QuestionType;
 import com.exam.examapp.model.question.Question;
@@ -21,7 +22,13 @@ public interface QuestionService {
                                         QuestionType questionType,
                                         UUID topicId);
 
+    List<QuestionResponse> getFilteredQuestionResponses(Difficulty difficulty,
+                                        QuestionType questionType,
+                                        UUID topicId);
+
     Question getQuestionById(UUID id);
+
+    QuestionResponse getQuestionResponseById(UUID id);
 
     Question update(QuestionUpdateRequest request,
                     List<MultipartFile> titles,

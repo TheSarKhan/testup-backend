@@ -3,10 +3,10 @@ package com.exam.examapp.controller;
 import com.exam.examapp.dto.request.QuestionRequest;
 import com.exam.examapp.dto.request.QuestionUpdateRequest;
 import com.exam.examapp.dto.response.ApiResponse;
+import com.exam.examapp.dto.response.subject.QuestionResponse;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Difficulty;
 import com.exam.examapp.model.enums.QuestionType;
-import com.exam.examapp.model.question.Question;
 import com.exam.examapp.service.interfaces.question.QuestionStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -57,8 +57,8 @@ public class QuestionStorageController {
     @Operation(
             summary = "Get My Storage",
             description = "Retrieve all questions from the personal storage of the logged-in user")
-    public ResponseEntity<ApiResponse<List<Question>>> getMyStorage() {
-        List<Question> questions = questionStorageService.getAllQuestionsFromMyStorage();
+    public ResponseEntity<ApiResponse<List<QuestionResponse>>> getMyStorage() {
+        List<QuestionResponse> questions = questionStorageService.getAllQuestionsFromMyStorage();
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "Suallar uğurla əldə edildi", questions));
     }
@@ -70,12 +70,12 @@ public class QuestionStorageController {
             summary = "Get My Filtered Storage",
             description =
                     "Retrieve filtered questions from personal storage by type, difficulty, topic, and number of questions")
-    public ResponseEntity<ApiResponse<List<Question>>> getMyFilteredStorage(
+    public ResponseEntity<ApiResponse<List<QuestionResponse>>> getMyFilteredStorage(
             @RequestParam(required = false) QuestionType type,
             @RequestParam(required = false) Difficulty difficulty,
             @RequestParam(required = false) UUID topicId,
             @RequestParam(required = false) int numberOfQuestions) {
-        List<Question> questions =
+        List<QuestionResponse> questions =
                 questionStorageService.getQuestionsFromMyStorage(
                         type, difficulty, topicId, numberOfQuestions);
         return ResponseEntity.ok(
@@ -89,9 +89,9 @@ public class QuestionStorageController {
             summary = "Get My Question Storage By Subject",
             description =
                     "Retrieve questions from personal storage by subject")
-    public ResponseEntity<ApiResponse<List<Question>>> getMyStorageBySubject(
+    public ResponseEntity<ApiResponse<List<QuestionResponse>>> getMyStorageBySubject(
             @RequestParam UUID subjectId) {
-        List<Question> questions =
+        List<QuestionResponse> questions =
                 questionStorageService.getQuestionsFromMyStorage(subjectId);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "Suallar uğurla əldə edildi", questions));
@@ -103,8 +103,8 @@ public class QuestionStorageController {
     @Operation(
             summary = "Get Admin Storage",
             description = "Retrieve all questions from the global admin storage")
-    public ResponseEntity<ApiResponse<List<Question>>> getAdminStorage() {
-        List<Question> questions = questionStorageService.getAllQuestionsFromAdminStorage();
+    public ResponseEntity<ApiResponse<List<QuestionResponse>>> getAdminStorage() {
+        List<QuestionResponse> questions = questionStorageService.getAllQuestionsFromAdminStorage();
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "Suallar uğurla əldə edildi", questions));
     }
@@ -116,12 +116,12 @@ public class QuestionStorageController {
             summary = "Get Admin Filtered Storage",
             description =
                     "Retrieve filtered questions from admin storage by type, difficulty, topic, and number of questions")
-    public ResponseEntity<ApiResponse<List<Question>>> getAdminFilteredStorage(
+    public ResponseEntity<ApiResponse<List<QuestionResponse>>> getAdminFilteredStorage(
             @RequestParam(required = false) QuestionType type,
             @RequestParam(required = false) Difficulty difficulty,
             @RequestParam(required = false) UUID topicId,
             @RequestParam(required = false) int numberOfQuestions) {
-        List<Question> questions =
+        List<QuestionResponse> questions =
                 questionStorageService.getQuestionFromAdminStorage(
                         type, difficulty, topicId, numberOfQuestions);
         return ResponseEntity.ok(
@@ -148,8 +148,8 @@ public class QuestionStorageController {
             summary = "Get questions by teacher",
             description = "Retrieves all questions created by the specified teacher. Accessible only by ADMIN."
     )
-    public ResponseEntity<ApiResponse<List<Question>>> getQuestionByTeacher(@RequestParam UUID teacherId) {
-        List<Question> response = questionStorageService.getQuestionsByTeacherId(teacherId);
+    public ResponseEntity<ApiResponse<List<QuestionResponse>>> getQuestionByTeacher(@RequestParam UUID teacherId) {
+        List<QuestionResponse> response = questionStorageService.getQuestionsByTeacherId(teacherId);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "Suallar uğurla əldə edildi", response));
     }

@@ -55,9 +55,9 @@ public class UserInitializer {
                     .isAcceptedTerms(true)
                     .build();
 
-            questionStorageRepository.save(QuestionStorage.builder().teacher(admin).build());
-
             admin = userService.save(admin);
+
+            questionStorageRepository.save(QuestionStorage.builder().teacher(admin).build());
 
             log.info("Admin created :{}", admin);
         }

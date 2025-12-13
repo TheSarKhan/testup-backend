@@ -26,9 +26,6 @@ public class ExamResultService {
 
     private final ExamMapper examMapper;
 
-    @Value("${app.base-url}")
-    private String baseUrl;
-
     @Value("${app.front-base-url}")
     private String frontBaseUrl;
 

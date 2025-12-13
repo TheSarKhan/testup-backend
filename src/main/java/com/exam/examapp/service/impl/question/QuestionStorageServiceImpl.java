@@ -2,9 +2,11 @@ package com.exam.examapp.service.impl.question;
 
 import com.exam.examapp.dto.request.QuestionRequest;
 import com.exam.examapp.dto.request.QuestionUpdateRequest;
+import com.exam.examapp.dto.response.subject.QuestionResponse;
 import com.exam.examapp.exception.custom.BadRequestException;
 import com.exam.examapp.exception.custom.DoesNotHavePermissionException;
 import com.exam.examapp.exception.custom.ResourceNotFoundException;
+import com.exam.examapp.mapper.ExamMapper;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Difficulty;
 import com.exam.examapp.model.enums.QuestionType;
@@ -34,7 +36,7 @@ import java.util.UUID;
 public class QuestionStorageServiceImpl implements QuestionStorageService {
     private final QuestionStorageRepository questionStorageRepository;
 
-    private final QuestionStorageSpecification questionStorageSpecification;
+    private final ExamMapper examMapper;
 
     private final UserService userService;
 
@@ -78,58 +80,64 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
 
     @Override
     @Transactional
-    public List<Question> getAllQuestionsFromMyStorage() {
+    public List<QuestionResponse> getAllQuestionsFromMyStorage() {
         User user = userService.getCurrentUser();
         if (!user.getPack().isCanUseQuestionDb())
             throw new DoesNotHavePermissionException("Sual bazasındaki suallardan istifadə edə bilməzsiniz");
 
-        return questionStorageRepository.getByTeacher(user).orElseThrow(() -> new ResourceNotFoundException("Sual bazanızda heç bir sualınız yoxdur")).getQuestions();
+        List<Question> questionList = questionStorageRepository.getByTeacher(user).orElseThrow(() -> new ResourceNotFoundException("Sual bazanızda heç bir sualınız yoxdur")).getQuestions();
+        return questionList.stream().map(examMapper::questionToResponse).toList();
     }
 
     @Override
     @Transactional
-    public List<Question> getQuestionsFromMyStorage(QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions) {
+    public List<QuestionResponse> getQuestionsFromMyStorage(QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions) {
         User user = userService.getCurrentUser();
         validateGetQuestion(numberOfQuestions, user);
 
         Pageable pageable = Pageable.ofSize(numberOfQuestions);
 
-        return questionStorageRepository.findQuestionsFiltered(
+        List<Question> questionList = questionStorageRepository.findQuestionsFiltered(
                 pageable, user.getId(), type, difficulty, topicId);
+        return questionList.stream().map(examMapper::questionToResponse).toList();
     }
 
     @Override
     @Transactional
-    public List<Question> getQuestionsFromMyStorage(UUID subjectId) {
+    public List<QuestionResponse> getQuestionsFromMyStorage(UUID subjectId) {
         User user = userService.getCurrentUser();
         if (!user.getPack().isCanUseQuestionDb())
             throw new DoesNotHavePermissionException("Sual bazasındaki suallardan istifadə edə bilməzsiniz");
 
         List<Topic> topics = topicService.getAllBySubjectId(subjectId);
 
-        return questionStorageRepository.getByTeacher(user).orElseThrow(() -> new ResourceNotFoundException("Sual bazanızda heç bir sualınız yoxdur")).getQuestions().stream().filter(question -> topics.contains(question.getTopic())).toList();
+        List<Question> questionList = questionStorageRepository.getByTeacher(user).orElseThrow(() -> new ResourceNotFoundException("Sual bazanızda heç bir sualınız yoxdur"))
+                .getQuestions().stream().filter(question -> topics.contains(question.getTopic())).toList();
+        return questionList.stream().map(examMapper::questionToResponse).toList();
     }
 
     @Override
     @Transactional
-    public List<Question> getAllQuestionsFromAdminStorage() {
+    public List<QuestionResponse> getAllQuestionsFromAdminStorage() {
         User user = userService.getCurrentUser();
         if (!user.getPack().isCanUseQuestionDb())
             throw new DoesNotHavePermissionException("Adminin sual bazasındaki suallardan istifadə edə bilməzsiniz");
 
-        return questionStorageRepository.getByTeacher(userService.getByEmail(adminEmail)).orElseThrow(() -> new ResourceNotFoundException("Adminin sual bazasında heç bir sual yoxdur")).getQuestions();
+        List<Question> questionList = questionStorageRepository.getByTeacher(userService.getByEmail(adminEmail)).orElseThrow(() -> new ResourceNotFoundException("Adminin sual bazasında heç bir sual yoxdur")).getQuestions();
+        return questionList.stream().map(examMapper::questionToResponse).toList();
     }
 
     @Override
     @Transactional
-    public List<Question> getQuestionFromAdminStorage(QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions) {
+    public List<QuestionResponse> getQuestionFromAdminStorage(QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions) {
         User user = userService.getCurrentUser();
         validateGetQuestion(numberOfQuestions, user);
 
         Pageable pageable = Pageable.ofSize(numberOfQuestions);
 
-        return questionStorageRepository.findQuestionsFiltered(
+        List<Question> questionList = questionStorageRepository.findQuestionsFiltered(
                 pageable, userService.getByEmail(adminEmail).getId(), type, difficulty, topicId);
+        return questionList.stream().map(examMapper::questionToResponse).toList();
     }
 
     @Override
@@ -140,10 +148,11 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
 
     @Override
     @Transactional
-    public List<Question> getQuestionsByTeacherId(UUID teacherId) {
-        return questionStorageRepository.getByTeacher(userService.getUserById(teacherId))
+    public List<QuestionResponse> getQuestionsByTeacherId(UUID teacherId) {
+        List<Question> questionList = questionStorageRepository.getByTeacher(userService.getUserById(teacherId))
                 .orElseThrow(() -> new ResourceNotFoundException("Sual bazası tapılmadı."))
                 .getQuestions();
+        return questionList.stream().map(examMapper::questionToResponse).toList();
     }
 
     @Override

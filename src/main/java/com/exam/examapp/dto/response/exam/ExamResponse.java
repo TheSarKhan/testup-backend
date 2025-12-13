@@ -1,8 +1,8 @@
 package com.exam.examapp.dto.response.exam;
 
+import com.exam.examapp.dto.response.SubjectStructureQuestionResponse;
 import com.exam.examapp.dto.response.UserResponseForExam;
 import com.exam.examapp.model.Tag;
-import com.exam.examapp.model.subject.SubjectStructureQuestion;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -17,7 +17,7 @@ public record ExamResponse(
     BigDecimal cost,
     Double rating,
     UserResponseForExam teacher,
-    List<SubjectStructureQuestion> subjectStructureQuestion,
+    List<SubjectStructureQuestionResponse> subjectStructureQuestion,
     String examDescription,
     Boolean hasUncheckedAnswer,
     String explanationVideoUrl,

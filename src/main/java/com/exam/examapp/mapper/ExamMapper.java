@@ -4,8 +4,10 @@ import com.exam.examapp.dto.QuestionDetails;
 import com.exam.examapp.dto.request.exam.ExamUpdateRequest;
 import com.exam.examapp.dto.response.QuestionDetailsResponseWithoutAnswer;
 import com.exam.examapp.dto.response.QuestionResponseWithoutAnswer;
+import com.exam.examapp.dto.response.SubjectStructureQuestionResponse;
 import com.exam.examapp.dto.response.UserResponseForExam;
 import com.exam.examapp.dto.response.exam.*;
+import com.exam.examapp.dto.response.subject.QuestionResponse;
 import com.exam.examapp.dto.response.subject.SubjectStructureQuestionResponseWithoutAnswer;
 import com.exam.examapp.model.Tag;
 import com.exam.examapp.model.User;
@@ -123,6 +125,16 @@ public class ExamMapper {
         return new Result(first, tags);
     }
 
+    public SubjectStructureQuestionResponse subjectStructureToResponse(SubjectStructureQuestion subjectStructureQuestion) {
+        return new SubjectStructureQuestionResponse(
+                subjectStructureQuestion.getId(),
+                subjectStructureQuestion.getSubjectStructure(),
+                subjectStructureQuestion.getQuestion().stream().map(this::questionToResponse).toList(),
+                subjectStructureQuestion.getCreatedAt(),
+                subjectStructureQuestion.getUpdatedAt()
+        );
+    }
+
     @Transactional
     public ExamResponse toResponse(Exam exam) {
         Result result = getResult(exam);
@@ -139,7 +151,7 @@ public class ExamMapper {
                 exam.getCost(),
                 exam.getRating(),
                 teacher,
-                exam.getSubjectStructureQuestions(),
+                exam.getSubjectStructureQuestions().stream().map(this::subjectStructureToResponse).toList(),
                 exam.getExamDescription(),
                 !(exam.getHasUncheckedQuestionStudentExamId() == null ||
                         exam.getHasUncheckedQuestionStudentExamId().isEmpty()),
@@ -208,6 +220,25 @@ public class ExamMapper {
                 question.getQuestionCount(),
                 question.getQuestions().stream().map(this::questionRemoveAnswer).toList(),
                 detailsRemoveAnswer(question.getQuestionDetails()),
+                question.getCreatedAt(),
+                question.getUpdatedAt()
+        );
+    }
+
+    public QuestionResponse questionToResponse(Question question) {
+        return new QuestionResponse(
+                question.getId(),
+                question.getTitle(),
+                question.getTitleDescription(),
+                question.isTitlePicture(),
+                question.isTitleContainMath(),
+                question.getType(),
+                question.getDifficulty(),
+                question.getTopic(),
+                question.getSoundUrl(),
+                question.getQuestionCount(),
+                question.getQuestions().stream().map(this::questionToResponse).toList(),
+                question.getQuestionDetails(),
                 question.getCreatedAt(),
                 question.getUpdatedAt()
         );
