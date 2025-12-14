@@ -5,9 +5,10 @@ import com.exam.examapp.model.exam.Exam;
 public class QuestionCountService {
     public static int getQuestionCount(Exam exam) {
         return exam.getSubjectStructureQuestions().stream()
-                .map(
-                        subjectStructureQuestion ->
-                                subjectStructureQuestion.getSubjectStructure().getQuestionCount())
+                .map(subjectStructureQuestion -> {
+                            return subjectStructureQuestion.getSubjectStructure().getQuestionCount();
+                        }
+                )
                 .mapToInt(Integer::intValue)
                 .sum();
     }

@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -53,7 +54,7 @@ public class CreateExamService {
                 .build();
     }
 
-    public void createExam(
+    public UUID createExam(
             ExamRequest request,
             List<MultipartFile> titles,
             List<MultipartFile> variantPictures,
@@ -85,10 +86,12 @@ public class CreateExamService {
         exam.setNumberOfQuestions(QuestionCountService.getQuestionCount(exam));
 
         log.info("Sualların sayı Hesablanır");
-        examRepository.save(exam);
+        Exam save = examRepository.save(exam);
 
         log.info("İmtahan saxlanıldı");
         updateTeacherStatistics(user);
+
+        return save.getId();
     }
 
     private List<SubjectStructureQuestion> buildSubjectStructureQuestions(

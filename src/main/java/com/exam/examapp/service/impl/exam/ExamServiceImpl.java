@@ -89,11 +89,12 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     @Transactional
-    public void createExam(ExamRequest request, List<MultipartFile> titles, List<MultipartFile> variantPictures, List<MultipartFile> numberPictures, List<MultipartFile> sounds) {
+    public UUID createExam(ExamRequest request, List<MultipartFile> titles, List<MultipartFile> variantPictures, List<MultipartFile> numberPictures, List<MultipartFile> sounds) {
         log.info("İmtahan yaradılır");
-        createExamService.createExam(request, titles, variantPictures, numberPictures, sounds);
+        UUID exam = createExamService.createExam(request, titles, variantPictures, numberPictures, sounds);
         log.info("İmtahanın yaradılması tamamlandı");
         logService.save("İmtahanın yaradılması tamamlandı", userService.getCurrentUserOrNull());
+        return exam;
     }
 
     @Override

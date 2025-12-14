@@ -15,7 +15,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 public interface ExamService {
-    void createExam(
+    UUID createExam(
             ExamRequest request,
             List<MultipartFile> titles,
             List<MultipartFile> variantPictures,

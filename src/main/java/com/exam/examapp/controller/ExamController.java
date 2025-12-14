@@ -40,15 +40,15 @@ public class ExamController {
             description =
                     "Create a new exam. Accepts an ExamRequest (structured JSON) as a multipart part and optional media lists (titles, variantPictures, numberPictures, sounds). "
                             + "Files are optional — pass only those that exist. ExamRequest contains subject structures, timing, cost and flags (hasSound/hasPicture/etc).")
-    public ResponseEntity<ApiResponse<Void>> createExam(
+    public ResponseEntity<ApiResponse<UUID>> createExam(
             @RequestPart @Valid ExamRequest request,
             @RequestPart(required = false) List<MultipartFile> titles,
             @RequestPart(required = false) List<MultipartFile> variantPictures,
             @RequestPart(required = false) List<MultipartFile> numberPictures,
             @RequestPart(required = false) List<MultipartFile> sounds) {
-        examService.createExam(request, titles, variantPictures, numberPictures, sounds);
+        UUID uuid = examService.createExam(request, titles, variantPictures, numberPictures, sounds);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.build(HttpStatus.CREATED, "İmtahan uğurla yaradıldı", null));
+                .body(ApiResponse.build(HttpStatus.CREATED, "İmtahan uğurla yaradıldı", uuid));
     }
 
     @GetMapping
@@ -185,7 +185,7 @@ public class ExamController {
             description =
                     "Start/join an exam by providing access code (for students). Returns studentExamId and exam payload.")
     public ResponseEntity<ApiResponse<StartExamResponseWithoutAnswer>> startExam(@RequestParam(required = false) String studentName,
-                                                                    @RequestParam String code) {
+                                                                                 @RequestParam String code) {
         StartExamResponseWithoutAnswer startExamResponse = examService.startExamViaCode(studentName, code);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "İmtahan uğurla başladı", startExamResponse));
@@ -198,7 +198,7 @@ public class ExamController {
             description =
                     "Start an exam by providing its UUID (teacher/admin or system-start). Useful for scheduled or manual starts.")
     public ResponseEntity<ApiResponse<StartExamResponseWithoutAnswer>> startExam(@RequestParam(required = false) String studentName,
-                                                                    @RequestParam UUID id) {
+                                                                                 @RequestParam UUID id) {
         StartExamResponseWithoutAnswer startExamResponse = examService.startExamViaId(studentName, id);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "İmtahan uğurla başladı", startExamResponse));

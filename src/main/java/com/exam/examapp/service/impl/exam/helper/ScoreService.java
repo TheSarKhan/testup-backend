@@ -61,6 +61,7 @@ public class ScoreService {
                 score += entry.getValue();
             }
         }
+
         log.info("Bal əsasında hesablandı");
         return score;
     }
