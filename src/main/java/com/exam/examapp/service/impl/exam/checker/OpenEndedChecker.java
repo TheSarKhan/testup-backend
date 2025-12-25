@@ -10,16 +10,16 @@ import java.util.Map;
 import java.util.UUID;
 
 @Component
-public class OpenEndedChecker implements AnswerChecker{
+public class OpenEndedChecker implements AnswerChecker {
     @Override
     public void check(Question question, QuestionDetails details, String answer, Map<UUID, AnswerStatus> answerStatusMap, List<Integer> counts) {
         if (details.isAuto()) {
-            if (details.answer().equals(answer))
+            if (details.answer().equals(answer)) {
                 answerStatusMap.put(question.getId(), AnswerStatus.CORRECT);
-            else if (answer == null) {
-                answerStatusMap.put(question.getId(), AnswerStatus.NOT_ANSWERED);
                 counts.set(3, counts.get(3) + 1);
-            } else {
+            } else if (answer == null)
+                answerStatusMap.put(question.getId(), AnswerStatus.NOT_ANSWERED);
+            else {
                 answerStatusMap.put(question.getId(), AnswerStatus.WRONG);
                 counts.set(7, counts.get(7) + 1);
             }
