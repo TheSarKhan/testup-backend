@@ -211,7 +211,8 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
         Map<UUID, AnswerStatus> questionIdToAnswerStatusMap = studentExam.getQuestionIdToAnswerStatusMap();
         AnswerStatus answerStatus = questionIdToAnswerStatusMap.get(questionId);
-        if (answerStatus != AnswerStatus.WAITING_FOR_REVIEW) throw new BadRequestException("Sual artıq yoxlanılmışdır");
+        if (!AnswerStatus.WAITING_FOR_REVIEW.equals(answerStatus))
+            throw new BadRequestException("Sual artıq yoxlanılmışdır");
 
         questionIdToAnswerStatusMap.remove(questionId);
         questionIdToAnswerStatusMap.put(questionId, answerStatus);
@@ -244,6 +245,15 @@ public class ExamCheckServiceImpl implements ExamCheckService {
         if (formula == null || formula.trim().isEmpty()) {
             double multiplayer = AnswerStatus.CORRECT.equals(status) ? 1.0 : AnswerStatus.HALF_CORRECT.equals(status) ? 0.5 : AnswerStatus.QUARTER_CORRECT.equals(status) ? 0.25 : AnswerStatus.THREE_QUARTERS_CORRECT.equals(status) ? 0.75 : 0.0;
             studentExam.setScore(studentExam.getScore() + subjectStructure.getQuestionToPointMap().get(indexOf) * multiplayer);
+            if (AnswerStatus.CORRECT.equals(status) ||
+                    AnswerStatus.HALF_CORRECT.equals(status) ||
+                    AnswerStatus.QUARTER_CORRECT.equals(status) ||
+                    AnswerStatus.THREE_QUARTERS_CORRECT.equals(status))
+                studentExam.setNumberOfCorrectAnswers(studentExam.getNumberOfCorrectAnswers() + 1);
+            else if (AnswerStatus.WRONG.equals(status))
+                studentExam.setNumberOfWrongAnswers(studentExam.getNumberOfWrongAnswers() + 1);
+            else if (AnswerStatus.NOT_ANSWERED.equals(status))
+                studentExam.setNumberOfNotAnsweredQuestions(studentExam.getNumberOfNotAnsweredQuestions() + 1);
         } else studentExam.setScore(calculateScoreByFormula(studentExam));
 
 
