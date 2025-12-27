@@ -60,8 +60,8 @@ server:
   forward-headers-strategy: framework
 
 jwt:
-  access-token-expire-time: ${ONE_MINUTE}
-  refresh-token-expire-time: ${ONE_DAY}
+  access-token-expire-time: ${ACCESS_TOKEN_EXPIRE_TIME}
+  refresh-token-expire-time: ${REFRESH_TOKEN_EXPIRE_TIME}
   secretKey: ${JWT_SECRET_KEY}
 
 app:
