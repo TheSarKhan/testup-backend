@@ -2,12 +2,12 @@ package com.exam.examapp.security.filter;
 
 import com.exam.examapp.security.model.CustomUserDetails;
 import com.exam.examapp.security.service.impl.CustomUserDetailsService;
+import com.exam.examapp.security.service.impl.JwtService;
+import com.exam.examapp.service.interfaces.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.exam.examapp.security.service.impl.JwtService;
-import com.exam.examapp.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -40,10 +40,11 @@ public class CustomJwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        String tokenValue = authHeader.substring(7);
 
-        String email = jwtService.extractEmail(tokenValue);
         try {
+            String tokenValue = authHeader.substring(7);
+
+            String email = jwtService.extractEmail(tokenValue);
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 CustomUserDetails customUserDetails = customUserDetailsService.getCustomUserDetails(userService.getByEmail(email));
 

@@ -3,9 +3,12 @@ package com.exam.examapp.security.service.impl;
 import com.exam.examapp.exception.custom.JwtException;
 import com.exam.examapp.service.interfaces.CacheService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,14 +69,23 @@ public class JwtService {
 
     private Claims extractClaims(String token) {
         try {
-            return Jwts.
-                    parser().
-                    verifyWith(getSecretKey(secretKey)).
-                    build().
-                    parseSignedClaims(token).
-                    getPayload();
+            return Jwts.parser()
+                    .verifyWith(getSecretKey(secretKey))
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+        } catch (ExpiredJwtException e) {
+            throw new JwtException("Token vaxtı bitib");
+
+        } catch (SignatureException | SecurityException e) {
+            throw new JwtException("Token imzası yanlışdır");
+
+        } catch (MalformedJwtException e) {
+            throw new JwtException("Token formatı yanlışdır");
+
         } catch (Exception e) {
-            throw new JwtException("Token yanlışdır");
+            throw new JwtException("Token oxuna bilmədi");
         }
     }
 }

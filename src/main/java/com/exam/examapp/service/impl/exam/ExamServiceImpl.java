@@ -12,6 +12,7 @@ import com.exam.examapp.exception.custom.UserNotLoginException;
 import com.exam.examapp.mapper.ExamMapper;
 import com.exam.examapp.mapper.QuestionMapper;
 import com.exam.examapp.model.Tag;
+import com.exam.examapp.model.TeacherInfo;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.ExamStatus;
 import com.exam.examapp.model.enums.Role;
@@ -137,10 +138,9 @@ public class ExamServiceImpl implements ExamService {
             return examRepository.getByTeacherOrderByCreatedAtDesc(user)
                     .stream().filter(exam -> !exam.isDeleted())
                     .map(exam -> ExamMapper.toBlockResponse(exam, null, null))
-                    .toList();
+                    .sorted(Comparator.comparing(ExamBlockResponse::createAt).reversed()).toList();
         } else {
             return studentExamRepository.getByStudent(user).stream()
-                    .filter(studentExam -> !studentExam.getExam().isDeleted())
                     .map(studentExam -> {
                         ExamStatus status = studentExam.getStatus();
                         return ExamMapper.toBlockResponse(studentExam.getExam(), status, studentExam.getId());
@@ -340,7 +340,8 @@ public class ExamServiceImpl implements ExamService {
 
         if (exam.isDeleted()) throw new BadRequestException("Imtahan silinib.");
 
-        ExamValidationService.validationForUpdate(request, exam.getTeacher());
+        User teacher = exam.getTeacher();
+        ExamValidationService.validationForUpdate(request, teacher);
 
         log.info("Imtahan validasiyadan keçdi");
         ExamMapper.update(exam, request);
@@ -385,9 +386,23 @@ public class ExamServiceImpl implements ExamService {
             subjectStructureQuestions.add(subjectStructureQuestion);
         }
         exam.setSubjectStructureQuestions(subjectStructureQuestions);
+        exam.setId(UUID.randomUUID());
         examRepository.save(exam);
+        TeacherInfo info = teacher.getInfo();
+        Map<UUID, Integer> examToStudentCountMap = info.getExamToStudentCountMap();
+        examToStudentCountMap.put(exam.getId(), examToStudentCountMap.get(request.id()));
+        userService.save(teacher);
+        deleteForUpdate(request.id());
         log.info("İmtahan yeniləndi. Id: {}", exam.getId());
         logService.save("İmtahan yeniləndi. Id: " + exam.getId(), userService.getCurrentUserOrNull());
+    }
+
+    @Transactional
+    public void deleteForUpdate(UUID examId) {
+        Exam exam = getById(examId);
+        exam.setDeleted(true);
+        exam.setDeletedAt(Instant.now());
+        examRepository.save(exam);
     }
 
     @Override
@@ -396,10 +411,17 @@ public class ExamServiceImpl implements ExamService {
         log.info("İmtahan id ilə silinir: {}", id);
         User user = userService.getCurrentUser();
         Exam exam = getById(id);
-        if (!Role.ADMIN.equals(user.getRole()) && exam.getTeacher().getId() != user.getId())
+        User teacher = exam.getTeacher();
+        if (!Role.ADMIN.equals(user.getRole()) && teacher.getId() != user.getId())
             throw new BadRequestException("Əgər admin deyilsinizsə, başqasının imtahanını silə bilməzsiniz.");
         exam.setDeleted(true);
+        exam.setDeletedAt(Instant.now());
         examRepository.save(exam);
+        TeacherInfo info = teacher.getInfo();
+        info.setCurrentlyTotalExamCount(info.getCurrentlyTotalExamCount() - 1);
+        if (info.getThisMonthStartTime().isBefore(exam.getCreatedAt()))
+            info.setThisMonthCreatedExamCount(info.getThisMonthCreatedExamCount() - 1);
+        userService.save(teacher);
         log.info("İmtahan silindi");
         logService.save("İmtahan silindi", userService.getCurrentUserOrNull());
     }
