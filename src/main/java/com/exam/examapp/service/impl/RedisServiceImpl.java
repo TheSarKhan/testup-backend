@@ -1,5 +1,6 @@
 package com.exam.examapp.service.impl;
 
+import com.exam.examapp.exception.custom.ResourceNotFoundException;
 import com.exam.examapp.service.interfaces.CacheService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -15,19 +16,22 @@ public class RedisServiceImpl implements CacheService {
     }
 
     @Override
-    public void saveContent(String header, String email, String refreshToken, Long expireIn) {
-        String key = header + email;
-        redisTemplate.opsForValue().set(key, refreshToken, expireIn, TimeUnit.MILLISECONDS);
+    public void saveContent(String header, String keyPart2, String data, Long expireIn) {
+        String key = header + keyPart2;
+        redisTemplate.opsForValue().set(key, data, expireIn, TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public String getContent(String header, String email) {
-        String key = header + email;
-        return redisTemplate.opsForValue().get(key);
+    public String getContent(String header, String keyPart2) {
+        String key = header + keyPart2;
+        String content = redisTemplate.opsForValue().get(key);
+        if (content == null)
+            throw new ResourceNotFoundException("Redisde bu key uzre data tapilmadi.");
+        return content;
     }
 
     @Override
-    public void deleteContent(String header, String email) {
-        redisTemplate.delete(header + email);
+    public void deleteContent(String header, String keyPart2) {
+        redisTemplate.delete(header + keyPart2);
     }
 }
