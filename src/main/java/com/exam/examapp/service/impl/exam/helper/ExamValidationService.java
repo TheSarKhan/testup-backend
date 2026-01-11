@@ -53,6 +53,8 @@ public class ExamValidationService {
             throw new ReachedLimitException(
                     "Bu ay və ya cəmi imtahan limitinə çatmısınız");
 
+        log.info("User limitleri kecmeyib");
+
         Integer questionCountTotal =
                 request.subjectStructures().stream()
                         .map(SubjectStructureQuestionsRequest::subjectStructureRequest)
@@ -60,13 +62,19 @@ public class ExamValidationService {
                         .reduce(Integer::sum)
                         .orElse(0);
 
+        log.info("Question count total: {}", questionCountTotal);
+
         if (questionCountTotal >= user.getPack().getQuestionCountPerExam())
             throw new ReachedLimitException("Bu imtahan üçün suallar limitinə çatdınız");
+
+        log.info("User 1 imtahandaki sual limitini kecmeyib");
 
         List<QuestionRequest> questionRequests =
                 request.subjectStructures().stream()
                         .flatMap(ss -> ss.questionRequests().stream())
                         .toList();
+
+        log.info("Question requests: {}", questionRequests);
 
         ExamValidationService.validateExam(
                 user,
