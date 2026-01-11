@@ -77,7 +77,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private void createStorageIfNeeded(Role role, User user) {
-        if (Role.TEACHER.equals(role) && questionStorageRepository.getByTeacher(user).isEmpty())
+        if ((Role.TEACHER.equals(role) || Role.ADMIN.equals(role)) && questionStorageRepository.getByTeacher(user).isEmpty())
             questionStorageRepository.save(QuestionStorage.builder().teacher(user).build());
     }
 

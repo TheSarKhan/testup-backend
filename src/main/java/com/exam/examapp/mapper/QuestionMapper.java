@@ -59,8 +59,8 @@ public class QuestionMapper {
                 request.difficulty(),
                 request.topicId(),
                 request.questionCount(),
-                request.questions().stream()
-                        .map(QuestionMapper::requestToUpdateRequest).toList(),
+                request.questions() != null ? request.questions().stream()
+                        .map(QuestionMapper::requestToUpdateRequest).toList(): null,
                 request.soundUrl(),
                 request.questionDetails(),
                 request.questionDbId()
