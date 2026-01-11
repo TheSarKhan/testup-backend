@@ -53,7 +53,7 @@ public class QuestionUpdateHelper {
             log.info("storagde suali update edilir.");
             byId = questionRepository.findById(updateRequest.questionDbId()).orElseThrow(() ->
                     new ResourceNotFoundException("Sual storege de tapilmadi"));
-            byId.setId(UUID.randomUUID());
+            byId = createNewQuestionSameData(byId);
         } else
             byId = questionRepository
                     .findById(updateRequest.id())
@@ -102,6 +102,25 @@ public class QuestionUpdateHelper {
         Question savedQuestion = questionRepository.save(question);
         logService.save("Suallar uğurla əlavə edildi", userService.getCurrentUserOrNull());
         return savedQuestion;
+    }
+
+    private Question createNewQuestionSameData(Question byId) {
+        return Question.builder()
+                .id(UUID.randomUUID())
+                .title(byId.getTitle())
+                .titleDescription(byId.getTitleDescription())
+                .isTitlePicture(byId.isTitlePicture())
+                .isTitleContainMath(byId.isTitleContainMath())
+                .type(byId.getType())
+                .difficulty(byId.getDifficulty())
+                .questionCount(byId.getQuestionCount())
+                .soundUrl(byId.getSoundUrl())
+                .questionDetails(byId.getQuestionDetails())
+                .topic(byId.getTopic())
+                .questions(byId.getQuestions())
+                .createdAt(byId.getCreatedAt())
+                .updatedAt(byId.getUpdatedAt())
+                .build();
     }
 
     private void createQuestionDetails(

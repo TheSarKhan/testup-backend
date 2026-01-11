@@ -386,7 +386,7 @@ public class ExamServiceImpl implements ExamService {
             subjectStructureQuestions.add(subjectStructureQuestion);
         }
         exam.setSubjectStructureQuestions(subjectStructureQuestions);
-        exam.setId(UUID.randomUUID());
+        exam = createNewExamSameData(exam);
         examRepository.save(exam);
         TeacherInfo info = teacher.getInfo();
         Map<UUID, Integer> examToStudentCountMap = info.getExamToStudentCountMap();
@@ -395,6 +395,31 @@ public class ExamServiceImpl implements ExamService {
         deleteForUpdate(request.id());
         log.info("İmtahan yeniləndi. Id: {}", exam.getId());
         logService.save("İmtahan yeniləndi. Id: " + exam.getId(), userService.getCurrentUserOrNull());
+    }
+
+    private Exam createNewExamSameData(Exam exam) {
+        return Exam.builder()
+                .id(UUID.randomUUID())
+                .examTitle(exam.getExamTitle())
+                .examDescription(exam.getExamDescription())
+                .teacher(exam.getTeacher())
+                .subjectStructureQuestions(exam.getSubjectStructureQuestions())
+                .tags(exam.getTags())
+                .explanationVideoUrl(exam.getExplanationVideoUrl())
+                .durationInSeconds(exam.getDurationInSeconds())
+                .numberOfQuestions(exam.getNumberOfQuestions())
+                .cost(exam.getCost())
+                .isReadyForSale(exam.isReadyForSale())
+                .isHidden(exam.isHidden())
+                .startId(UUID.randomUUID())
+                .rating(exam.getRating())
+                .userIdToRatingMap(exam.getUserIdToRatingMap())
+                .hasUncheckedQuestionStudentExamId(List.of())
+                .isDeleted(exam.isDeleted())
+                .deletedAt(exam.getDeletedAt())
+                .createdAt(exam.getCreatedAt())
+                .updatedAt(Instant.now())
+                .build();
     }
 
     @Transactional
