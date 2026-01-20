@@ -68,6 +68,7 @@ public class QuestionUpdateHelper {
             String titleUrl = fileService.uploadFile(IMAGE_TITLE_PATH, titles.getFirst());
             titles.removeFirst();
             question.setTitle(titleUrl);
+            log.info("Title Image updated");
         }
         log.info("Sualın başlığı hazırdır");
 
