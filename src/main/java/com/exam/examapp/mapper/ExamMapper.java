@@ -146,7 +146,7 @@ public class ExamMapper {
                 exam.getId(),
                 exam.getExamTitle(),
                 result.first,
-                exam.getTags(),
+                result.otherTags,
                 exam.getDurationInSeconds(),
                 exam.getCost(),
                 exam.getRating(),
