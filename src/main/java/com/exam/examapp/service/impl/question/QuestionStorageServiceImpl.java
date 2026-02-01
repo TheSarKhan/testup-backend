@@ -91,14 +91,14 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
 
     @Override
     @Transactional
-    public List<QuestionResponse> getQuestionsFromMyStorage(QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions) {
+    public List<QuestionResponse> getQuestionsFromMyStorage(QuestionType type, Difficulty difficulty, UUID subjectId, int numberOfQuestions) {
         User user = userService.getCurrentUser();
         validateGetQuestion(numberOfQuestions, user);
 
         Pageable pageable = Pageable.ofSize(numberOfQuestions);
 
         List<Question> questionList = questionStorageRepository.findQuestionsFiltered(
-                pageable, user.getId(), type, difficulty, topicId);
+                pageable, user.getId(), type, difficulty, subjectId);
         return questionList.stream().map(examMapper::questionToResponse).toList();
     }
 
@@ -129,14 +129,14 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
 
     @Override
     @Transactional
-    public List<QuestionResponse> getQuestionFromAdminStorage(QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions) {
+    public List<QuestionResponse> getQuestionFromAdminStorage(QuestionType type, Difficulty difficulty, UUID subjectId, int numberOfQuestions) {
         User user = userService.getCurrentUser();
         validateGetQuestion(numberOfQuestions, user);
 
         Pageable pageable = Pageable.ofSize(numberOfQuestions);
 
         List<Question> questionList = questionStorageRepository.findQuestionsFiltered(
-                pageable, userService.getByEmail(adminEmail).getId(), type, difficulty, topicId);
+                pageable, userService.getByEmail(adminEmail).getId(), type, difficulty, subjectId);
         return questionList.stream().map(examMapper::questionToResponse).toList();
     }
 

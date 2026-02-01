@@ -31,7 +31,7 @@ public interface QuestionStorageRepository extends JpaRepository<QuestionStorage
             where (:teacherId IS NULL OR qs.teacher.id = :teacherId)
                 and (:type IS NULL OR q.type = :type)
                 and (:difficulty IS NULL OR q.difficulty = :difficulty)
-                and (:topicId IS NULL OR q.topic.id = :topicId)
+                and (:subjectId IS NULL OR q.topic.subject.id = :subjectId)
             """)
-    List<Question> findQuestionsFiltered(Pageable pageable, UUID teacherId, QuestionType type, Difficulty difficulty, UUID topicId);
+    List<Question> findQuestionsFiltered(Pageable pageable, UUID teacherId, QuestionType type, Difficulty difficulty, UUID subjectId);
 }
