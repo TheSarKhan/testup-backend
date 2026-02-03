@@ -376,7 +376,12 @@ public class ExamServiceImpl implements ExamService {
             for (QuestionUpdateRequestForExam questionUpdateRequestForExam : questionUpdateRequestForExams) {
                 Question question;
                 if (questionUpdateRequestForExam.hasChange()) {
-                    question = questionService.update(QuestionMapper.requestToRequest(questionUpdateRequestForExam), titles, variantPictures, numberPictures, sounds);
+                    if (questionUpdateRequestForExam.id() == null)
+                        question = questionService.save(QuestionMapper.updateRequestToRequest(questionUpdateRequestForExam)
+                                , titles, variantPictures, numberPictures, sounds);
+                    else
+                        question = questionService.update(QuestionMapper.requestToRequest(questionUpdateRequestForExam),
+                                titles, variantPictures, numberPictures, sounds);
                 } else {
                     question = questionService.getQuestionById(questionUpdateRequestForExam.id());
                 }

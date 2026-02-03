@@ -60,7 +60,43 @@ public class QuestionMapper {
                 request.topicId(),
                 request.questionCount(),
                 request.questions() != null ? request.questions().stream()
-                        .map(QuestionMapper::requestToUpdateRequest).toList(): null,
+                        .map(QuestionMapper::requestToUpdateRequest).toList() : null,
+                request.soundUrl(),
+                request.questionDetails(),
+                request.questionDbId()
+        );
+    }
+
+    public static QuestionRequest updateRequestToRequest(QuestionUpdateRequestForExam request) {
+        return new QuestionRequest(
+                request.title(),
+                request.titleDescription(),
+                request.isTitlePicture(),
+                request.isTitleContainMath(),
+                request.type(),
+                request.difficulty(),
+                request.topicId(),
+                request.questionCount(),
+                request.questions() != null ? request.questions().stream()
+                        .map(QuestionMapper::updateRequestToRequest).toList() : null,
+                request.soundUrl(),
+                request.questionDetails(),
+                request.questionDbId()
+        );
+    }
+
+    public static QuestionRequest updateRequestToRequest(QuestionUpdateRequest request) {
+        return new QuestionRequest(
+                request.title(),
+                request.titleDescription(),
+                request.isTitlePicture(),
+                request.isTitleContainMath(),
+                request.type(),
+                request.difficulty(),
+                request.topicId(),
+                request.questionCount(),
+                request.questions() != null ? request.questions().stream()
+                        .map(QuestionMapper::updateRequestToRequest).toList() : null,
                 request.soundUrl(),
                 request.questionDetails(),
                 request.questionDbId()
