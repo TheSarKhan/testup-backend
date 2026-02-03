@@ -54,11 +54,13 @@ public class QuestionUpdateHelper {
             byId = questionRepository.findById(updateRequest.questionDbId()).orElseThrow(() ->
                     new ResourceNotFoundException("Sual storege de tapilmadi"));
             byId = createNewQuestionSameData(byId);
+        }else if (updateRequest.id() == null) {
+            log.info("Sual yeni qeyd edilir.");
+            byId = Question.builder().build();
         } else
             byId = questionRepository
                     .findById(updateRequest.id())
                     .orElseThrow(() -> new ResourceNotFoundException("Sual tapılmadı"));
-
 
         String oldTitle = byId.getTitle();
         Question question = QuestionMapper.updateRequestTo(byId, updateRequest);
