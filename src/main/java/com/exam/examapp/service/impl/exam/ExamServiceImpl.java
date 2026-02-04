@@ -355,6 +355,8 @@ public class ExamServiceImpl implements ExamService {
 
         exam.setTags(tags);
 
+        int questionCount = 0;
+
         log.info("Etiketlər hazırlanmışdır");
 
         var subjectStructureQuestionsUpdateRequests = request.subjectStructures();
@@ -375,6 +377,7 @@ public class ExamServiceImpl implements ExamService {
             List<Question> questions = new ArrayList<>();
             for (QuestionUpdateRequestForExam questionUpdateRequestForExam : questionUpdateRequestForExams) {
                 Question question;
+                questionCount++;
                 if (questionUpdateRequestForExam.hasChange()) {
                     if (questionUpdateRequestForExam.id() == null)
                         question = questionService.save(QuestionMapper.updateRequestToRequest(questionUpdateRequestForExam)
@@ -392,6 +395,7 @@ public class ExamServiceImpl implements ExamService {
         }
         exam.setSubjectStructureQuestions(subjectStructureQuestions);
         exam = createNewExamSameData(exam);
+        exam.setNumberOfQuestions(questionCount);
         examRepository.save(exam);
         TeacherInfo info = teacher.getInfo();
         Map<UUID, Integer> examToStudentCountMap = info.getExamToStudentCountMap();
