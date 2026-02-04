@@ -368,7 +368,8 @@ public class ExamServiceImpl implements ExamService {
             if (subjectStructureUpdateRequest.submoduleId() != null) {
                 subjectStructure = subjectStructureService.getById(subjectStructureUpdateRequest.id());
             } else {
-                subjectStructureService.delete(subjectStructureUpdateRequest.id());
+                if (subjectStructureUpdateRequest.id() != null)
+                    subjectStructureService.delete(subjectStructureUpdateRequest.id());
                 subjectStructure = subjectStructureService.create(subjectStructureUpdateRequest);
             }
             subjectStructureQuestion.setSubjectStructure(subjectStructure);

@@ -42,19 +42,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() ->
-                new ResourceNotFoundException("İstifadəçi tapılmadı: "));
+                new ResourceNotFoundException("İstifadəçi tapılmadı email: "+email));
     }
 
     @Override
     public User getByPhoneNumber(String phoneNumber) {
         return userRepository.findByPhoneNumber(phoneNumber).orElseThrow(() ->
-                new ResourceNotFoundException("İstifadəçi tapılmadı: "));
+                new ResourceNotFoundException("İstifadəçi tapılmadı telefon: "+phoneNumber));
     }
 
     @Override
     public User getUserById(UUID userId) {
         return userRepository.findById(userId).orElseThrow(() ->
-                new ResourceNotFoundException("İstifadəçi tapılmadı"));
+                new ResourceNotFoundException("İstifadəçi tapılmadı id: "+userId));
     }
 
     @Override

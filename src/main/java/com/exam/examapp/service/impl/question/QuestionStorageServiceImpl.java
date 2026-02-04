@@ -123,7 +123,9 @@ public class QuestionStorageServiceImpl implements QuestionStorageService {
         if (!user.getPack().isCanUseQuestionDb())
             throw new DoesNotHavePermissionException("Adminin sual bazasındaki suallardan istifadə edə bilməzsiniz");
 
-        List<Question> questionList = questionStorageRepository.getByTeacher(userService.getByEmail(adminEmail)).orElseThrow(() -> new ResourceNotFoundException("Adminin sual bazasında heç bir sual yoxdur")).getQuestions();
+        List<Question> questionList = questionStorageRepository.getByTeacher(userService.getByEmail(adminEmail))
+                .orElseThrow(() -> new ResourceNotFoundException("Adminin sual bazasında heç bir sual yoxdur"))
+                .getQuestions();
         return questionList.stream().map(examMapper::questionToResponse).toList();
     }
 
