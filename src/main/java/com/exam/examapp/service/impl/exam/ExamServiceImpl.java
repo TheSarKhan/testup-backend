@@ -390,6 +390,7 @@ public class ExamServiceImpl implements ExamService {
                     question = questionService.getQuestionById(questionUpdateRequestForExam.id());
                 }
                 questions.add(question);
+                questionCount += question.getQuestions() == null ? 0 : question.getQuestions().size();
             }
             subjectStructureQuestion.setQuestion(questions);
             subjectStructureQuestions.add(subjectStructureQuestion);
