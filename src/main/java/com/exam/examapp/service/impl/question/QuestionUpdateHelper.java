@@ -54,7 +54,7 @@ public class QuestionUpdateHelper {
             byId = questionRepository.findById(updateRequest.questionDbId()).orElseThrow(() ->
                     new ResourceNotFoundException("Sual storege de tapilmadi"));
             byId = createNewQuestionSameData(byId);
-        }else
+        } else
             byId = questionRepository
                     .findById(updateRequest.id())
                     .orElseThrow(() -> new ResourceNotFoundException("Sual tapılmadı"));
@@ -63,11 +63,12 @@ public class QuestionUpdateHelper {
         Question question = QuestionMapper.updateRequestTo(byId, updateRequest);
 
         if (updateRequest.isTitlePicture() && (updateRequest.title() == null || updateRequest.title().isEmpty())) {
-            fileService.deleteFile(IMAGE_TITLE_PATH, oldTitle);
+            if (oldTitle != null && !oldTitle.isEmpty())
+                fileService.deleteFile(IMAGE_TITLE_PATH, oldTitle);
             String titleUrl = fileService.uploadFile(IMAGE_TITLE_PATH, titles.getFirst());
             titles.removeFirst();
             question.setTitle(titleUrl);
-            log.info("Title Image updated");
+            log.info("Basliq yenilendi");
         }
         log.info("Sualın başlığı hazırdır");
 

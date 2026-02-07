@@ -74,7 +74,7 @@ public class QuestionStorageController {
             @RequestParam(required = false) QuestionType type,
             @RequestParam(required = false) Difficulty difficulty,
             @RequestParam(required = false) UUID subjectId,
-            @RequestParam(required = false) int numberOfQuestions) {
+            @RequestParam int numberOfQuestions) {
         List<QuestionResponse> questions =
                 questionStorageService.getQuestionsFromMyStorage(
                         type, difficulty, subjectId, numberOfQuestions);
@@ -120,7 +120,7 @@ public class QuestionStorageController {
             @RequestParam(required = false) QuestionType type,
             @RequestParam(required = false) Difficulty difficulty,
             @RequestParam(required = false) UUID subjectId,
-            @RequestParam(required = false) int numberOfQuestions) {
+            @RequestParam int numberOfQuestions) {
         List<QuestionResponse> questions =
                 questionStorageService.getQuestionFromAdminStorage(
                         type, difficulty, subjectId, numberOfQuestions);
