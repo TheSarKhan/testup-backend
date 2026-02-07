@@ -13,7 +13,7 @@ import com.exam.examapp.model.exam.Exam;
 import com.exam.examapp.model.exam.StudentExam;
 import com.exam.examapp.repository.StudentExamRepository;
 import com.exam.examapp.service.interfaces.UserService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,7 +36,7 @@ public class StartExamService {
 
     private final ExamMapper examMapper;
 
-    @Transactional
+    @Transactional(noRollbackFor = ExamExpiredException.class)
     public StartExamResponseWithoutAnswer startExam(String studentName, Exam exam) {
         log.info("İmtahan id ilə başlayır: {}", exam.getId());
         User user = userService.getCurrentUserOrNull();
@@ -60,36 +60,36 @@ public class StartExamService {
             return createStudentExamEntry(exam, user);
         } else if (!startedStudentExamByExamAndStudent.isEmpty()) {
             log.info("Tələbə hazırda bu imtahanı işləyir");
-            StudentExam first = startedStudentExamByExamAndStudent.getFirst();
+            StudentExam firstCreatedStudentExam = startedStudentExamByExamAndStudent.getLast();
 
-            if (first.getExam().getDurationInSeconds() == null) {
+            if (firstCreatedStudentExam.getExam().getDurationInSeconds() == null) {
                 log.info("Hazırki imtahan başladılır. Vaxt limitsizdir.");
                 return new StartExamResponseWithoutAnswer(
-                        first.getId(),
+                        firstCreatedStudentExam.getId(),
                         ExamStatus.STARTED,
-                        first.getQuestionIdToAnswerMap(),
-                        first.getListeningIdToPlayTimeMap(),
-                        first.getStartTime(),
+                        firstCreatedStudentExam.getQuestionIdToAnswerMap(),
+                        firstCreatedStudentExam.getListeningIdToPlayTimeMap(),
+                        firstCreatedStudentExam.getStartTime(),
                         examMapper.toResponseWithoutAnswer(exam));
             } else {
-                if (first.getStartTime().plusSeconds(first.getExam().getDurationInSeconds()).isBefore(Instant.now())) {
+                if (!firstCreatedStudentExam.getStartTime().plusSeconds(firstCreatedStudentExam.getExam().getDurationInSeconds()).isBefore(Instant.now())) {
                     log.info("Hazırki imtahan başladılır");
                     return new StartExamResponseWithoutAnswer(
-                            first.getId(),
-                            first.getStatus(),
-                            first.getQuestionIdToAnswerMap(),
-                            first.getListeningIdToPlayTimeMap(),
-                            first.getStartTime(),
+                            firstCreatedStudentExam.getId(),
+                            firstCreatedStudentExam.getStatus(),
+                            firstCreatedStudentExam.getQuestionIdToAnswerMap(),
+                            firstCreatedStudentExam.getListeningIdToPlayTimeMap(),
+                            firstCreatedStudentExam.getStartTime(),
                             examMapper.toResponseWithoutAnswer(exam));
                 } else {
                     log.info("Imtahanın vaxtı bitib");
-                    first.setStatus(ExamStatus.EXPIRED);
-                    first.setEndTime(Instant.now());
-                    examResultService.calculateResult(first);
-                    User student = first.getStudent();
+                    firstCreatedStudentExam.setStatus(ExamStatus.EXPIRED);
+                    firstCreatedStudentExam.setEndTime(Instant.now());
+                    examResultService.calculateResult(firstCreatedStudentExam);
+                    User student = firstCreatedStudentExam.getStudent();
                     List<CurrentExam> currentExams = student.getCurrentExams();
                     CurrentExam activeExam = currentExams.stream().filter(currentExam ->
-                            currentExam.studentExamId().equals(first.getId())).findFirst().orElse(null);
+                            currentExam.studentExamId().equals(firstCreatedStudentExam.getId())).findFirst().orElse(null);
 
                     if (activeExam != null) {
                         currentExams.remove(activeExam);
@@ -101,21 +101,21 @@ public class StartExamService {
             }
         } else if (!activeStudentExamByExamAndStudent.isEmpty()) {
             log.info("Tələbənin aktiv imtahanı var");
-            StudentExam studentExam = activeStudentExamByExamAndStudent.getFirst();
-            studentExam.setStatus(ExamStatus.STARTED);
-            studentExam.setStartTime(Instant.now());
+            StudentExam firstActivatedStudentExam = activeStudentExamByExamAndStudent.getLast();
+            firstActivatedStudentExam.setStatus(ExamStatus.STARTED);
+            firstActivatedStudentExam.setStartTime(Instant.now());
 
             List<CurrentExam> currentExams = user.getCurrentExams();
             currentExams.add(new CurrentExam(
                     Instant.now(),
                     exam.getDurationInSeconds(),
-                    studentExam.getId(),
+                    firstActivatedStudentExam.getId(),
                     exam.getStartId(),
                     exam.getId()));
             userService.save(user);
 
             return new StartExamResponseWithoutAnswer(
-                    studentExam.getId(),
+                    firstActivatedStudentExam.getId(),
                     ExamStatus.STARTED,
                     Map.of(),
                     Map.of(),
