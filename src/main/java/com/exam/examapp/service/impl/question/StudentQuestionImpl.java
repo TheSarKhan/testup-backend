@@ -70,17 +70,16 @@ public class StudentQuestionImpl {
                 }
                 if (question.getId().equals(questionId)){
                     QuestionResponse questionResponse = examMapper.questionToResponse(question);
-                    log.info("Sual maplendi.");
                     String answer = studentExam.getQuestionIdToAnswerMap().get(questionId);
-                    log.info("pointer 1");
                     AnswerStatus answerStatus = studentExam.getQuestionIdToAnswerStatusMap().get(questionId);
-                    log.info("pointer 2");
                     Boolean isAnswerPicture = studentExam.getQuestionIdToIsAnswerPictureMap().get(questionId);
-                    log.info("pointer 3");
-                    return new StudentQuestionResponse(questionResponse,
-                            List.of(answer), List.of(isAnswerPicture), List.of(answerStatus));
+                    return new StudentQuestionResponse(
+                            questionResponse,
+                            answer == null ? List.of() : List.of(answer),
+                            isAnswerPicture == null ? List.of() : List.of(isAnswerPicture),
+                            answerStatus == null ? List.of() : List.of(answerStatus)
+                    );
                 }
-                log.info("tapilmadi question:{}", question.getId());
             }
         }
         throw new ResourceNotFoundException("Verilen id ye uygun sual tapilmadi.");
