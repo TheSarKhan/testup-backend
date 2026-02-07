@@ -286,12 +286,13 @@ public class ExamServiceImpl implements ExamService {
         User student = studentExam.getStudent();
         List<CurrentExam> currentExams = student.getCurrentExams();
         CurrentExam activeExam = currentExams.stream().filter(currentExam ->
-                currentExam.studentExamId().equals(studentExamId)).findFirst().orElse(null);
+                currentExam.studentExamId().equals(studentExamId)).findAny().orElse(null);
 
         if (activeExam != null) {
             currentExams.remove(activeExam);
             student.setCurrentExams(currentExams);
             userService.save(student);
+            log.info("Telebenin current exam-i silindi. Student: {}, Exam: {}", student.getId(), studentExamId);
         }
     }
 
