@@ -158,7 +158,7 @@ public class CreateExamService {
         if (Role.TEACHER.equals(user.getRole())) {
             user.getInfo().setCurrentlyTotalExamCount(user.getInfo().getCurrentlyTotalExamCount() + 1);
             user.getInfo().setThisMonthCreatedExamCount(user.getInfo().getThisMonthCreatedExamCount() + 1);
-            userService.save(user);
+            userService.update(user);
             log.info("İmtahan müəllim məlumatına əlavə edildi");
         }
     }

@@ -46,6 +46,13 @@ public class StartExamService {
             return startExamWithoutLogin(studentName, exam.getId(), examCreator, exam);
 
         List<StudentExam> byExamAndStudent = studentExamRepository.getByExamAndStudent(exam, user);
+
+        if (byExamAndStudent.isEmpty()) {
+            log.info("Tələbə imtahanı siyahısı boşdur");
+            updateExamStudentCount(exam.getId(), examCreator);
+            return createStudentExamEntry(exam, user);
+        }
+
         List<StudentExam> activeStudentExamByExamAndStudent = byExamAndStudent.stream()
                 .filter(studentExam -> ExamStatus.ACTIVE.equals(studentExam.getStatus()))
                 .toList();
@@ -54,11 +61,7 @@ public class StartExamService {
                 .filter(studentExam -> ExamStatus.STARTED.equals(studentExam.getStatus()))
                 .toList();
 
-        if (byExamAndStudent.isEmpty()) {
-            log.info("Tələbə imtahanı siyahısı boşdur");
-            updateExamStudentCount(exam.getId(), examCreator);
-            return createStudentExamEntry(exam, user);
-        } else if (!startedStudentExamByExamAndStudent.isEmpty()) {
+        if (!startedStudentExamByExamAndStudent.isEmpty()) {
             log.info("Tələbə hazırda bu imtahanı işləyir");
             StudentExam firstCreatedStudentExam = startedStudentExamByExamAndStudent.getLast();
 
@@ -94,7 +97,7 @@ public class StartExamService {
                     if (activeExam != null) {
                         currentExams.remove(activeExam);
                         student.setCurrentExams(currentExams);
-                        userService.save(student);
+                        userService.update(student);
                     }
                     throw new ExamExpiredException("Imtahanın vaxtı bitib");
                 }
@@ -112,7 +115,7 @@ public class StartExamService {
                     firstActivatedStudentExam.getId(),
                     exam.getStartId(),
                     exam.getId()));
-            userService.save(user);
+            userService.update(user);
 
             return new StartExamResponseWithoutAnswer(
                     firstActivatedStudentExam.getId(),
@@ -167,7 +170,7 @@ public class StartExamService {
         examToStudentCountMap = examToStudentCountMap == null ? new HashMap<>() : examToStudentCountMap;
         examToStudentCountMap.put(id, examToStudentCountMap.getOrDefault(id, 0) + 1);
 
-        userService.save(examCreator);
+        userService.update(examCreator);
         log.info("Tələbələrin iştirak sayını yenilədi");
     }
 
@@ -191,12 +194,12 @@ public class StartExamService {
                 save.getId(),
                 exam.getStartId(),
                 exam.getId()));
-        userService.save(user);
+        userService.update(user);
 
         log.info("tələbə imtahanı hazırlandı");
         return new StartExamResponseWithoutAnswer(
                 save.getId(),
-                ExamStatus.STARTED,
+                save.getStatus(),
                 Map.of(),
                 Map.of(),
                 Instant.now(),

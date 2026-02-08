@@ -63,7 +63,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         user.setEmail(email);
 
-        User newUser = userService.save(user);
+        User newUser = userService.update(user);
 
         TokenResponse tokenResponse = generateToken(email, newUser);
 
@@ -105,7 +105,7 @@ public class ProfileServiceImpl implements ProfileService {
             user.setProfilePictureUrl(url);
         }
 
-        userService.save(user);
+        userService.update(user);
         log.info("Profil şəkil yeniləndi");
         logService.save("Profil şəkil yeniləndi", userService.getCurrentUserOrNull());
     }

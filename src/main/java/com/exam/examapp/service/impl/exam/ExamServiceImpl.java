@@ -291,7 +291,7 @@ public class ExamServiceImpl implements ExamService {
         if (activeExam != null) {
             currentExams.remove(activeExam);
             student.setCurrentExams(currentExams);
-            userService.save(student);
+            userService.update(student);
             log.info("Telebenin current exam-i silindi. Student: {}, Exam: {}", student.getId(), studentExamId);
         }
     }
@@ -403,7 +403,7 @@ public class ExamServiceImpl implements ExamService {
         TeacherInfo info = teacher.getInfo();
         Map<UUID, Integer> examToStudentCountMap = info.getExamToStudentCountMap();
         examToStudentCountMap.put(exam.getId(), examToStudentCountMap.get(request.id()));
-        userService.save(teacher);
+        userService.update(teacher);
         deleteForUpdate(request.id());
         log.info("İmtahan yeniləndi. Id: {}", exam.getId());
         logService.save("İmtahan yeniləndi. Id: " + exam.getId(), userService.getCurrentUserOrNull());
@@ -458,7 +458,7 @@ public class ExamServiceImpl implements ExamService {
         info.setCurrentlyTotalExamCount(info.getCurrentlyTotalExamCount() - 1);
         if (info.getThisMonthStartTime().isBefore(exam.getCreatedAt()))
             info.setThisMonthCreatedExamCount(info.getThisMonthCreatedExamCount() - 1);
-        userService.save(teacher);
+        userService.update(teacher);
         log.info("İmtahan silindi");
         logService.save("İmtahan silindi", userService.getCurrentUserOrNull());
     }
