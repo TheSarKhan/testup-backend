@@ -5,11 +5,13 @@ import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.repository.PaymentResultRepository;
 import com.exam.examapp.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GraphService {
@@ -108,6 +110,7 @@ public class GraphService {
             Instant endOfDay = day.plusDays(1).atStartOfDay(zone).toInstant();
 
             Double count = (double) userRepository.countByCreatedAtBetweenAndRole(startOfDay, endOfDay, role);
+            log.info("Daily count {}, {} :{}", i, role, count);
             dailyRegister.add(count);
         }
         return dailyRegister;
@@ -128,6 +131,7 @@ public class GraphService {
             Instant endInstant = startOfNextMonth.atStartOfDay(zone).toInstant();
 
             Double count = (double) userRepository.countByCreatedAtBetweenAndRole(startInstant, endInstant, role);
+            log.info("Monthly count {}, {} :{}", i, role, count);
             monthRegister.add(count);
         }
         return monthRegister;
@@ -145,7 +149,7 @@ public class GraphService {
             Instant endInstant = endOfYear.atStartOfDay(zone).toInstant();
 
             Double count = (double) userRepository.countByCreatedAtBetweenAndRole(startInstant, endInstant, role);
-
+            log.info("Yearly count {}, {} :{}", i, role, count);
             yearRegister.add(count);
         }
         return yearRegister;
