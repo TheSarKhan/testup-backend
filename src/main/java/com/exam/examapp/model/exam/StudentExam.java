@@ -79,7 +79,6 @@ public class StudentExam {
     @PrePersist
     void prePersist() {
         id = UUID.randomUUID();
-        status = ExamStatus.ACTIVE;
         examRating = 0.0;
         score = 0.0;
         createdAt = updatedAt = Instant.now();

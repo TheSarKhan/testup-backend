@@ -73,11 +73,11 @@ public class QuestionStorageController {
     public ResponseEntity<ApiResponse<List<QuestionResponse>>> getMyFilteredStorage(
             @RequestParam(required = false) QuestionType type,
             @RequestParam(required = false) Difficulty difficulty,
-            @RequestParam(required = false) UUID topicId,
-            @RequestParam(required = false) int numberOfQuestions) {
+            @RequestParam(required = false) UUID subjectId,
+            @RequestParam int numberOfQuestions) {
         List<QuestionResponse> questions =
                 questionStorageService.getQuestionsFromMyStorage(
-                        type, difficulty, topicId, numberOfQuestions);
+                        type, difficulty, subjectId, numberOfQuestions);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "Suallar uğurla əldə edildi", questions));
     }
@@ -119,11 +119,11 @@ public class QuestionStorageController {
     public ResponseEntity<ApiResponse<List<QuestionResponse>>> getAdminFilteredStorage(
             @RequestParam(required = false) QuestionType type,
             @RequestParam(required = false) Difficulty difficulty,
-            @RequestParam(required = false) UUID topicId,
-            @RequestParam(required = false) int numberOfQuestions) {
+            @RequestParam(required = false) UUID subjectId,
+            @RequestParam int numberOfQuestions) {
         List<QuestionResponse> questions =
                 questionStorageService.getQuestionFromAdminStorage(
-                        type, difficulty, topicId, numberOfQuestions);
+                        type, difficulty, subjectId, numberOfQuestions);
         return ResponseEntity.ok(
                 ApiResponse.build(HttpStatus.OK, "Suallar uğurla əldə edildi", questions));
     }

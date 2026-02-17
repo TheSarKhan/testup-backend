@@ -164,7 +164,7 @@ public class CreateExamService {
             TeacherInfo info = user.getInfo();
             Map<UUID, Integer> examToStudentCountMap = info.getExamToStudentCountMap();
             examToStudentCountMap.put(examId, 0);
-            userService.save(user);
+            userService.update(user);
             log.info("İmtahan müəllim məlumatına əlavə edildi");
         }
     }

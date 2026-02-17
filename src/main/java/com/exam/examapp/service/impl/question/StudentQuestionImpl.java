@@ -27,11 +27,15 @@ public class StudentQuestionImpl {
 
     public StudentQuestionResponse getStudentQuestionResponse(UUID studentExamId, UUID questionId){
         StudentExam studentExam = studentExamService.getStudentExam(studentExamId);
+        log.info("Sual axtarilmaga baslanildi. studentExamId: "+ studentExamId + " question: " + questionId);
         List<SubjectStructureQuestion> subjectStructureQuestions = studentExam.getExam().getSubjectStructureQuestions();
 
         for (SubjectStructureQuestion subjectStructureQuestion : subjectStructureQuestions) {
+            log.info("basladi subject structure question:{}", subjectStructureQuestion.getId());
             List<Question> questions = subjectStructureQuestion.getQuestion();
+            if (questions == null || questions.isEmpty()) continue;
             for (Question question : questions) {
+                log.info("basladi question:{}", question.getId());
                 List<Question> questionList = question.getQuestions();
                 if (questionList != null && !questionList.isEmpty()){
                     boolean isThere = false;
@@ -69,8 +73,12 @@ public class StudentQuestionImpl {
                     String answer = studentExam.getQuestionIdToAnswerMap().get(questionId);
                     AnswerStatus answerStatus = studentExam.getQuestionIdToAnswerStatusMap().get(questionId);
                     Boolean isAnswerPicture = studentExam.getQuestionIdToIsAnswerPictureMap().get(questionId);
-                    return new StudentQuestionResponse(questionResponse,
-                            List.of(answer), List.of(isAnswerPicture), List.of(answerStatus));
+                    return new StudentQuestionResponse(
+                            questionResponse,
+                            answer == null ? List.of() : List.of(answer),
+                            isAnswerPicture == null ? List.of() : List.of(isAnswerPicture),
+                            answerStatus == null ? List.of() : List.of(answerStatus)
+                    );
                 }
             }
         }

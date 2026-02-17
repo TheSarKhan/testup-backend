@@ -26,11 +26,9 @@ public class UserServiceImpl implements UserService {
 
     private final LogService logService;
 
-    private final UserSpecification userSpecification;
-
     @Override
     public User save(User user) {
-        log.info("İstifadəçi yaradılır: {}", user.getEmail());
+        log.info("İstifadəçi yaradıldı: {}", user.getEmail());
 
         User save = userRepository.save(user);
 
@@ -40,21 +38,33 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User update(User user) {
+        log.info("İstifadəçi yenilendi: {}", user.getEmail());
+
+        User save = userRepository.save(user);
+
+        log.info("İstifadəçi yenilendi: {}", user.getEmail());
+        logService.save("İstifadəçi yeniləndi:" + user.getEmail(), getCurrentUserOrNull());
+        return save;
+    }
+
+
+    @Override
     public User getByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() ->
-                new ResourceNotFoundException("İstifadəçi tapılmadı: "));
+                new ResourceNotFoundException("İstifadəçi tapılmadı email: " + email));
     }
 
     @Override
     public User getByPhoneNumber(String phoneNumber) {
         return userRepository.findByPhoneNumber(phoneNumber).orElseThrow(() ->
-                new ResourceNotFoundException("İstifadəçi tapılmadı: "));
+                new ResourceNotFoundException("İstifadəçi tapılmadı telefon: " + phoneNumber));
     }
 
     @Override
     public User getUserById(UUID userId) {
         return userRepository.findById(userId).orElseThrow(() ->
-                new ResourceNotFoundException("İstifadəçi tapılmadı"));
+                new ResourceNotFoundException("İstifadəçi tapılmadı id: " + userId));
     }
 
     @Override

@@ -59,16 +59,16 @@ public class QuestionUpdateHelper {
                     .findById(updateRequest.id())
                     .orElseThrow(() -> new ResourceNotFoundException("Sual tapılmadı"));
 
-
         String oldTitle = byId.getTitle();
         Question question = QuestionMapper.updateRequestTo(byId, updateRequest);
 
         if (updateRequest.isTitlePicture() && (updateRequest.title() == null || updateRequest.title().isEmpty())) {
-            fileService.deleteFile(IMAGE_TITLE_PATH, oldTitle);
+            if (oldTitle != null && !oldTitle.isEmpty())
+                fileService.deleteFile(IMAGE_TITLE_PATH, oldTitle);
             String titleUrl = fileService.uploadFile(IMAGE_TITLE_PATH, titles.getFirst());
             titles.removeFirst();
             question.setTitle(titleUrl);
-            log.info("Title Image updated");
+            log.info("Basliq yenilendi");
         }
         log.info("Sualın başlığı hazırdır");
 

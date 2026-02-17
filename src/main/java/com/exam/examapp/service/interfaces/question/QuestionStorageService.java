@@ -22,14 +22,14 @@ public interface QuestionStorageService {
   List<QuestionResponse> getAllQuestionsFromMyStorage();
 
   List<QuestionResponse> getQuestionsFromMyStorage(
-      QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions);
+      QuestionType type, Difficulty difficulty, UUID subjectId, int numberOfQuestions);
 
   List<QuestionResponse> getQuestionsFromMyStorage(UUID subjectId);
 
   List<QuestionResponse> getAllQuestionsFromAdminStorage();
 
   List<QuestionResponse> getQuestionFromAdminStorage(
-      QuestionType type, Difficulty difficulty, UUID topicId, int numberOfQuestions);
+      QuestionType type, Difficulty difficulty, UUID subjectId, int numberOfQuestions);
 
   List<User> getTeachersHasQuestionStorage();
 

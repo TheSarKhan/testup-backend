@@ -250,7 +250,7 @@ public class AdminServiceImpl implements AdminService {
     public void deactivateUser(UUID id) {
         User user = userService.getUserById(id);
         user.setActive(false);
-        userService.save(user);
+        userService.update(user);
         log.info("{} e-poçt ünvanı olan istifadəçi deaktiv edildi", user.getEmail());
         logService.save(user.getEmail() + " e-poçt ünvanı olan istifadəçi deaktiv edildi",
                 userService.getCurrentUserOrNull());
@@ -260,7 +260,7 @@ public class AdminServiceImpl implements AdminService {
     public void activateUser(UUID id) {
         User user = userService.getUserById(id);
         user.setActive(true);
-        userService.save(user);
+        userService.update(user);
         log.info("{} e-poçt ünvanı olan istifadəçi aktiv edildi.", user.getEmail());
         logService.save(user.getEmail() + " e-poçt ünvanı olan istifadəçi aktiv edildi",
                 userService.getCurrentUserOrNull());
@@ -274,7 +274,7 @@ public class AdminServiceImpl implements AdminService {
         User user = userService.getUserById(id);
         Pack pack = packService.getPackById(packId);
         user.setPack(pack);
-        userService.save(user);
+        userService.update(user);
 
         notificationService.sendNotification(new NotificationRequest("Testup Paket yeniliyi",
                 "Admin sizin paketi deyisdi. Paket adi:" + pack.getPackName(),
@@ -296,7 +296,7 @@ public class AdminServiceImpl implements AdminService {
 
     private void changeUserRole(User user, Role role) {
         user.setRole(role);
-        userService.save(user);
+        userService.update(user);
     }
 
     private UsersForAdminResponse mapUser(User user) {

@@ -199,7 +199,7 @@ public class PaymentServiceImpl implements PaymentService {
                 Pack pack = packService.getPackById(productId);
                 user.setPack(pack);
                 user.setNextPaymentDate(Instant.now().plusSeconds(2_629_743));
-                userService.save(user);
+                userService.update(user);
                 log.info("Müəllim yeni paket aldı. Paketin adı: {}", pack.getPackName());
                 logService.save("Müəllim yeni paket aldı. Paketin adı: " + pack.getPackName(), userService.getCurrentUserOrNull());
             }

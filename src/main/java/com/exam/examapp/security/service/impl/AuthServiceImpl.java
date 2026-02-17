@@ -187,7 +187,7 @@ public class AuthServiceImpl implements AuthService {
         cacheService.deleteContent(ACCESS_RESET_PASSWORD, request.email());
         User user = userService.getByEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
-        userService.save(user);
+        userService.update(user);
         log.info("Istifadəçi parolu yenilədi:{}", request.email());
         return "Parolunuz yeniləndi";
     }
@@ -200,7 +200,7 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidCredentialsException("Köhnə parol yanlışdır");
 
         user.setPassword(passwordEncoder.encode(newPassword));
-        userService.save(user);
+        userService.update(user);
 
         String email = user.getEmail();
         log.info("Hazırki istifadəçi parolunu yeniləndi:{}", email);

@@ -286,12 +286,13 @@ public class ExamServiceImpl implements ExamService {
         User student = studentExam.getStudent();
         List<CurrentExam> currentExams = student.getCurrentExams();
         CurrentExam activeExam = currentExams.stream().filter(currentExam ->
-                currentExam.studentExamId().equals(studentExamId)).findFirst().orElse(null);
+                currentExam.studentExamId().equals(studentExamId)).findAny().orElse(null);
 
         if (activeExam != null) {
             currentExams.remove(activeExam);
             student.setCurrentExams(currentExams);
-            userService.save(student);
+            userService.update(student);
+            log.info("Telebenin current exam-i silindi. Student: {}, Exam: {}", student.getId(), studentExamId);
         }
     }
 
@@ -355,6 +356,8 @@ public class ExamServiceImpl implements ExamService {
 
         exam.setTags(tags);
 
+        int questionCount = 0;
+
         log.info("Etiketlər hazırlanmışdır");
 
         var subjectStructureQuestionsUpdateRequests = request.subjectStructures();
@@ -366,7 +369,8 @@ public class ExamServiceImpl implements ExamService {
             if (subjectStructureUpdateRequest.submoduleId() != null) {
                 subjectStructure = subjectStructureService.getById(subjectStructureUpdateRequest.id());
             } else {
-                subjectStructureService.delete(subjectStructureUpdateRequest.id());
+                if (subjectStructureUpdateRequest.id() != null)
+                    subjectStructureService.delete(subjectStructureUpdateRequest.id());
                 subjectStructure = subjectStructureService.create(subjectStructureUpdateRequest);
             }
             subjectStructureQuestion.setSubjectStructure(subjectStructure);
@@ -375,23 +379,31 @@ public class ExamServiceImpl implements ExamService {
             List<Question> questions = new ArrayList<>();
             for (QuestionUpdateRequestForExam questionUpdateRequestForExam : questionUpdateRequestForExams) {
                 Question question;
+                questionCount++;
                 if (questionUpdateRequestForExam.hasChange()) {
-                    question = questionService.update(QuestionMapper.requestToRequest(questionUpdateRequestForExam), titles, variantPictures, numberPictures, sounds);
+                    if (questionUpdateRequestForExam.id() == null)
+                        question = questionService.save(QuestionMapper.updateRequestToRequest(questionUpdateRequestForExam)
+                                , titles, variantPictures, numberPictures, sounds);
+                    else
+                        question = questionService.update(QuestionMapper.requestToRequest(questionUpdateRequestForExam),
+                                titles, variantPictures, numberPictures, sounds);
                 } else {
                     question = questionService.getQuestionById(questionUpdateRequestForExam.id());
                 }
                 questions.add(question);
+                questionCount += question.getQuestions() == null ? 0 : question.getQuestions().size();
             }
             subjectStructureQuestion.setQuestion(questions);
             subjectStructureQuestions.add(subjectStructureQuestion);
         }
         exam.setSubjectStructureQuestions(subjectStructureQuestions);
         exam = createNewExamSameData(exam);
+        exam.setNumberOfQuestions(questionCount);
         examRepository.save(exam);
         TeacherInfo info = teacher.getInfo();
         Map<UUID, Integer> examToStudentCountMap = info.getExamToStudentCountMap();
         examToStudentCountMap.put(exam.getId(), examToStudentCountMap.get(request.id()));
-        userService.save(teacher);
+        userService.update(teacher);
         deleteForUpdate(request.id());
         log.info("İmtahan yeniləndi. Id: {}", exam.getId());
         logService.save("İmtahan yeniləndi. Id: " + exam.getId(), userService.getCurrentUserOrNull());
@@ -446,7 +458,7 @@ public class ExamServiceImpl implements ExamService {
         info.setCurrentlyTotalExamCount(info.getCurrentlyTotalExamCount() - 1);
         if (info.getThisMonthStartTime().isBefore(exam.getCreatedAt()))
             info.setThisMonthCreatedExamCount(info.getThisMonthCreatedExamCount() - 1);
-        userService.save(teacher);
+        userService.update(teacher);
         log.info("İmtahan silindi");
         logService.save("İmtahan silindi", userService.getCurrentUserOrNull());
     }

@@ -39,15 +39,13 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class ExamCheckServiceImpl implements ExamCheckService {
-    private static final String MAIL_SUBJECT = "Sualiniz Yoxlandi";
+    private static final String SUBJECT = "Sualiniz Yoxlandi";
 
-    private static final String MAIL_BODY = "Muellim sizin sualiniz yoxladi. Imtahan adi: %s";
+    private static final String BODY = "Muellim sizin sualiniz yoxladi. Imtahan adi: %s";
 
     private final StudentExamRepository studentExamRepository;
 
     private final NotificationService notificationService;
-
-    private final EmailService emailService;
 
     private final LogService logService;
 
@@ -259,23 +257,22 @@ public class ExamCheckServiceImpl implements ExamCheckService {
 
         studentExamRepository.save(studentExam);
         log.info("Imtahan yoxlanıldı");
-        sendMailAndNotification(studentExam);
+        sendNotification(studentExam);
         logService.save("Imtahan yoxlanıldı", userService.getCurrentUserOrNull());
     }
 
-    private void sendMailAndNotification(StudentExam studentExam) {
-        log.info("Email və Bildiriş göndərilir");
+    private void sendNotification(StudentExam studentExam) {
+        log.info("Bildiriş göndərilir");
         String examTitle = studentExam.getExam().getExamTitle();
         User student = studentExam.getStudent();
         if (student == null) {
             log.info("Telebe giris etmeden imtahan isleyib");
-            log.info("Email və Bildiriş göndərilmek olmadi");
+            log.info("Bildiriş göndərilmek olmadi");
             return;
         }
-        String emailContent = String.format(MAIL_BODY, examTitle);
-        emailService.sendEmail(student.getEmail(), MAIL_SUBJECT, emailContent);
-        notificationService.sendNotification(new NotificationRequest(MAIL_SUBJECT, emailContent, student.getEmail()));
-        log.info("Email və Bildiriş göndərildi");
+        String content = String.format(BODY, examTitle);
+        notificationService.sendNotification(new NotificationRequest(SUBJECT, content, student.getEmail()));
+        log.info("Bildiriş göndərildi");
     }
 
     private double calculateScoreByFormula(StudentExam studentExam) {
