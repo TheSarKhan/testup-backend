@@ -4,6 +4,7 @@ import com.exam.examapp.dto.request.QuestionRequest;
 import com.exam.examapp.dto.request.SubjectStructureQuestionsRequest;
 import com.exam.examapp.dto.request.exam.ExamRequest;
 import com.exam.examapp.model.Tag;
+import com.exam.examapp.model.TeacherInfo;
 import com.exam.examapp.model.User;
 import com.exam.examapp.model.enums.Role;
 import com.exam.examapp.model.exam.Exam;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -89,9 +91,10 @@ public class CreateExamService {
         Exam save = examRepository.save(exam);
 
         log.info("İmtahan saxlanıldı");
-        updateTeacherStatistics(user);
+        UUID examId = save.getId();
+        updateTeacherStatistics(user, examId);
 
-        return save.getId();
+        return examId;
     }
 
     private List<SubjectStructureQuestion> buildSubjectStructureQuestions(
@@ -154,10 +157,13 @@ public class CreateExamService {
                 ? null : request.cost() == null ? BigDecimal.ZERO : request.cost();
     }
 
-    private void updateTeacherStatistics(User user) {
-        if (Role.TEACHER.equals(user.getRole())) {
+    private void updateTeacherStatistics(User user, UUID examId) {
+        if (Role.TEACHER.equals(user.getRole()) || Role.ADMIN.equals(user.getRole())) {
             user.getInfo().setCurrentlyTotalExamCount(user.getInfo().getCurrentlyTotalExamCount() + 1);
             user.getInfo().setThisMonthCreatedExamCount(user.getInfo().getThisMonthCreatedExamCount() + 1);
+            TeacherInfo info = user.getInfo();
+            Map<UUID, Integer> examToStudentCountMap = info.getExamToStudentCountMap();
+            examToStudentCountMap.put(examId, 0);
             userService.save(user);
             log.info("İmtahan müəllim məlumatına əlavə edildi");
         }

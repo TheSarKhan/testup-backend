@@ -158,11 +158,14 @@ public class StartExamService {
 
         Map<UUID, Integer> examToStudentCountMap = examCreator.getInfo().getExamToStudentCountMap();
         User currentUserOrNull = userService.getCurrentUserOrNull();
-        if (examToStudentCountMap != null &&
-                (!(Role.TEACHER.equals(examCreator.getRole()) ||
-                        (currentUserOrNull != null && examCreator.getId().equals(currentUserOrNull.getId()))) &&
-                        examToStudentCountMap.get(id) >= examCreator.getPack().getStudentPerExam()))
-            throw new ReachedLimitException("Bu imtahan üçün tələbə limitinə çatdınız");
+        if (examToStudentCountMap != null) {
+            if (!(Role.TEACHER.equals(examCreator.getRole()) ||
+                    (currentUserOrNull != null && examCreator.getId().equals(currentUserOrNull.getId())))) {
+                Integer studentCount = examToStudentCountMap.getOrDefault(id, 0);
+                if (studentCount >= examCreator.getPack().getStudentPerExam())
+                    throw new ReachedLimitException("Bu imtahan üçün tələbə limitinə çatdınız");
+            }
+        }
 
         examToStudentCountMap = examToStudentCountMap == null ? new HashMap<>() : examToStudentCountMap;
         examToStudentCountMap.put(id, examToStudentCountMap.getOrDefault(id, 0) + 1);
