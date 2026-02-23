@@ -1,21 +1,25 @@
 package com.exam.examapp.controller;
 
-import com.exam.examapp.dto.request.payment.PaymentRequest;
 import com.exam.examapp.dto.response.ApiResponse;
 import com.exam.examapp.dto.response.payment.PaymentResultResponse;
 import com.exam.examapp.service.interfaces.payment.PaymentResultService;
 import com.exam.examapp.service.interfaces.payment.PaymentService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,8 +36,9 @@ public class PaymentController {
             summary = "Initialize payment",
             description = "Starts the payment process and returns the payment URL."
     )
-    public ResponseEntity<ApiResponse<String>> initPayment(@RequestBody @Valid PaymentRequest request) {
-        String paymentUrl = paymentService.initPayment(request);
+    public ResponseEntity<ApiResponse<String>> initPayment(@RequestParam @Min(0) @Max(10000) @Valid double amount,
+                                                           @RequestParam UUID productId) throws NoSuchAlgorithmException, JsonProcessingException {
+        String paymentUrl = paymentService.initPayment(amount, productId);
         return ResponseEntity.ok(ApiResponse.build(
                 HttpStatus.OK,
                 "Ödəniş uğurla başladı",

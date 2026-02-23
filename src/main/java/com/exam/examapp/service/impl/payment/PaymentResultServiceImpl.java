@@ -6,6 +6,7 @@ import com.exam.examapp.model.User;
 import com.exam.examapp.repository.PaymentResultRepository;
 import com.exam.examapp.service.interfaces.UserService;
 import com.exam.examapp.service.interfaces.payment.PaymentResultService;
+import com.exam.examapp.service.interfaces.payment.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.util.List;
 public class PaymentResultServiceImpl implements PaymentResultService {
     private final PaymentResultRepository paymentResultRepository;
 
-    private final PaymentServiceImpl paymentService;
+    private final PaymentService paymentService;
 
     private final UserService userService;
 

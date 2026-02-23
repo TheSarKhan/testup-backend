@@ -79,8 +79,11 @@ admin:
 payment:
   api:
     approve: ${PAYMENT_APPROVE_URL}
-    cancel: ${PAYMENT_CANCEL_URL}
     decline: ${PAYMENT_DECLINE_URL}
-  merchant: ${PAYMENT_MERCHANT}
-  secret:
-    key: ${PAYMENT_SECRET_KEY}
+  private-key: ${PAYMENT_PRIVATE_KEY}
+  public-key: ${PAYMENT_PUBLIC_KEY}
+
+sendpulse:
+  userid: ${SENDPLUS_USERID}
+  sender: ${SENDPLUS_SENDER}
+  secret: ${SENDPLUS_SECRET}
